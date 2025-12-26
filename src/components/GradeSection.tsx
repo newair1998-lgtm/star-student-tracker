@@ -192,7 +192,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                       <BulkScoreSelector
                         max={10}
                         label="مشاركة"
-                        subLabel="(10)"
                         onSelect={(value) => handleBulkScoreUpdate('participation', value)}
                       />
                     </TableHead>
@@ -201,7 +200,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     <BulkScoreSelector
                       max={10}
                       label="الأنشطة الصفية"
-                      subLabel="كتاب (10)"
                       onSelect={(value) => handleBulkScoreUpdate('book', value)}
                     />
                   </TableHead>
@@ -209,7 +207,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     <BulkScoreSelector
                       max={10}
                       label="واجبات"
-                      subLabel="(10)"
                       onSelect={(value) => handleBulkScoreUpdate('homework', value)}
                     />
                   </TableHead>
