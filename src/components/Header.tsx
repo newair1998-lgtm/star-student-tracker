@@ -30,7 +30,7 @@ const Header = () => {
                 الدكتورة نوير مسري الحربي
               </p>
               <h1 className="text-2xl font-bold text-foreground">
-                نظام متابعة الطالبات
+                نظام إدارة الدرجات
               </h1>
             </div>
             <div className="flex items-center gap-2">
