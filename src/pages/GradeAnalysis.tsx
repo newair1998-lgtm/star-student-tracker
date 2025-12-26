@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, AttendanceRecord } from '@/types/student';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, FileDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   BarChart,
   Bar,
@@ -28,6 +30,37 @@ const GradeAnalysis = () => {
   const { grade } = useParams<{ grade: Grade }>();
   const navigate = useNavigate();
   const { getStudentsByGrade, loading } = useStudents();
+  const tableRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  const exportToPDF = async () => {
+    if (!tableRef.current) return;
+    
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = tableRef.current;
+      const opt = {
+        margin: 10,
+        filename: `تفاصيل_درجات_${gradeLabels[grade as Grade]}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'landscape' as const }
+      };
+      
+      await html2pdf().set(opt).from(element).save();
+      
+      toast({
+        title: 'تم الحفظ بنجاح',
+        description: 'تم حفظ الملف بصيغة PDF',
+      });
+    } catch (error) {
+      toast({
+        title: 'خطأ في الحفظ',
+        description: 'حدث خطأ أثناء حفظ الملف',
+        variant: 'destructive',
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -271,20 +304,23 @@ const GradeAnalysis = () => {
         {/* Students Details Table */}
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">تفاصيل درجات الطالبات</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div ref={tableRef} className="overflow-x-auto bg-white p-4 rounded-lg">
+            <h3 className="text-center font-bold text-lg mb-4 text-gray-800">
+              تفاصيل درجات طالبات {gradeLabels[grade as Grade]}
+            </h3>
+            <table className="w-full text-sm" style={{ direction: 'rtl' }}>
               <thead>
-                <tr className="border-b border-border bg-secondary/30">
-                  <th className="py-3 px-4 text-right">#</th>
-                  <th className="py-3 px-4 text-right">الاسم</th>
-                  <th className="py-3 px-4 text-center">المهام الأدائية</th>
-                  <th className="py-3 px-4 text-center">المشاركة</th>
-                  <th className="py-3 px-4 text-center">الأنشطة</th>
-                  <th className="py-3 px-4 text-center">الواجبات</th>
-                  <th className="py-3 px-4 text-center">اختبار ١</th>
-                  <th className="py-3 px-4 text-center">اختبار ٢</th>
-                  <th className="py-3 px-4 text-center">المجموع</th>
-                  <th className="py-3 px-4 text-center">التقدير</th>
+                <tr className="border-b-2 border-gray-300 bg-gray-100">
+                  <th className="py-3 px-4 text-right text-gray-800">#</th>
+                  <th className="py-3 px-4 text-right text-gray-800">الاسم</th>
+                  <th className="py-3 px-4 text-center text-gray-800">المهام الأدائية</th>
+                  <th className="py-3 px-4 text-center text-gray-800">المشاركة</th>
+                  <th className="py-3 px-4 text-center text-gray-800">الأنشطة</th>
+                  <th className="py-3 px-4 text-center text-gray-800">الواجبات</th>
+                  <th className="py-3 px-4 text-center text-gray-800">اختبار ١</th>
+                  <th className="py-3 px-4 text-center text-gray-800">اختبار ٢</th>
+                  <th className="py-3 px-4 text-center text-gray-800">المجموع</th>
+                  <th className="py-3 px-4 text-center text-gray-800">التقدير</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,22 +329,28 @@ const GradeAnalysis = () => {
                   const gradeLevel = getGradeLevel(total);
                   const colorIndex = ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'].indexOf(gradeLevel);
                   return (
-                    <tr key={student.id} className="border-b border-border/50 hover:bg-accent/20">
-                      <td className="py-2 px-4">{index + 1}</td>
-                      <td className="py-2 px-4 font-medium">{student.name}</td>
-                      <td className="py-2 px-4 text-center">{student.performanceTasks}</td>
-                      <td className="py-2 px-4 text-center">{student.participation}</td>
-                      <td className="py-2 px-4 text-center">{student.book}</td>
-                      <td className="py-2 px-4 text-center">{student.homework}</td>
-                      <td className="py-2 px-4 text-center">{student.exam1}</td>
-                      <td className="py-2 px-4 text-center">{student.exam2}</td>
-                      <td className="py-2 px-4 text-center font-bold">{total}</td>
+                    <tr key={student.id} className="border-b border-gray-200">
+                      <td className="py-2 px-4 text-gray-800">{index + 1}</td>
+                      <td className="py-2 px-4 font-medium text-gray-800">{student.name}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.performanceTasks}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.participation}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.book}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.homework}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.exam1}</td>
+                      <td className="py-2 px-4 text-center text-gray-800">{student.exam2}</td>
+                      <td className="py-2 px-4 text-center font-bold text-gray-800">{total}</td>
                       <td className="py-2 px-4 text-center font-bold" style={{ color: COLORS[colorIndex] }}>{gradeLevel}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <Button onClick={exportToPDF} className="bg-primary hover:bg-primary/90">
+              <FileDown className="w-4 h-4 ml-2" />
+              حفظ PDF
+            </Button>
           </div>
         </div>
       </main>
