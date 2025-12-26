@@ -365,32 +365,25 @@ const GradeAnalysis = () => {
   const variance = totals.reduce((sum, t) => sum + Math.pow(t - average, 2), 0) / totals.length;
   const standardDeviation = Math.sqrt(variance);
 
-  // Frequency Distribution by 10s (التوزيع التكراري)
+  // Frequency Distribution (التوزيع التكراري)
   const frequencyDistribution = (() => {
-    const ranges: { range: string; count: number; label: string }[] = [];
-    const step = 10;
-    for (let i = 0; i < finalTotalMax; i += step) {
-      const end = Math.min(i + step - 1, finalTotalMax);
-      const count = totals.filter(t => t >= i && t <= end).length;
-      ranges.push({
-        range: `${i}-${end}`,
-        count,
-        label: `من ${i} إلى ${end}`
-      });
+    if (finalTotalMax === 60) {
+      return [
+        { range: '0-29', count: totals.filter(t => t < 30).length, label: 'أقل من 30' },
+        { range: '30-35', count: totals.filter(t => t >= 30 && t < 36).length, label: 'من 30 إلى 36' },
+        { range: '36-47', count: totals.filter(t => t >= 36 && t < 48).length, label: 'من 36 إلى 48' },
+        { range: '48-53', count: totals.filter(t => t >= 48 && t < 54).length, label: 'من 48 إلى 54' },
+        { range: '54-60', count: totals.filter(t => t >= 54).length, label: 'من 54 إلى 60' },
+      ];
+    } else {
+      return [
+        { range: '0-49', count: totals.filter(t => t < 50).length, label: 'أقل من 50' },
+        { range: '50-59', count: totals.filter(t => t >= 50 && t < 60).length, label: 'من 50 إلى 60' },
+        { range: '60-79', count: totals.filter(t => t >= 60 && t < 80).length, label: 'من 60 إلى 80' },
+        { range: '80-89', count: totals.filter(t => t >= 80 && t < 90).length, label: 'من 80 إلى 90' },
+        { range: '90-100', count: totals.filter(t => t >= 90).length, label: 'من 90 إلى 100' },
+      ];
     }
-    // Add final range if finalTotalMax is not divisible by step
-    if (finalTotalMax % step !== 0) {
-      const lastStart = Math.floor(finalTotalMax / step) * step;
-      const count = totals.filter(t => t >= lastStart && t <= finalTotalMax).length;
-      if (!ranges.find(r => r.range === `${lastStart}-${finalTotalMax}`)) {
-        ranges.push({
-          range: `${lastStart}-${finalTotalMax}`,
-          count,
-          label: `من ${lastStart} إلى ${finalTotalMax}`
-        });
-      }
-    }
-    return ranges;
   })();
 
   // Calculate grade distribution based on maxTotal
