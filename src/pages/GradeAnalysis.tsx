@@ -481,7 +481,9 @@ const GradeAnalysis = () => {
         </div>
       </header>
 
-      <main ref={reportRef} className="container py-6 space-y-6">
+      <main className="container py-6 space-y-6">
+        {/* Report content for export - excludes student details table */}
+        <div ref={reportRef} className="space-y-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-card rounded-xl p-4 shadow-card text-center">
@@ -758,8 +760,10 @@ const GradeAnalysis = () => {
             </ResponsiveContainer>
           </div>
         </div>
+        </div>
+        {/* End of report content for export */}
 
-        {/* Students Details Table */}
+        {/* Students Details Table - NOT included in Word export */}
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">تفاصيل درجات الطالبات</h2>
           <div ref={tableRef} className="overflow-x-auto bg-white p-4 rounded-lg">
