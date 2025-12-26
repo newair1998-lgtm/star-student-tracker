@@ -17,6 +17,7 @@ const Index = () => {
       name,
       grade,
       attendance: null,
+      performanceTasks: 0,
       participation: 0,
       book: 0,
       homework: 0,

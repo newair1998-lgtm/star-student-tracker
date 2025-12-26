@@ -80,6 +80,12 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: Gra
                 <TableHead className="text-center w-24">الحضور</TableHead>
                 <TableHead className="text-center w-20">
                   <div className="flex flex-col items-center">
+                    <span>المهام الأدائية</span>
+                    <span className="text-xs text-muted-foreground">(10)</span>
+                  </div>
+                </TableHead>
+                <TableHead className="text-center w-20">
+                  <div className="flex flex-col items-center">
                     <span>مشاركة</span>
                     <span className="text-xs text-muted-foreground">(10)</span>
                   </div>
@@ -99,7 +105,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: Gra
                 <TableHead className="text-center w-24">
                   <div className="flex flex-col items-center">
                     <span>مجموع المهام</span>
-                    <span className="text-xs text-muted-foreground">(40)</span>
+                    <span className="text-xs text-muted-foreground">(50)</span>
                   </div>
                 </TableHead>
                 <TableHead className="text-center w-20">

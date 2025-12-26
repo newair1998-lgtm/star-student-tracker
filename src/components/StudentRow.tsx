@@ -14,7 +14,7 @@ interface StudentRowProps {
 }
 
 const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => {
-  const tasksTotal = student.participation + student.book + student.homework;
+  const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
   const examsTotal = student.exam1 + student.exam2;
   const finalTotal = tasksTotal + examsTotal;
 
@@ -42,6 +42,13 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
       </TableCell>
       <TableCell className="text-center">
         <ScoreInput
+          value={student.performanceTasks}
+          max={10}
+          onChange={(value) => onUpdate(student.id, { performanceTasks: value })}
+        />
+      </TableCell>
+      <TableCell className="text-center">
+        <ScoreInput
           value={student.participation}
           max={10}
           onChange={(value) => onUpdate(student.id, { participation: value })}
@@ -61,9 +68,9 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
           onChange={(value) => onUpdate(student.id, { homework: value })}
         />
       </TableCell>
-      <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 40))}>
+      <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 50))}>
         <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
-          {tasksTotal}/40
+          {tasksTotal}/50
         </div>
       </TableCell>
       <TableCell className="text-center">

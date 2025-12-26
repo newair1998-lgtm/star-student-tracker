@@ -5,6 +5,7 @@ export interface Student {
   name: string;
   grade: Grade;
   attendance: 'present' | 'absent' | null;
+  performanceTasks: number;
   participation: number;
   book: number;
   homework: number;
