@@ -39,8 +39,8 @@ const gradeIconColors: Record<Grade, string> = {
 };
 
 const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
-  const presentCount = students.filter(s => s.attendance === 'present').length;
-  const absentCount = students.filter(s => s.attendance === 'absent').length;
+  const presentCount = students.reduce((sum, s) => sum + (s.attendance || []).filter(a => a === 'present').length, 0);
+  const absentCount = students.reduce((sum, s) => sum + (s.attendance || []).filter(a => a === 'absent').length, 0);
 
   const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
     if (onBulkUpdate) {
@@ -55,7 +55,8 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
 
   const handleBulkAttendance = (status: 'present' | 'absent') => {
     students.forEach(student => {
-      onUpdateStudent(student.id, { attendance: status });
+      const newAttendance: ('present' | 'absent' | null)[] = [status, status, status, status, status];
+      onUpdateStudent(student.id, { attendance: newAttendance });
     });
   };
 

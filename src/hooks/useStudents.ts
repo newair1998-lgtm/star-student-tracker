@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Student, Grade } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
 
+const DEFAULT_ATTENDANCE: ('present' | 'absent' | null)[] = [null, null, null, null, null];
+
 export const useStudents = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
-        attendance: s.attendance as 'present' | 'absent' | null,
+        attendance: (s.attendance as ('present' | 'absent' | null)[]) || DEFAULT_ATTENDANCE,
         performanceTasks: s.performance_tasks,
         participation: s.participation,
         book: s.book,
@@ -53,7 +55,7 @@ export const useStudents = () => {
       const newStudents = names.map(name => ({
         name,
         grade,
-        attendance: null,
+        attendance: DEFAULT_ATTENDANCE,
         performance_tasks: 0,
         participation: 0,
         book: 0,
@@ -73,7 +75,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
-        attendance: s.attendance as 'present' | 'absent' | null,
+        attendance: (s.attendance as ('present' | 'absent' | null)[]) || DEFAULT_ATTENDANCE,
         performanceTasks: s.performance_tasks,
         participation: s.participation,
         book: s.book,
