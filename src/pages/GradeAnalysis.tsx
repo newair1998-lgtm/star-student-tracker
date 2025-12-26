@@ -189,6 +189,55 @@ const GradeAnalysis = () => {
   const minScore = Math.min(...totals);
   const achievementPercentage = (average / finalTotalMax) * 100;
 
+  // Calculate Median (الوسيط)
+  const sortedTotals = [...totals].sort((a, b) => a - b);
+  const median = sortedTotals.length % 2 === 0
+    ? (sortedTotals[sortedTotals.length / 2 - 1] + sortedTotals[sortedTotals.length / 2]) / 2
+    : sortedTotals[Math.floor(sortedTotals.length / 2)];
+
+  // Calculate Mode (المنوال)
+  const frequencyMap: Record<number, number> = {};
+  totals.forEach(t => {
+    frequencyMap[t] = (frequencyMap[t] || 0) + 1;
+  });
+  const maxFrequency = Math.max(...Object.values(frequencyMap));
+  const modes = Object.entries(frequencyMap)
+    .filter(([_, freq]) => freq === maxFrequency)
+    .map(([val, _]) => Number(val));
+  const mode = modes.length === totals.length ? 'لا يوجد' : modes.join('، ');
+
+  // Calculate Standard Deviation (الانحراف المعياري)
+  const variance = totals.reduce((sum, t) => sum + Math.pow(t - average, 2), 0) / totals.length;
+  const standardDeviation = Math.sqrt(variance);
+
+  // Frequency Distribution by 10s (التوزيع التكراري)
+  const frequencyDistribution = (() => {
+    const ranges: { range: string; count: number; label: string }[] = [];
+    const step = 10;
+    for (let i = 0; i < finalTotalMax; i += step) {
+      const end = Math.min(i + step - 1, finalTotalMax);
+      const count = totals.filter(t => t >= i && t <= end).length;
+      ranges.push({
+        range: `${i}-${end}`,
+        count,
+        label: `من ${i} إلى ${end}`
+      });
+    }
+    // Add final range if finalTotalMax is not divisible by step
+    if (finalTotalMax % step !== 0) {
+      const lastStart = Math.floor(finalTotalMax / step) * step;
+      const count = totals.filter(t => t >= lastStart && t <= finalTotalMax).length;
+      if (!ranges.find(r => r.range === `${lastStart}-${finalTotalMax}`)) {
+        ranges.push({
+          range: `${lastStart}-${finalTotalMax}`,
+          count,
+          label: `من ${lastStart} إلى ${finalTotalMax}`
+        });
+      }
+    }
+    return ranges;
+  })();
+
   // Calculate grade distribution based on percentage
   const gradeDistribution = {
     'ممتاز': totals.filter(t => (t / finalTotalMax) * 100 >= 90).length,
@@ -281,6 +330,78 @@ const GradeAnalysis = () => {
           <div className="bg-card rounded-xl p-4 shadow-card text-center">
             <p className="text-sm text-muted-foreground">أدنى درجة</p>
             <p className="text-2xl font-bold text-destructive">{minScore}</p>
+          </div>
+        </div>
+
+        {/* Statistical Analysis */}
+        <div className="bg-card rounded-xl p-6 shadow-card">
+          <h2 className="text-lg font-bold text-foreground mb-4">التحليل الإحصائي</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-primary/10 rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">المتوسط الحسابي</p>
+              <p className="text-2xl font-bold text-primary">{average.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">قياس المستوى العام</p>
+            </div>
+            <div className="bg-grade-two/10 rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">الوسيط</p>
+              <p className="text-2xl font-bold text-grade-two">{median.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">الدرجة الأكثر تمركزًا</p>
+            </div>
+            <div className="bg-grade-four/10 rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">المنوال</p>
+              <p className="text-2xl font-bold text-grade-four">{mode}</p>
+              <p className="text-xs text-muted-foreground mt-1">أكثر درجة تكرارًا</p>
+            </div>
+            <div className="bg-grade-five/10 rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">الانحراف المعياري</p>
+              <p className="text-2xl font-bold text-grade-five">{standardDeviation.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {standardDeviation < 10 ? 'الدرجات متقاربة' : standardDeviation < 20 ? 'تباين متوسط' : 'الدرجات متباعدة'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Frequency Distribution */}
+        <div className="bg-card rounded-xl p-6 shadow-card">
+          <h2 className="text-lg font-bold text-foreground mb-4">التوزيع التكراري للدرجات</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="py-2 px-4 text-right">الفئة</th>
+                    <th className="py-2 px-4 text-center">التكرار</th>
+                    <th className="py-2 px-4 text-center">النسبة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {frequencyDistribution.map((item, i) => (
+                    <tr key={item.range} className="border-b border-border/50">
+                      <td className="py-2 px-4 font-medium">{item.label}</td>
+                      <td className="py-2 px-4 text-center">{item.count}</td>
+                      <td className="py-2 px-4 text-center">{((item.count / students.length) * 100).toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Bar Chart */}
+            <div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={frequencyDistribution}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="range" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: number) => [`${value} طالبة`, 'العدد']}
+                    labelFormatter={(label) => `الفئة: ${label}`}
+                  />
+                  <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} name="التكرار" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
