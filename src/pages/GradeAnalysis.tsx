@@ -108,7 +108,10 @@ const GradeAnalysis = () => {
   const navigate = useNavigate();
   const { getStudentsByGrade, loading } = useStudents();
   const tableRef = useRef<HTMLDivElement>(null);
-  const reportRef = useRef<HTMLDivElement>(null);
+  const section1Ref = useRef<HTMLDivElement>(null);
+  const section2Ref = useRef<HTMLDivElement>(null);
+  const section3Ref = useRef<HTMLDivElement>(null);
+  const section4Ref = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const STUDENTS_PER_PAGE = 25;
@@ -209,14 +212,13 @@ const GradeAnalysis = () => {
   };
 
   const exportFullReportToWord = async () => {
-    if (!reportRef.current) {
-      toast({
-        title: 'خطأ',
-        description: 'لم يتم العثور على التقرير',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const sections = [section1Ref, section2Ref, section3Ref, section4Ref];
+    const sectionTitles = [
+      'الإحصائيات العامة والتحليل الإحصائي',
+      'التوزيع التكراري للدرجات',
+      'تحليل مستوى الإتقان',
+      'توزيع التقديرات والرسوم البيانية'
+    ];
 
     toast({
       title: 'جاري التحضير',
@@ -224,25 +226,32 @@ const GradeAnalysis = () => {
     });
 
     try {
-      // Capture the entire report as an image
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
+      const sectionImages: { data: Uint8Array; width: number; height: number }[] = [];
 
-      // Convert canvas to base64
-      const imageData = canvas.toDataURL('image/png');
-      const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+      for (const sectionRef of sections) {
+        if (sectionRef.current) {
+          const canvas = await html2canvas(sectionRef.current, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+          });
+          const imageData = canvas.toDataURL('image/png');
+          const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+          sectionImages.push({
+            data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+            width: 600,
+            height: Math.round((canvas.height / canvas.width) * 600),
+          });
+        }
+      }
 
-      // Create Word document with the image
-      const doc = new Document({
-        sections: [{
-          properties: {
-            page: { margin: { top: 500, right: 500, bottom: 500, left: 500 } }
-          },
-          children: [
+      const docSections = sectionImages.map((img, index) => ({
+        properties: {
+          page: { margin: { top: 500, right: 500, bottom: 500, left: 500 } }
+        },
+        children: [
+          ...(index === 0 ? [
             new Paragraph({
               children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}`, bold: true, size: 36, font: "Arial" })],
               heading: HeadingLevel.HEADING_1,
@@ -266,30 +275,35 @@ const GradeAnalysis = () => {
               bidirectional: true,
               spacing: { after: 300 },
             })] : []),
-            new Paragraph({
-              children: [
-                new ImageRun({
-                  data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
-                  transformation: {
-                    width: 650,
-                    height: Math.round((canvas.height / canvas.width) * 650),
-                  },
-                  type: 'png',
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            }),
-          ],
-        }],
-      });
+          ] : []),
+          new Paragraph({
+            children: [new TextRun({ text: sectionTitles[index], bold: true, size: 28, font: "Arial" })],
+            heading: HeadingLevel.HEADING_2,
+            alignment: AlignmentType.CENTER,
+            bidirectional: true,
+            spacing: { before: 200, after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: img.data,
+                transformation: { width: img.width, height: img.height },
+                type: 'png',
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+      }));
 
-      // Generate and save
+      const doc = new Document({ sections: docSections });
+
       const blob = await Packer.toBlob(doc);
       saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}.docx`);
 
       toast({
         title: 'تم الحفظ بنجاح',
-        description: 'تم حفظ التقرير الكامل بصيغة Word مع الرسوم البيانية',
+        description: 'تم حفظ التقرير في 4 صفحات مرتبة',
       });
     } catch (error) {
       console.error('Error exporting to Word:', error);
@@ -482,8 +496,8 @@ const GradeAnalysis = () => {
       </header>
 
       <main className="container py-6 space-y-6">
-        {/* Report content for export - excludes student details table */}
-        <div ref={reportRef} className="space-y-6">
+        {/* Section 1: Summary Stats and Statistical Analysis */}
+        <div ref={section1Ref} className="space-y-6 bg-background p-4">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-card rounded-xl p-4 shadow-card text-center">
@@ -540,8 +554,11 @@ const GradeAnalysis = () => {
             </div>
           </div>
         </div>
+        </div>
+        {/* End Section 1 */}
 
-        {/* Frequency Distribution */}
+        {/* Section 2: Frequency Distribution */}
+        <div ref={section2Ref} className="bg-background p-4">
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">التوزيع التكراري للدرجات</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -583,8 +600,11 @@ const GradeAnalysis = () => {
             </div>
           </div>
         </div>
+        </div>
+        {/* End Section 2 */}
 
-        {/* Mastery Level Analysis */}
+        {/* Section 3: Mastery Level Analysis */}
+        <div ref={section3Ref} className="bg-background p-4">
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">تحليل مستوى الإتقان</h2>
           
@@ -684,8 +704,11 @@ const GradeAnalysis = () => {
             </div>
           </div>
         </div>
+        </div>
+        {/* End Section 3 */}
 
-        {/* Grade Distribution Table */}
+        {/* Section 4: Grade Distribution and Charts */}
+        <div ref={section4Ref} className="space-y-6 bg-background p-4">
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">توزيع التقديرات</h2>
           <div className="overflow-x-auto">
@@ -761,7 +784,7 @@ const GradeAnalysis = () => {
           </div>
         </div>
         </div>
-        {/* End of report content for export */}
+        {/* End Section 4 */}
 
         {/* Students Details Table - NOT included in Word export */}
         <div className="bg-card rounded-xl p-6 shadow-card">
