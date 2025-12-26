@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -145,6 +145,16 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     });
   };
 
+  const handleDeleteAllStudents = () => {
+    students.forEach(student => {
+      onDeleteStudent(student.id);
+    });
+    toast({
+      title: "تم إزالة الطالبات",
+      description: `تم إزالة جميع طالبات ${gradeLabels[grade]} بنجاح`,
+    });
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden animate-fade-in">
       {/* Header */}
@@ -166,36 +176,69 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
             </div>
           </div>
           {students.length > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  title="إزالة جميع البيانات"
-                >
-                  <Eraser className="w-4 h-4 ml-1" />
-                  إزالة الكل
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>مسح جميع البيانات</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    هل أنتِ متأكدة من مسح جميع بيانات {gradeLabels[grade]}؟ سيتم إعادة تعيين جميع الدرجات والحضور إلى الصفر.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="gap-2">
-                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleClearAllData}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <div className="flex items-center gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title="إزالة جميع البيانات"
                   >
-                    مسح البيانات
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Eraser className="w-4 h-4 ml-1" />
+                    إزالة الكل
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>مسح جميع البيانات</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      هل أنتِ متأكدة من مسح جميع بيانات {gradeLabels[grade]}؟ سيتم إعادة تعيين جميع الدرجات والحضور إلى الصفر.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearAllData}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      مسح البيانات
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title="إزالة جميع الطالبات"
+                  >
+                    <Trash2 className="w-4 h-4 ml-1" />
+                    إزالة جميع الطالبات
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>إزالة جميع الطالبات</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      هل أنتِ متأكدة من إزالة جميع طالبات {gradeLabels[grade]}؟ سيتم حذف جميع الطالبات نهائياً.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAllStudents}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      إزالة الطالبات
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </div>
       </div>
