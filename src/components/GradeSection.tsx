@@ -86,8 +86,8 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: Gra
                 </TableHead>
                 <TableHead className="text-center w-20">
                   <div className="flex flex-col items-center">
-                    <span>كتاب</span>
-                    <span className="text-xs text-muted-foreground">(10)</span>
+                    <span>الأنشطة الصفية</span>
+                    <span className="text-xs text-muted-foreground">كتاب (10)</span>
                   </div>
                 </TableHead>
                 <TableHead className="text-center w-20">
