@@ -7,10 +7,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Users, GraduationCap } from 'lucide-react';
+import { Users, GraduationCap, FileSpreadsheet, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
   present: [false, false, false, false],
@@ -44,14 +46,8 @@ const gradeIconColors: Record<Grade, string> = {
 };
 
 const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
-  const presentCount = students.reduce((sum, s) => {
-    const att = s.attendance || DEFAULT_ATTENDANCE;
-    return sum + att.present.filter(p => p).length;
-  }, 0);
-  const absentCount = students.reduce((sum, s) => {
-    const att = s.attendance || DEFAULT_ATTENDANCE;
-    return sum + att.absent.filter(a => a).length;
-  }, 0);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
     if (onBulkUpdate) {
@@ -71,6 +67,52 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
         : { present: [false, false, false, false], absent: [true, true, true, true] };
       onUpdateStudent(student.id, { attendance: newAttendance });
     });
+  };
+
+  const exportToExcel = () => {
+    if (students.length === 0) {
+      toast({
+        title: 'لا توجد بيانات',
+        description: 'لا توجد طالبات للتصدير',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Create CSV content
+    const headers = ['#', 'الاسم', 'المهام الأدائية', 'المشاركة', 'الأنشطة الصفية', 'الواجبات', 'مجموع المهام', 'اختبار ١', 'اختبار ٢', 'المجموع النهائي'];
+    const rows = students.map((student, index) => {
+      const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
+      const finalTotal = tasksTotal + student.exam1 + student.exam2;
+      return [
+        index + 1,
+        student.name,
+        student.performanceTasks,
+        student.participation,
+        student.book,
+        student.homework,
+        tasksTotal,
+        student.exam1,
+        student.exam2,
+        finalTotal,
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${gradeLabels[grade]}_درجات.csv`;
+    link.click();
+
+    toast({
+      title: 'تم التصدير بنجاح',
+      description: 'تم تصدير البيانات إلى ملف Excel',
+    });
+  };
+
+  const goToAnalysis = () => {
+    navigate(`/analysis/${grade}`);
   };
 
   return (
@@ -98,101 +140,122 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
 
       {/* Table */}
       {students.length > 0 ? (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary/30 hover:bg-secondary/30">
-                <TableHead className="text-center w-10">#</TableHead>
-                <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
-                <TableHead className="text-center w-24">
-                  <div className="flex flex-col items-center gap-1">
-                    <span>الحضور</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleBulkAttendance('present')}
-                      className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
-                    >
-                      حضور الكل
-                    </Button>
-                  </div>
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={10}
-                    label="المهام الأدائية"
-                    subLabel="(10)"
-                    onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
+        <>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-secondary/30 hover:bg-secondary/30">
+                  <TableHead className="text-center w-10">#</TableHead>
+                  <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
+                  <TableHead className="text-center w-24">
+                    <div className="flex flex-col items-center gap-1">
+                      <span>الحضور</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAttendance('present')}
+                        className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
+                      >
+                        حضور الكل
+                      </Button>
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={10}
+                      label="المهام الأدائية"
+                      subLabel="(10)"
+                      onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={10}
+                      label="مشاركة"
+                      subLabel="(10)"
+                      onSelect={(value) => handleBulkScoreUpdate('participation', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={10}
+                      label="الأنشطة الصفية"
+                      subLabel="كتاب (10)"
+                      onSelect={(value) => handleBulkScoreUpdate('book', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={10}
+                      label="واجبات"
+                      subLabel="(10)"
+                      onSelect={(value) => handleBulkScoreUpdate('homework', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-24">
+                    <div className="flex flex-col items-center">
+                      <span>مجموع المهام</span>
+                      <span className="text-xs text-muted-foreground">(40)</span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={30}
+                      label="اختبار ١"
+                      subLabel="(30)"
+                      onSelect={(value) => handleBulkScoreUpdate('exam1', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-20">
+                    <BulkScoreSelector
+                      max={30}
+                      label="اختبار ٢"
+                      subLabel="(30)"
+                      onSelect={(value) => handleBulkScoreUpdate('exam2', value)}
+                    />
+                  </TableHead>
+                  <TableHead className="text-center w-28">
+                    <div className="flex flex-col items-center">
+                      <span>المجموع النهائي</span>
+                      <span className="text-xs text-muted-foreground">(100)</span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map((student, index) => (
+                  <StudentRow
+                    key={student.id}
+                    student={student}
+                    index={index}
+                    onUpdate={onUpdateStudent}
+                    onDelete={onDeleteStudent}
                   />
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={10}
-                    label="مشاركة"
-                    subLabel="(10)"
-                    onSelect={(value) => handleBulkScoreUpdate('participation', value)}
-                  />
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={10}
-                    label="الأنشطة الصفية"
-                    subLabel="كتاب (10)"
-                    onSelect={(value) => handleBulkScoreUpdate('book', value)}
-                  />
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={10}
-                    label="واجبات"
-                    subLabel="(10)"
-                    onSelect={(value) => handleBulkScoreUpdate('homework', value)}
-                  />
-                </TableHead>
-                <TableHead className="text-center w-24">
-                  <div className="flex flex-col items-center">
-                    <span>مجموع المهام</span>
-                    <span className="text-xs text-muted-foreground">(40)</span>
-                  </div>
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={30}
-                    label="اختبار ١"
-                    subLabel="(30)"
-                    onSelect={(value) => handleBulkScoreUpdate('exam1', value)}
-                  />
-                </TableHead>
-                <TableHead className="text-center w-20">
-                  <BulkScoreSelector
-                    max={30}
-                    label="اختبار ٢"
-                    subLabel="(30)"
-                    onSelect={(value) => handleBulkScoreUpdate('exam2', value)}
-                  />
-                </TableHead>
-                <TableHead className="text-center w-28">
-                  <div className="flex flex-col items-center">
-                    <span>المجموع النهائي</span>
-                    <span className="text-xs text-muted-foreground">(100)</span>
-                  </div>
-                </TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {students.map((student, index) => (
-                <StudentRow
-                  key={student.id}
-                  student={student}
-                  index={index}
-                  onUpdate={onUpdateStudent}
-                  onDelete={onDeleteStudent}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          {/* Action Buttons */}
+          <div className="p-4 border-t border-border/50 flex gap-3 justify-center">
+            <Button
+              variant="outline"
+              onClick={exportToExcel}
+              className="bg-success/10 border-success/30 text-success hover:bg-success/20"
+            >
+              <FileSpreadsheet className="w-4 h-4 ml-2" />
+              حفظ Excel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={goToAnalysis}
+              className="bg-grade-five/10 border-grade-five/30 text-grade-five hover:bg-grade-five/20"
+            >
+              <BarChart3 className="w-4 h-4 ml-2" />
+              تحليل النتائج
+            </Button>
+          </div>
+        </>
       ) : (
         <div className="py-12 text-center">
           <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
