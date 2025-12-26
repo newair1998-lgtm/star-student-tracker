@@ -4,7 +4,7 @@ export interface Student {
   id: string;
   name: string;
   grade: Grade;
-  attendance: 'present' | 'absent' | null;
+  attendance: ('present' | 'absent' | null)[];
   performanceTasks: number;
   participation: number;
   book: number;
