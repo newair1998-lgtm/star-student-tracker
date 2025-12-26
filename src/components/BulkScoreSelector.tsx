@@ -1,10 +1,4 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface BulkScoreSelectorProps {
   max: number;
@@ -14,24 +8,18 @@ interface BulkScoreSelectorProps {
 }
 
 const BulkScoreSelector = ({ max, onSelect, label, subLabel }: BulkScoreSelectorProps) => {
-  const options = Array.from({ length: max + 1 }, (_, i) => i);
-
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-sm">{label}</span>
       {subLabel && <span className="text-xs text-muted-foreground">{subLabel}</span>}
-      <Select onValueChange={(value) => onSelect(Number(value))}>
-        <SelectTrigger className="h-7 w-16 text-xs bg-primary/10 border-primary/20 hover:bg-primary/20">
-          <SelectValue placeholder="الكل" />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((value) => (
-            <SelectItem key={value} value={String(value)} className="text-sm">
-              {value}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSelect(max)}
+        className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
+      >
+        {max}
+      </Button>
     </div>
   );
 };
