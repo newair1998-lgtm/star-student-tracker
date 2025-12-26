@@ -847,7 +847,7 @@ const GradeAnalysis = () => {
           <div className="mt-4 flex justify-center gap-4">
             <Button onClick={() => exportToExcel(students)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
               <FileSpreadsheet className="w-4 h-4 ml-2" />
-              حفظ Excel
+              تصدير السجل
             </Button>
             <Button onClick={() => exportFullReportToWord()} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
