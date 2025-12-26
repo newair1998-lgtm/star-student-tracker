@@ -172,10 +172,10 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  title="مسح جميع البيانات"
+                  title="إزالة جميع البيانات"
                 >
                   <Eraser className="w-4 h-4 ml-1" />
-                  مسح
+                  إزالة الكل
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
