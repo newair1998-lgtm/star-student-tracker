@@ -85,6 +85,9 @@ export const useStudents = () => {
       setStudents(prev => [...prev, ...mappedStudents]);
 
       const gradeNames: Record<Grade, string> = {
+        first: 'الأول',
+        second: 'الثاني',
+        third: 'الثالث',
         fourth: 'الرابع',
         fifth: 'الخامس',
         sixth: 'السادس',

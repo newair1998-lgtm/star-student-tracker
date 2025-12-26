@@ -20,12 +20,18 @@ interface GradeSectionProps {
 }
 
 const gradeHeaderColors: Record<Grade, string> = {
+  first: 'from-grade-one/20 to-grade-one/5 border-grade-one/30',
+  second: 'from-grade-two/20 to-grade-two/5 border-grade-two/30',
+  third: 'from-grade-three/20 to-grade-three/5 border-grade-three/30',
   fourth: 'from-grade-four/20 to-grade-four/5 border-grade-four/30',
   fifth: 'from-grade-five/20 to-grade-five/5 border-grade-five/30',
   sixth: 'from-grade-six/20 to-grade-six/5 border-grade-six/30',
 };
 
 const gradeIconColors: Record<Grade, string> = {
+  first: 'bg-grade-one/20 text-grade-one',
+  second: 'bg-grade-two/20 text-grade-two',
+  third: 'bg-grade-three/20 text-grade-three',
   fourth: 'bg-grade-four/20 text-grade-four',
   fifth: 'bg-grade-five/20 text-grade-five',
   sixth: 'bg-grade-six/20 text-grade-six',

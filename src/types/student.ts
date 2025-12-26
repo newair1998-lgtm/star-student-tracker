@@ -1,4 +1,4 @@
-export type Grade = 'fourth' | 'fifth' | 'sixth';
+export type Grade = 'first' | 'second' | 'third' | 'fourth' | 'fifth' | 'sixth';
 
 export interface Student {
   id: string;
@@ -14,12 +14,18 @@ export interface Student {
 }
 
 export const gradeLabels: Record<Grade, string> = {
+  first: 'الصف الأول',
+  second: 'الصف الثاني',
+  third: 'الصف الثالث',
   fourth: 'الصف الرابع',
   fifth: 'الصف الخامس',
   sixth: 'الصف السادس',
 };
 
 export const gradeColors: Record<Grade, string> = {
+  first: 'grade-one',
+  second: 'grade-two',
+  third: 'grade-three',
   fourth: 'grade-four',
   fifth: 'grade-five',
   sixth: 'grade-six',

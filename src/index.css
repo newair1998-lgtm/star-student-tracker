@@ -42,6 +42,9 @@
 
     --radius: 0.75rem;
 
+    --grade-one: 24 85% 55%;
+    --grade-two: 145 65% 42%;
+    --grade-three: 38 92% 50%;
     --grade-four: 199 89% 48%;
     --grade-five: 280 65% 60%;
     --grade-six: 340 75% 55%;
