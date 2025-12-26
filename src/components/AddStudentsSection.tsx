@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { UserPlus, Users, BookOpen, User } from 'lucide-react';
 import { Grade } from '@/types/student';
 
 interface AddStudentsSectionProps {
@@ -10,6 +11,8 @@ interface AddStudentsSectionProps {
 
 const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [studentNames, setStudentNames] = useState('');
+  const [subject, setSubject] = useState('');
+  const [teacherName, setTeacherName] = useState('');
 
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
@@ -33,6 +36,36 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
       </div>
       
       <div className="space-y-4">
+        {/* Subject and Teacher Name Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              المادة
+            </label>
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="أدخلي اسم المادة..."
+              className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
+              dir="rtl"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+              <User className="w-4 h-4" />
+              اسم المعلمة
+            </label>
+            <Input
+              value={teacherName}
+              onChange={(e) => setTeacherName(e.target.value)}
+              placeholder="أدخلي اسم المعلمة..."
+              className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
+              dir="rtl"
+            />
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-2">
             أسماء الطالبات (اسم واحد في كل سطر)
