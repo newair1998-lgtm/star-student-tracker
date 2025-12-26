@@ -72,7 +72,8 @@ const Index = () => {
       </main>
 
       <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border/50 bg-card/50">
-        نظام متابعة حضور وتقييم الطالبات © {new Date().getFullYear()}
+        <p>نظام متابعة حضور وتقييم الطالبات © {new Date().getFullYear()}</p>
+        <p className="mt-1 font-medium text-foreground/70">الحقوق محفوظة للدكتورة نوير الحربي</p>
       </footer>
     </div>
   );
