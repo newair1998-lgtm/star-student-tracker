@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, AttendanceRecord } from '@/types/student';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileDown } from 'lucide-react';
+import { ArrowRight, FileDown, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   BarChart,
@@ -177,6 +177,86 @@ const GradeAnalysis = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const exportToWord = () => {
+    const subject = localStorage.getItem('subject') || '';
+    const teacherName = localStorage.getItem('teacherName') || '';
+    const students = getStudentsByGrade(grade as Grade);
+    
+    let tableRows = students.map((student, index) => {
+      const total = calculateTotal(student);
+      const gradeLevel = getGradeLevel(total);
+      return `
+        <tr>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
+          <td style="border: 1px solid #000; padding: 8px;">${student.name}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.performanceTasks}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.participation}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.book}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.homework}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.exam1}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.exam2}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${total}</td>
+          <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">${gradeLevel}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <title>تفاصيل درجات ${gradeLabels[grade as Grade]}</title>
+        <style>
+          body { direction: rtl; font-family: Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th { border: 1px solid #000; padding: 10px; background-color: #f0f0f0; }
+        </style>
+      </head>
+      <body>
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2>تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}</h2>
+          ${subject ? `<p>المادة: ${subject}</p>` : ''}
+          ${teacherName ? `<p>المعلمة: ${teacherName}</p>` : ''}
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>المهام الأدائية</th>
+              <th>المشاركة</th>
+              <th>الأنشطة</th>
+              <th>الواجبات</th>
+              <th>اختبار ١</th>
+              <th>اختبار ٢</th>
+              <th>المجموع</th>
+              <th>التقدير</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `تفاصيل_درجات_${gradeLabels[grade as Grade]}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: 'تم الحفظ بنجاح',
+      description: 'تم حفظ الملف بصيغة Word',
+    });
   };
 
   if (loading) {
@@ -456,10 +536,14 @@ const GradeAnalysis = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex justify-center gap-4">
             <Button onClick={exportToPDF} className="bg-primary hover:bg-primary/90">
               <FileDown className="w-4 h-4 ml-2" />
               حفظ PDF
+            </Button>
+            <Button onClick={exportToWord} variant="outline" className="border-primary text-primary hover:bg-primary/10">
+              <FileText className="w-4 h-4 ml-2" />
+              حفظ Word
             </Button>
           </div>
         </div>
