@@ -15,7 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3 } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, RotateCcw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
@@ -116,6 +127,24 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     navigate(`/analysis/${grade}`);
   };
 
+  const handleClearAllData = () => {
+    students.forEach(student => {
+      onUpdateStudent(student.id, {
+        attendance: DEFAULT_ATTENDANCE,
+        performanceTasks: 0,
+        participation: 0,
+        book: 0,
+        homework: 0,
+        exam1: 0,
+        exam2: 0,
+      });
+    });
+    toast({
+      title: "تم مسح البيانات",
+      description: `تم مسح جميع بيانات ${gradeLabels[grade]} بنجاح`,
+    });
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden animate-fade-in">
       {/* Header */}
@@ -135,6 +164,37 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                 {students.length} طالبة
               </p>
             </div>
+            {students.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title="مسح جميع البيانات"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>مسح جميع البيانات</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      هل أنتِ متأكدة من مسح جميع بيانات {gradeLabels[grade]}؟ سيتم إعادة تعيين جميع الدرجات والحضور إلى الصفر.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearAllData}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      مسح البيانات
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       </div>
