@@ -33,6 +33,24 @@ const Index = () => {
         
         <div className="space-y-5">
           <GradeSection
+            grade="first"
+            students={getStudentsByGrade('first')}
+            onUpdateStudent={updateStudent}
+            onDeleteStudent={deleteStudent}
+          />
+          <GradeSection
+            grade="second"
+            students={getStudentsByGrade('second')}
+            onUpdateStudent={updateStudent}
+            onDeleteStudent={deleteStudent}
+          />
+          <GradeSection
+            grade="third"
+            students={getStudentsByGrade('third')}
+            onUpdateStudent={updateStudent}
+            onDeleteStudent={deleteStudent}
+          />
+          <GradeSection
             grade="fourth"
             students={getStudentsByGrade('fourth')}
             onUpdateStudent={updateStudent}

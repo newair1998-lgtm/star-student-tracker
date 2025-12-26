@@ -48,6 +48,30 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
         
         <div className="flex flex-wrap gap-3">
           <Button
+            variant="gradeOne"
+            onClick={() => handleAddToGrade('first')}
+            className="flex-1 min-w-[140px]"
+          >
+            <Users className="w-4 h-4" />
+            إضافة إلى الصف الأول
+          </Button>
+          <Button
+            variant="gradeTwo"
+            onClick={() => handleAddToGrade('second')}
+            className="flex-1 min-w-[140px]"
+          >
+            <Users className="w-4 h-4" />
+            إضافة إلى الصف الثاني
+          </Button>
+          <Button
+            variant="gradeThree"
+            onClick={() => handleAddToGrade('third')}
+            className="flex-1 min-w-[140px]"
+          >
+            <Users className="w-4 h-4" />
+            إضافة إلى الصف الثالث
+          </Button>
+          <Button
             variant="gradeFour"
             onClick={() => handleAddToGrade('fourth')}
             className="flex-1 min-w-[140px]"

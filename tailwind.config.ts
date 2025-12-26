@@ -59,6 +59,9 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         grade: {
+          one: "hsl(var(--grade-one))",
+          two: "hsl(var(--grade-two))",
+          three: "hsl(var(--grade-three))",
           four: "hsl(var(--grade-four))",
           five: "hsl(var(--grade-five))",
           six: "hsl(var(--grade-six))",
