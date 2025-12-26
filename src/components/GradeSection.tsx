@@ -66,6 +66,10 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     const saved = localStorage.getItem(`exam2Max_${grade}`);
     return saved ? parseInt(saved) : 30;
   });
+  const [finalTotalMax, setFinalTotalMax] = useState<number>(() => {
+    const saved = localStorage.getItem(`finalTotalMax_${grade}`);
+    return saved ? parseInt(saved) : 100;
+  });
 
   useEffect(() => {
     localStorage.setItem(`exam1Max_${grade}`, exam1Max.toString());
@@ -74,6 +78,10 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
   useEffect(() => {
     localStorage.setItem(`exam2Max_${grade}`, exam2Max.toString());
   }, [exam2Max, grade]);
+
+  useEffect(() => {
+    localStorage.setItem(`finalTotalMax_${grade}`, finalTotalMax.toString());
+  }, [finalTotalMax, grade]);
 
   const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
     if (onBulkUpdate) {
@@ -223,9 +231,17 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     </div>
                   </TableHead>
                   <TableHead className="text-center w-28">
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center gap-1">
                       <span>المجموع النهائي</span>
-                      <span className="text-xs text-muted-foreground">(100)</span>
+                      <Select value={finalTotalMax.toString()} onValueChange={(val) => setFinalTotalMax(parseInt(val))}>
+                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          <SelectItem value="60">60</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </TableHead>
                   <TableHead className="w-12"></TableHead>
@@ -241,6 +257,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     onDelete={onDeleteStudent}
                     exam1Max={exam1Max}
                     exam2Max={exam2Max}
+                    finalTotalMax={finalTotalMax}
                   />
                 ))}
               </TableBody>

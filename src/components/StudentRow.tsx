@@ -18,12 +18,15 @@ interface StudentRowProps {
   onDelete: (id: string) => void;
   exam1Max?: number;
   exam2Max?: number;
+  finalTotalMax?: number;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Max = 30 }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Max = 30, finalTotalMax = 100 }: StudentRowProps) => {
   const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
   const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
-  const finalTotal = tasksTotal + examsTotal;
+  const finalTotal = finalTotalMax === 60 
+    ? Math.min(tasksTotal + examsTotal, 60) 
+    : tasksTotal + examsTotal;
 
   const getScoreColor = (score: number, max: number) => {
     const percentage = (score / max) * 100;
@@ -102,9 +105,9 @@ const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Ma
           onChange={(value) => onUpdate(student.id, { exam2: value })}
         />
       </TableCell>
-      <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, 100))}>
+      <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, finalTotalMax))}>
         <div className="bg-primary/10 rounded-md py-1 px-2 inline-block min-w-[50px]">
-          {finalTotal}/100
+          {finalTotal}/{finalTotalMax}
         </div>
       </TableCell>
       <TableCell className="text-center">
