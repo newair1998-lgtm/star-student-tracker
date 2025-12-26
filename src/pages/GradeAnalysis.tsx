@@ -179,12 +179,11 @@ const GradeAnalysis = () => {
     }
   };
 
-  const exportToWord = () => {
+  const exportToWord = (studentsData: StudentType[]) => {
     const subject = localStorage.getItem('subject') || '';
     const teacherName = localStorage.getItem('teacherName') || '';
-    const students = getStudentsByGrade(grade as Grade);
     
-    let tableRows = students.map((student, index) => {
+    let tableRows = studentsData.map((student, index) => {
       const total = calculateTotal(student);
       const gradeLevel = getGradeLevel(total);
       return `
@@ -541,7 +540,7 @@ const GradeAnalysis = () => {
               <FileDown className="w-4 h-4 ml-2" />
               حفظ PDF
             </Button>
-            <Button onClick={exportToWord} variant="outline" className="border-primary text-primary hover:bg-primary/10">
+            <Button onClick={() => exportToWord(students)} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
               حفظ Word
             </Button>
