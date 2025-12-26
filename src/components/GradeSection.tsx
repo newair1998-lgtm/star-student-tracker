@@ -165,21 +165,26 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center gap-1">
                       <span>المهام الأدائية</span>
-                      <Select value={performanceTasksMax.toString()} onValueChange={(val) => setPerformanceTasksMax(parseInt(val))}>
-                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="10">10</SelectItem>
-                          <SelectItem value="20">20</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <BulkScoreSelector
-                        max={performanceTasksMax}
-                        label=""
-                        subLabel=""
-                        onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
-                      />
+                      <div className="flex items-center gap-1">
+                        <Select value={performanceTasksMax.toString()} onValueChange={(val) => setPerformanceTasksMax(parseInt(val))}>
+                          <SelectTrigger className="h-7 w-14 text-xs bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover z-50">
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleBulkScoreUpdate('performanceTasks', performanceTasksMax)}
+                          className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
+                          title="تعبئة الكل"
+                        >
+                          {performanceTasksMax}
+                        </Button>
+                      </div>
                     </div>
                   </TableHead>
                   {performanceTasksMax === 10 && (
