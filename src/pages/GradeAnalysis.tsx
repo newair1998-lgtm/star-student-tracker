@@ -126,6 +126,22 @@ const GradeAnalysis = () => {
   const subject = localStorage.getItem('subject') || '';
   const teacherName = localStorage.getItem('teacherName') || '';
   const semester = localStorage.getItem('semester') || '';
+  const academicYear = localStorage.getItem('academicYear') || '';
+  const educationStage = localStorage.getItem('educationStage') || '';
+
+  const getEducationStageName = () => {
+    switch (educationStage) {
+      case 'primary': return 'ابتدائي';
+      case 'middle': return 'متوسط';
+      case 'secondary': return 'ثانوي';
+      default: return '';
+    }
+  };
+
+  const getFullGradeName = () => {
+    const stageName = getEducationStageName();
+    return stageName ? `${gradeLabels[grade as Grade]} ${stageName}` : gradeLabels[grade as Grade];
+  };
 
   const exportToExcel = (studentsData: StudentType[]) => {
     const subject = localStorage.getItem('subject') || '';
@@ -484,14 +500,20 @@ const GradeAnalysis = () => {
               العودة
             </Button>
             <h1 className="text-xl font-bold text-foreground">
-              تحليل نتائج {gradeLabels[grade as Grade]}
+              تحليل نتائج {getFullGradeName()}
             </h1>
             <div className="w-24"></div>
           </div>
           
           {/* Metadata Display */}
-          {(subject || teacherName || semester) && (
+          {(subject || teacherName || semester || academicYear || educationStage) && (
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm bg-primary/5 rounded-lg py-2 px-4">
+              {educationStage && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">المرحلة:</span>
+                  <span className="font-semibold text-foreground">{getEducationStageName()}</span>
+                </div>
+              )}
               {subject && (
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">المادة:</span>
@@ -508,6 +530,12 @@ const GradeAnalysis = () => {
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">الفصل الدراسي:</span>
                   <span className="font-semibold text-foreground">{semester}</span>
+                </div>
+              )}
+              {academicYear && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">العام الدراسي:</span>
+                  <span className="font-semibold text-foreground">{academicYear}</span>
                 </div>
               )}
             </div>
