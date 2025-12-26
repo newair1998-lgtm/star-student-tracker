@@ -203,6 +203,191 @@ const GradeAnalysis = () => {
     });
   };
 
+  const exportFullReportToExcel = (studentsData: StudentType[]) => {
+    const wb = XLSX.utils.book_new();
+    
+    // Sheet 1: Summary Statistics
+    const summaryData = [
+      [`تقرير تحليل نتائج ${gradeLabels[grade as Grade]}`],
+      [''],
+      [subject ? `المادة: ${subject}` : ''],
+      [teacherName ? `المعلمة: ${teacherName}` : ''],
+      [semester ? `الفصل الدراسي: ${semester}` : ''],
+      [''],
+      ['الإحصائيات العامة'],
+      ['البيان', 'القيمة'],
+      ['عدد الطالبات', studentsData.length],
+      ['مجموع الدرجات', studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax)).reduce((a, b) => a + b, 0).toFixed(2)],
+      ['المتوسط الحسابي', (studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax)).reduce((a, b) => a + b, 0) / studentsData.length).toFixed(2)],
+      ['أعلى درجة', Math.max(...studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax)))],
+      ['أدنى درجة', Math.min(...studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax)))],
+      ['نسبة التحصيل', `${((studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax)).reduce((a, b) => a + b, 0) / studentsData.length / finalTotalMax) * 100).toFixed(2)}%`],
+    ];
+    
+    // Calculate stats for summary
+    const allTotals = studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax));
+    const sortedAllTotals = [...allTotals].sort((a, b) => a - b);
+    const calcMedian = sortedAllTotals.length % 2 === 0
+      ? (sortedAllTotals[sortedAllTotals.length / 2 - 1] + sortedAllTotals[sortedAllTotals.length / 2]) / 2
+      : sortedAllTotals[Math.floor(sortedAllTotals.length / 2)];
+    const calcAvg = allTotals.reduce((a, b) => a + b, 0) / allTotals.length;
+    const calcVariance = allTotals.reduce((sum, t) => sum + Math.pow(t - calcAvg, 2), 0) / allTotals.length;
+    const calcStdDev = Math.sqrt(calcVariance);
+    
+    // Calculate mode
+    const freqMap: Record<number, number> = {};
+    allTotals.forEach(t => { freqMap[t] = (freqMap[t] || 0) + 1; });
+    const maxFreq = Math.max(...Object.values(freqMap));
+    const modeValues = Object.entries(freqMap).filter(([_, freq]) => freq === maxFreq).map(([val]) => Number(val));
+    const modeStr = modeValues.length === allTotals.length ? 'لا يوجد' : modeValues.join('، ');
+    
+    summaryData.push(
+      [''],
+      ['التحليل الإحصائي'],
+      ['الوسيط', calcMedian.toFixed(2)],
+      ['المنوال', modeStr],
+      ['الانحراف المعياري', calcStdDev.toFixed(2)]
+    );
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    summarySheet['!cols'] = [{ wch: 20 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'الإحصائيات العامة');
+    
+    // Sheet 2: Grade Distribution
+    const gradeDistData: (string | number)[][] = [
+      ['توزيع التقديرات'],
+      [''],
+      ['المستوى', 'نطاق الدرجات', 'الوصف', 'العدد', 'النسبة'],
+    ];
+    
+    const ranges = getGradeRanges(finalTotalMax);
+    const distribution = finalTotalMax === 60
+      ? {
+          'ممتاز': allTotals.filter(t => t >= 54).length,
+          'جيد جداً': allTotals.filter(t => t >= 48 && t < 54).length,
+          'جيد': allTotals.filter(t => t >= 36 && t < 48).length,
+          'مقبول': allTotals.filter(t => t >= 30 && t < 36).length,
+          'ضعيف': allTotals.filter(t => t < 30).length,
+        }
+      : {
+          'ممتاز': allTotals.filter(t => t >= 90).length,
+          'جيد جداً': allTotals.filter(t => t >= 80 && t < 90).length,
+          'جيد': allTotals.filter(t => t >= 60 && t < 80).length,
+          'مقبول': allTotals.filter(t => t >= 50 && t < 60).length,
+          'ضعيف': allTotals.filter(t => t < 50).length,
+        };
+    
+    ranges.forEach(item => {
+      const count = distribution[item.level as keyof typeof distribution] || 0;
+      gradeDistData.push([item.level, item.range, item.description, count, `${((count / studentsData.length) * 100).toFixed(2)}%`]);
+    });
+    
+    const gradeDistSheet = XLSX.utils.aoa_to_sheet(gradeDistData);
+    gradeDistSheet['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 10 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, gradeDistSheet, 'توزيع التقديرات');
+    
+    // Sheet 3: Frequency Distribution
+    const freqDistData: (string | number)[][] = [
+      ['التوزيع التكراري للدرجات'],
+      [''],
+      ['الفئة', 'التكرار', 'النسبة'],
+    ];
+    
+    const step = 10;
+    for (let i = 0; i < finalTotalMax; i += step) {
+      const end = Math.min(i + step - 1, finalTotalMax);
+      const count = allTotals.filter(t => t >= i && t <= end).length;
+      freqDistData.push([`من ${i} إلى ${end}`, count, `${((count / studentsData.length) * 100).toFixed(1)}%`]);
+    }
+    
+    const freqDistSheet = XLSX.utils.aoa_to_sheet(freqDistData);
+    freqDistSheet['!cols'] = [{ wch: 20 }, { wch: 10 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, freqDistSheet, 'التوزيع التكراري');
+    
+    // Sheet 4: Mastery Analysis
+    const masteryData: (string | number)[][] = [
+      ['تحليل مستوى الإتقان'],
+      [''],
+      ['المستوى', 'العدد', 'النسبة'],
+      ['إتقان عالٍ (≥ 85%)', studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length, `${((studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length / studentsData.length) * 100).toFixed(1)}%`],
+      ['إتقان متوسط (70% - 85%)', studentsData.filter(s => { const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100; return pct >= 70 && pct < 85; }).length, `${((studentsData.filter(s => { const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100; return pct >= 70 && pct < 85; }).length / studentsData.length) * 100).toFixed(1)}%`],
+      ['إتقان منخفض (< 70%)', studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length, `${((studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length / studentsData.length) * 100).toFixed(1)}%`],
+      [''],
+      ['الخطة الإثرائية - طالبات تحتاج تحديات إضافية'],
+      ['#', 'الاسم', 'النسبة'],
+    ];
+    
+    studentsData
+      .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85)
+      .forEach((s, i) => {
+        masteryData.push([i + 1, s.name, `${((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%`]);
+      });
+    
+    masteryData.push([''], ['الخطة العلاجية - طالبات تحتاج دعم إضافي'], ['#', 'الاسم', 'النسبة']);
+    
+    studentsData
+      .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70)
+      .sort((a, b) => calculateTotal(a, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) - calculateTotal(b, performanceTasksMax, exam1Max, exam2Max, finalTotalMax))
+      .forEach((s, i) => {
+        masteryData.push([i + 1, s.name, `${((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%`]);
+      });
+    
+    const masterySheet = XLSX.utils.aoa_to_sheet(masteryData);
+    masterySheet['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, masterySheet, 'مستوى الإتقان');
+    
+    // Sheet 5: Student Details
+    const detailsData: (string | number)[][] = [
+      [`تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}`],
+      [''],
+    ];
+    
+    if (performanceTasksMax === 20) {
+      if (exam1Max !== 20) {
+        detailsData.push(['#', 'الاسم', 'المهام الأدائية', 'الأنشطة', 'الواجبات', 'اختبار ١', 'اختبار ٢', 'المجموع', 'التقدير']);
+      } else {
+        detailsData.push(['#', 'الاسم', 'المهام الأدائية', 'الأنشطة', 'الواجبات', 'اختبار ١', 'المجموع', 'التقدير']);
+      }
+    } else {
+      if (exam1Max !== 20) {
+        detailsData.push(['#', 'الاسم', 'المهام الأدائية', 'المشاركة', 'الأنشطة', 'الواجبات', 'اختبار ١', 'اختبار ٢', 'المجموع', 'التقدير']);
+      } else {
+        detailsData.push(['#', 'الاسم', 'المهام الأدائية', 'المشاركة', 'الأنشطة', 'الواجبات', 'اختبار ١', 'المجموع', 'التقدير']);
+      }
+    }
+    
+    studentsData.forEach((student, index) => {
+      const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
+      const gradeLevel = getGradeLevel(total, finalTotalMax);
+      
+      if (performanceTasksMax === 20) {
+        if (exam1Max !== 20) {
+          detailsData.push([index + 1, student.name, student.performanceTasks, student.book, student.homework, student.exam1, student.exam2, total, gradeLevel]);
+        } else {
+          detailsData.push([index + 1, student.name, student.performanceTasks, student.book, student.homework, student.exam1, total, gradeLevel]);
+        }
+      } else {
+        if (exam1Max !== 20) {
+          detailsData.push([index + 1, student.name, student.performanceTasks, student.participation, student.book, student.homework, student.exam1, student.exam2, total, gradeLevel]);
+        } else {
+          detailsData.push([index + 1, student.name, student.performanceTasks, student.participation, student.book, student.homework, student.exam1, total, gradeLevel]);
+        }
+      }
+    });
+    
+    const detailsSheet = XLSX.utils.aoa_to_sheet(detailsData);
+    detailsSheet['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, detailsSheet, 'تفاصيل الدرجات');
+
+    // Save file
+    XLSX.writeFile(wb, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}.xlsx`);
+
+    toast({
+      title: 'تم الحفظ بنجاح',
+      description: 'تم حفظ التقرير الكامل بصيغة Excel',
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -722,10 +907,14 @@ const GradeAnalysis = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex justify-center gap-4">
             <Button onClick={() => exportToExcel(students)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
               <FileSpreadsheet className="w-4 h-4 ml-2" />
               حفظ Excel
+            </Button>
+            <Button onClick={() => exportFullReportToExcel(students)} variant="outline" className="border-primary text-primary hover:bg-primary/10">
+              <FileSpreadsheet className="w-4 h-4 ml-2" />
+              حفظ التقرير
             </Button>
           </div>
         </div>
