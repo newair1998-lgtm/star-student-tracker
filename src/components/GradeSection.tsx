@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { Users, GraduationCap } from 'lucide-react';
 import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
@@ -52,6 +53,12 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     }
   };
 
+  const handleBulkAttendance = (status: 'present' | 'absent') => {
+    students.forEach(student => {
+      onUpdateStudent(student.id, { attendance: status });
+    });
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden animate-fade-in">
       {/* Header */}
@@ -96,7 +103,19 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
               <TableRow className="bg-secondary/30 hover:bg-secondary/30">
                 <TableHead className="text-center w-10">#</TableHead>
                 <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
-                <TableHead className="text-center w-24">الحضور</TableHead>
+                <TableHead className="text-center w-24">
+                  <div className="flex flex-col items-center gap-1">
+                    <span>الحضور</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkAttendance('present')}
+                      className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
+                    >
+                      حضور الكل
+                    </Button>
+                  </div>
+                </TableHead>
                 <TableHead className="text-center w-20">
                   <BulkScoreSelector
                     max={10}
