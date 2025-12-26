@@ -111,16 +111,17 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
                 <SelectValue placeholder="اختاري العام الدراسي..." />
               </SelectTrigger>
               <SelectContent className="bg-card border-border z-50">
-                <SelectItem value="1447-1448">1447-1448</SelectItem>
-                <SelectItem value="1448-1449">1448-1449</SelectItem>
-                <SelectItem value="1449-1450">1449-1450</SelectItem>
-                <SelectItem value="1450-1451">1450-1451</SelectItem>
-                <SelectItem value="1451-1452">1451-1452</SelectItem>
-                <SelectItem value="1452-1453">1452-1453</SelectItem>
-                <SelectItem value="1453-1454">1453-1454</SelectItem>
-                <SelectItem value="1454-1455">1454-1455</SelectItem>
-                <SelectItem value="1455-1456">1455-1456</SelectItem>
-                <SelectItem value="1456-1457">1456-1457</SelectItem>
+                <SelectItem value="1447">1447</SelectItem>
+                <SelectItem value="1448">1448</SelectItem>
+                <SelectItem value="1449">1449</SelectItem>
+                <SelectItem value="1450">1450</SelectItem>
+                <SelectItem value="1451">1451</SelectItem>
+                <SelectItem value="1452">1452</SelectItem>
+                <SelectItem value="1453">1453</SelectItem>
+                <SelectItem value="1454">1454</SelectItem>
+                <SelectItem value="1455">1455</SelectItem>
+                <SelectItem value="1456">1456</SelectItem>
+                <SelectItem value="1457">1457</SelectItem>
               </SelectContent>
             </Select>
           </div>
