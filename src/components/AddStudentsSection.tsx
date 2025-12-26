@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,16 @@ interface AddStudentsSectionProps {
 
 const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [studentNames, setStudentNames] = useState('');
-  const [subject, setSubject] = useState('');
-  const [teacherName, setTeacherName] = useState('');
+  const [subject, setSubject] = useState(() => localStorage.getItem('subject') || '');
+  const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
+
+  useEffect(() => {
+    localStorage.setItem('subject', subject);
+  }, [subject]);
+
+  useEffect(() => {
+    localStorage.setItem('teacherName', teacherName);
+  }, [teacherName]);
 
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
