@@ -1,10 +1,15 @@
-import { Student } from '@/types/student';
+import { Student, AttendanceRecord } from '@/types/student';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import AttendanceButtons from './AttendanceButtons';
 import ScoreInput from './ScoreInput';
 import { cn } from '@/lib/utils';
+
+const DEFAULT_ATTENDANCE: AttendanceRecord = {
+  present: [false, false, false, false],
+  absent: [false, false, false, false],
+};
 
 interface StudentRowProps {
   student: Student;
@@ -36,10 +41,14 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
       </TableCell>
       <TableCell>
         <AttendanceButtons
-          attendance={student.attendance}
-          onAttendanceChange={(index, status) => {
-            const newAttendance = [...(student.attendance || [null, null, null, null])];
-            newAttendance[index] = status;
+          attendance={student.attendance || DEFAULT_ATTENDANCE}
+          onAttendanceChange={(type, idx) => {
+            const currentAttendance = student.attendance || DEFAULT_ATTENDANCE;
+            const newAttendance: AttendanceRecord = {
+              present: [...currentAttendance.present],
+              absent: [...currentAttendance.absent],
+            };
+            newAttendance[type][idx] = !newAttendance[type][idx];
             onUpdate(student.id, { attendance: newAttendance });
           }}
         />

@@ -1,4 +1,4 @@
-import { Student, Grade, gradeLabels } from '@/types/student';
+import { Student, Grade, gradeLabels, AttendanceRecord } from '@/types/student';
 import {
   Table,
   TableBody,
@@ -11,6 +11,11 @@ import { Users, GraduationCap } from 'lucide-react';
 import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
 import { cn } from '@/lib/utils';
+
+const DEFAULT_ATTENDANCE: AttendanceRecord = {
+  present: [false, false, false, false],
+  absent: [false, false, false, false],
+};
 
 interface GradeSectionProps {
   grade: Grade;
@@ -39,8 +44,14 @@ const gradeIconColors: Record<Grade, string> = {
 };
 
 const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
-  const presentCount = students.reduce((sum, s) => sum + (s.attendance || []).filter(a => a === 'present').length, 0);
-  const absentCount = students.reduce((sum, s) => sum + (s.attendance || []).filter(a => a === 'absent').length, 0);
+  const presentCount = students.reduce((sum, s) => {
+    const att = s.attendance || DEFAULT_ATTENDANCE;
+    return sum + att.present.filter(p => p).length;
+  }, 0);
+  const absentCount = students.reduce((sum, s) => {
+    const att = s.attendance || DEFAULT_ATTENDANCE;
+    return sum + att.absent.filter(a => a).length;
+  }, 0);
 
   const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
     if (onBulkUpdate) {
@@ -55,7 +66,9 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
 
   const handleBulkAttendance = (status: 'present' | 'absent') => {
     students.forEach(student => {
-      const newAttendance: ('present' | 'absent' | null)[] = [status, status, status, status];
+      const newAttendance: AttendanceRecord = status === 'present'
+        ? { present: [true, true, true, true], absent: [false, false, false, false] }
+        : { present: [false, false, false, false], absent: [true, true, true, true] };
       onUpdateStudent(student.id, { attendance: newAttendance });
     });
   };

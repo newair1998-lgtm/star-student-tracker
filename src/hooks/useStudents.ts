@@ -1,14 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Student, Grade } from '@/types/student';
+import { Student, Grade, AttendanceRecord } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
 
-const DEFAULT_ATTENDANCE: ('present' | 'absent' | null)[] = [null, null, null, null];
+const DEFAULT_ATTENDANCE: AttendanceRecord = {
+  present: [false, false, false, false],
+  absent: [false, false, false, false],
+};
 
 export const useStudents = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const parseAttendance = (data: unknown): AttendanceRecord => {
+    if (data && typeof data === 'object' && 'present' in data && 'absent' in data) {
+      return data as AttendanceRecord;
+    }
+    return DEFAULT_ATTENDANCE;
+  };
 
   // Fetch students from database
   const fetchStudents = useCallback(async () => {
@@ -24,7 +34,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
-        attendance: (s.attendance as ('present' | 'absent' | null)[]) || DEFAULT_ATTENDANCE,
+        attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
         book: s.book,
@@ -52,10 +62,11 @@ export const useStudents = () => {
 
   const addStudents = useCallback(async (names: string[], grade: Grade) => {
     try {
+      const defaultAttendanceJson = { present: [false, false, false, false], absent: [false, false, false, false] };
       const newStudents = names.map(name => ({
         name,
         grade,
-        attendance: DEFAULT_ATTENDANCE,
+        attendance: defaultAttendanceJson,
         performance_tasks: 0,
         participation: 0,
         book: 0,
@@ -66,7 +77,7 @@ export const useStudents = () => {
 
       const { data, error } = await supabase
         .from('students')
-        .insert(newStudents)
+        .insert(newStudents as never[])
         .select();
 
       if (error) throw error;
@@ -75,7 +86,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
-        attendance: (s.attendance as ('present' | 'absent' | null)[]) || DEFAULT_ATTENDANCE,
+        attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
         book: s.book,
