@@ -38,7 +38,7 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
         <AttendanceButtons
           attendance={student.attendance}
           onAttendanceChange={(index, status) => {
-            const newAttendance = [...(student.attendance || [null, null, null, null, null])];
+            const newAttendance = [...(student.attendance || [null, null, null, null])];
             newAttendance[index] = status;
             onUpdate(student.id, { attendance: newAttendance });
           }}

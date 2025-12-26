@@ -55,7 +55,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
 
   const handleBulkAttendance = (status: 'present' | 'absent') => {
     students.forEach(student => {
-      const newAttendance: ('present' | 'absent' | null)[] = [status, status, status, status, status];
+      const newAttendance: ('present' | 'absent' | null)[] = [status, status, status, status];
       onUpdateStudent(student.id, { attendance: newAttendance });
     });
   };
