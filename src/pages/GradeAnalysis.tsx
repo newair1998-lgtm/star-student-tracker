@@ -30,12 +30,50 @@ const DEFAULT_ATTENDANCE: AttendanceRecord = {
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'];
 
 const getGradeLevel = (total: number, maxTotal: number) => {
-  const percentage = (total / maxTotal) * 100;
-  if (percentage >= 90) return 'ممتاز';
-  if (percentage >= 80) return 'جيد جداً';
-  if (percentage >= 70) return 'جيد';
-  if (percentage >= 60) return 'مقبول';
-  return 'ضعيف';
+  if (maxTotal === 60) {
+    if (total >= 54) return 'ممتاز';
+    if (total >= 48) return 'جيد جداً';
+    if (total >= 36) return 'جيد';
+    if (total >= 30) return 'مقبول';
+    return 'ضعيف';
+  } else {
+    if (total >= 90) return 'ممتاز';
+    if (total >= 80) return 'جيد جداً';
+    if (total >= 60) return 'جيد';
+    if (total >= 50) return 'مقبول';
+    return 'ضعيف';
+  }
+};
+
+const getGradeLevelDescription = (level: string) => {
+  const descriptions: Record<string, string> = {
+    'ممتاز': 'إتقان عالٍ',
+    'جيد جداً': 'إتقان مرتفع',
+    'جيد': 'إتقان متوسط',
+    'مقبول': 'إتقان أساسي',
+    'ضعيف': 'يحتاج دعمًا علاجيًا',
+  };
+  return descriptions[level] || '';
+};
+
+const getGradeRanges = (maxTotal: number) => {
+  if (maxTotal === 60) {
+    return [
+      { level: 'ممتاز', range: '54 – 60', description: 'إتقان عالٍ' },
+      { level: 'جيد جداً', range: '48 – أقل من 54', description: 'إتقان مرتفع' },
+      { level: 'جيد', range: '36 – أقل من 48', description: 'إتقان متوسط' },
+      { level: 'مقبول', range: '30 – أقل من 36', description: 'إتقان أساسي' },
+      { level: 'ضعيف', range: 'أقل من 30', description: 'يحتاج دعمًا علاجيًا' },
+    ];
+  } else {
+    return [
+      { level: 'ممتاز', range: '90 – 100', description: 'إتقان عالٍ' },
+      { level: 'جيد جداً', range: '80 – أقل من 90', description: 'إتقان مرتفع' },
+      { level: 'جيد', range: '60 – أقل من 80', description: 'إتقان متوسط' },
+      { level: 'مقبول', range: '50 – أقل من 60', description: 'إتقان أساسي' },
+      { level: 'ضعيف', range: 'أقل من 50', description: 'يحتاج دعمًا علاجيًا' },
+    ];
+  }
 };
 
 interface StudentType {
@@ -238,14 +276,24 @@ const GradeAnalysis = () => {
     return ranges;
   })();
 
-  // Calculate grade distribution based on percentage
-  const gradeDistribution = {
-    'ممتاز': totals.filter(t => (t / finalTotalMax) * 100 >= 90).length,
-    'جيد جداً': totals.filter(t => (t / finalTotalMax) * 100 >= 80 && (t / finalTotalMax) * 100 < 90).length,
-    'جيد': totals.filter(t => (t / finalTotalMax) * 100 >= 70 && (t / finalTotalMax) * 100 < 80).length,
-    'مقبول': totals.filter(t => (t / finalTotalMax) * 100 >= 60 && (t / finalTotalMax) * 100 < 70).length,
-    'ضعيف': totals.filter(t => (t / finalTotalMax) * 100 < 60).length,
-  };
+  // Calculate grade distribution based on maxTotal
+  const gradeDistribution = finalTotalMax === 60
+    ? {
+        'ممتاز': totals.filter(t => t >= 54).length,
+        'جيد جداً': totals.filter(t => t >= 48 && t < 54).length,
+        'جيد': totals.filter(t => t >= 36 && t < 48).length,
+        'مقبول': totals.filter(t => t >= 30 && t < 36).length,
+        'ضعيف': totals.filter(t => t < 30).length,
+      }
+    : {
+        'ممتاز': totals.filter(t => t >= 90).length,
+        'جيد جداً': totals.filter(t => t >= 80 && t < 90).length,
+        'جيد': totals.filter(t => t >= 60 && t < 80).length,
+        'مقبول': totals.filter(t => t >= 50 && t < 60).length,
+        'ضعيف': totals.filter(t => t < 50).length,
+      };
+
+  const gradeRanges = getGradeRanges(finalTotalMax);
 
   const pieData = Object.entries(gradeDistribution).map(([name, value]) => ({ name, value }));
 
@@ -513,19 +561,26 @@ const GradeAnalysis = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="py-2 px-4 text-right">التقدير</th>
+                  <th className="py-2 px-4 text-right">المستوى</th>
+                  <th className="py-2 px-4 text-center">نطاق الدرجات</th>
+                  <th className="py-2 px-4 text-center">الوصف</th>
                   <th className="py-2 px-4 text-center">العدد</th>
                   <th className="py-2 px-4 text-center">النسبة</th>
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(gradeDistribution).map(([level, count], i) => (
-                  <tr key={level} className="border-b border-border/50">
-                    <td className="py-2 px-4 font-medium" style={{ color: COLORS[i] }}>{level}</td>
-                    <td className="py-2 px-4 text-center">{count}</td>
-                    <td className="py-2 px-4 text-center">{((count / students.length) * 100).toFixed(2)}%</td>
-                  </tr>
-                ))}
+                {gradeRanges.map((item, i) => {
+                  const count = gradeDistribution[item.level as keyof typeof gradeDistribution] || 0;
+                  return (
+                    <tr key={item.level} className="border-b border-border/50">
+                      <td className="py-2 px-4 font-medium" style={{ color: COLORS[i] }}>{item.level}</td>
+                      <td className="py-2 px-4 text-center">{item.range}</td>
+                      <td className="py-2 px-4 text-center text-muted-foreground">{item.description}</td>
+                      <td className="py-2 px-4 text-center">{count}</td>
+                      <td className="py-2 px-4 text-center">{((count / students.length) * 100).toFixed(2)}%</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
