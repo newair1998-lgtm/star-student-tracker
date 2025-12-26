@@ -131,43 +131,70 @@ const GradeAnalysis = () => {
     const subject = localStorage.getItem('subject') || '';
     const teacherName = localStorage.getItem('teacherName') || '';
     
-    // Prepare data for Excel
+    // Prepare data for Excel with correct column order
     const excelData = studentsData.map((student, index) => {
       const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
       const gradeLevel = getGradeLevel(total, finalTotalMax);
       
-    if (performanceTasksMax === 20) {
-      const baseData = {
-        '#': index + 1,
-        'الاسم': student.name,
-        'المهام الأدائية': student.performanceTasks,
-        'الأنشطة': student.book,
-        'الواجبات': student.homework,
-        'اختبار ١': student.exam1,
-        'المجموع': total,
-        'التقدير': gradeLevel,
-      };
-      if (exam1Max !== 20) {
-        return { ...baseData, 'اختبار ٢': student.exam2 };
+      if (performanceTasksMax === 20) {
+        // Mode with 20 performance tasks (no participation)
+        if (exam1Max === 20) {
+          // Only Exam 1, no Exam 2
+          return {
+            '#': index + 1,
+            'الاسم': student.name,
+            'المهام الأدائية': student.performanceTasks,
+            'الأنشطة': student.book,
+            'الواجبات': student.homework,
+            'اختبار ١': student.exam1,
+            'المجموع': total,
+            'التقدير': gradeLevel,
+          };
+        } else {
+          // Both Exam 1 and Exam 2
+          return {
+            '#': index + 1,
+            'الاسم': student.name,
+            'المهام الأدائية': student.performanceTasks,
+            'الأنشطة': student.book,
+            'الواجبات': student.homework,
+            'اختبار ١': student.exam1,
+            'اختبار ٢': student.exam2,
+            'المجموع': total,
+            'التقدير': gradeLevel,
+          };
+        }
       }
-      return baseData;
-    }
-    
-    const baseData = {
-      '#': index + 1,
-      'الاسم': student.name,
-      'المهام الأدائية': student.performanceTasks,
-      'المشاركة': student.participation,
-      'الأنشطة': student.book,
-      'الواجبات': student.homework,
-      'اختبار ١': student.exam1,
-      'المجموع': total,
-      'التقدير': gradeLevel,
-    };
-    if (exam1Max !== 20) {
-      return { ...baseData, 'اختبار ٢': student.exam2 };
-    }
-    return baseData;
+      
+      // Standard mode with participation
+      if (exam1Max === 20) {
+        // Only Exam 1, no Exam 2
+        return {
+          '#': index + 1,
+          'الاسم': student.name,
+          'المهام الأدائية': student.performanceTasks,
+          'المشاركة': student.participation,
+          'الأنشطة': student.book,
+          'الواجبات': student.homework,
+          'اختبار ١': student.exam1,
+          'المجموع': total,
+          'التقدير': gradeLevel,
+        };
+      } else {
+        // Both Exam 1 and Exam 2
+        return {
+          '#': index + 1,
+          'الاسم': student.name,
+          'المهام الأدائية': student.performanceTasks,
+          'المشاركة': student.participation,
+          'الأنشطة': student.book,
+          'الواجبات': student.homework,
+          'اختبار ١': student.exam1,
+          'اختبار ٢': student.exam2,
+          'المجموع': total,
+          'التقدير': gradeLevel,
+        };
+      }
     });
 
     // Create workbook and worksheet
