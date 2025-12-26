@@ -50,8 +50,10 @@ interface StudentType {
   attendance?: AttendanceRecord;
 }
 
-const calculateTotal = (student: StudentType, exam1Max: number, exam2Max: number, finalTotalMax: number) => {
-  const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
+const calculateTotal = (student: StudentType, performanceTasksMax: number, exam1Max: number, exam2Max: number, finalTotalMax: number) => {
+  const tasksTotal = performanceTasksMax === 20 
+    ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
+    : student.performanceTasks + student.participation + student.book + student.homework;
   const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
   const rawTotal = tasksTotal + examsTotal;
   return finalTotalMax === 60 ? Math.min(rawTotal, 60) : rawTotal;
@@ -66,7 +68,8 @@ const GradeAnalysis = () => {
 
   const STUDENTS_PER_PAGE = 25;
 
-  // Load exam max scores from localStorage
+  // Load settings from localStorage
+  const performanceTasksMax = parseInt(localStorage.getItem(`performanceTasksMax_${grade}`) || '10');
   const exam1Max = parseInt(localStorage.getItem(`exam1Max_${grade}`) || '30');
   const exam2Max = parseInt(localStorage.getItem(`exam2Max_${grade}`) || '30');
   const finalTotalMax = parseInt(localStorage.getItem(`finalTotalMax_${grade}`) || '100');
@@ -77,8 +80,23 @@ const GradeAnalysis = () => {
     
     // Prepare data for Excel
     const excelData = studentsData.map((student, index) => {
-      const total = calculateTotal(student, exam1Max, exam2Max, finalTotalMax);
+      const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
       const gradeLevel = getGradeLevel(total, finalTotalMax);
+      
+      if (performanceTasksMax === 20) {
+        return {
+          '#': index + 1,
+          'الاسم': student.name,
+          'المهام الأدائية': student.performanceTasks,
+          'الأنشطة': student.book,
+          'الواجبات': student.homework,
+          'اختبار ١': student.exam1,
+          'اختبار ٢': student.exam2,
+          'المجموع': total,
+          'التقدير': gradeLevel,
+        };
+      }
+      
       return {
         '#': index + 1,
         'الاسم': student.name,
@@ -156,7 +174,7 @@ const GradeAnalysis = () => {
     );
   }
 
-  const totals = students.map(s => calculateTotal(s, exam1Max, exam2Max, finalTotalMax));
+  const totals = students.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax));
   const totalSum = totals.reduce((a, b) => a + b, 0);
   const average = totalSum / students.length;
   const maxScore = Math.max(...totals);
@@ -177,18 +195,26 @@ const GradeAnalysis = () => {
   // Student scores for bar chart
   const studentScoresData = students.map((s, i) => ({
     name: s.name.split(' ')[0],
-    الدرجة: calculateTotal(s, exam1Max, exam2Max, finalTotalMax),
+    الدرجة: calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax),
   }));
 
-  // Category breakdown
-  const categoryData = [
-    { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
-    { name: 'المشاركة', المتوسط: students.reduce((a, s) => a + s.participation, 0) / students.length },
-    { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
-    { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
-    { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
-    { name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length },
-  ];
+  // Category breakdown - hide participation if performanceTasksMax is 20
+  const categoryData = performanceTasksMax === 20 
+    ? [
+        { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
+        { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
+        { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
+        { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
+        { name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length },
+      ]
+    : [
+        { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
+        { name: 'المشاركة', المتوسط: students.reduce((a, s) => a + s.participation, 0) / students.length },
+        { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
+        { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
+        { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
+        { name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length },
+      ];
 
   // Attendance data
   const attendanceData = students.map(s => {
@@ -380,7 +406,9 @@ const GradeAnalysis = () => {
                   <th className="py-3 px-4 text-right text-gray-800">#</th>
                   <th className="py-3 px-4 text-right text-gray-800">الاسم</th>
                   <th className="py-3 px-4 text-center text-gray-800">المهام الأدائية</th>
-                  <th className="py-3 px-4 text-center text-gray-800">المشاركة</th>
+                  {performanceTasksMax === 10 && (
+                    <th className="py-3 px-4 text-center text-gray-800">المشاركة</th>
+                  )}
                   <th className="py-3 px-4 text-center text-gray-800">الأنشطة</th>
                   <th className="py-3 px-4 text-center text-gray-800">الواجبات</th>
                   <th className="py-3 px-4 text-center text-gray-800">اختبار ١</th>
@@ -391,7 +419,7 @@ const GradeAnalysis = () => {
               </thead>
               <tbody>
                 {students.map((student, index) => {
-                  const total = calculateTotal(student, exam1Max, exam2Max, finalTotalMax);
+                  const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
                   const gradeLevel = getGradeLevel(total, finalTotalMax);
                   const colorIndex = ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'].indexOf(gradeLevel);
                   return (
@@ -399,7 +427,9 @@ const GradeAnalysis = () => {
                       <td className="py-2 px-4 text-gray-800">{index + 1}</td>
                       <td className="py-2 px-4 font-medium text-gray-800">{student.name}</td>
                       <td className="py-2 px-4 text-center text-gray-800">{student.performanceTasks}</td>
-                      <td className="py-2 px-4 text-center text-gray-800">{student.participation}</td>
+                      {performanceTasksMax === 10 && (
+                        <td className="py-2 px-4 text-center text-gray-800">{student.participation}</td>
+                      )}
                       <td className="py-2 px-4 text-center text-gray-800">{student.book}</td>
                       <td className="py-2 px-4 text-center text-gray-800">{student.homework}</td>
                       <td className="py-2 px-4 text-center text-gray-800">{student.exam1}</td>
