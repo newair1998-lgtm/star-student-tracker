@@ -7,7 +7,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Users, GraduationCap, FileSpreadsheet, BarChart3 } from 'lucide-react';
+import { Users, GraduationCap, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
@@ -66,48 +66,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
         ? { present: [true, true, true, true], absent: [false, false, false, false] }
         : { present: [false, false, false, false], absent: [true, true, true, true] };
       onUpdateStudent(student.id, { attendance: newAttendance });
-    });
-  };
-
-  const exportToExcel = () => {
-    if (students.length === 0) {
-      toast({
-        title: 'لا توجد بيانات',
-        description: 'لا توجد طالبات للتصدير',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Create CSV content
-    const headers = ['#', 'الاسم', 'المهام الأدائية', 'المشاركة', 'الأنشطة الصفية', 'الواجبات', 'مجموع المهام', 'اختبار ١', 'اختبار ٢', 'المجموع النهائي'];
-    const rows = students.map((student, index) => {
-      const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
-      const finalTotal = tasksTotal + student.exam1 + student.exam2;
-      return [
-        index + 1,
-        student.name,
-        student.performanceTasks,
-        student.participation,
-        student.book,
-        student.homework,
-        tasksTotal,
-        student.exam1,
-        student.exam2,
-        finalTotal,
-      ].join(',');
-    });
-
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${gradeLabels[grade]}_درجات.csv`;
-    link.click();
-
-    toast({
-      title: 'تم التصدير بنجاح',
-      description: 'تم تصدير البيانات إلى ملف Excel',
     });
   };
 
@@ -238,14 +196,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
           </div>
           {/* Action Buttons */}
           <div className="p-4 border-t border-border/50 flex gap-3 justify-center">
-            <Button
-              variant="outline"
-              onClick={exportToExcel}
-              className="bg-success/10 border-success/30 text-success hover:bg-success/20"
-            >
-              <FileSpreadsheet className="w-4 h-4 ml-2" />
-              حفظ Excel
-            </Button>
             <Button
               variant="outline"
               onClick={goToAnalysis}
