@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table';
 import { Users, GraduationCap } from 'lucide-react';
 import StudentRow from './StudentRow';
+import BulkScoreSelector from './BulkScoreSelector';
 import { cn } from '@/lib/utils';
 
 interface GradeSectionProps {
@@ -15,6 +16,7 @@ interface GradeSectionProps {
   students: Student[];
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
+  onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
 }
 
 const gradeHeaderColors: Record<Grade, string> = {
@@ -29,9 +31,20 @@ const gradeIconColors: Record<Grade, string> = {
   sixth: 'bg-grade-six/20 text-grade-six',
 };
 
-const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: GradeSectionProps) => {
+const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
   const presentCount = students.filter(s => s.attendance === 'present').length;
   const absentCount = students.filter(s => s.attendance === 'absent').length;
+
+  const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
+    if (onBulkUpdate) {
+      const studentIds = students.map(s => s.id);
+      onBulkUpdate(studentIds, { [field]: value });
+    } else {
+      students.forEach(student => {
+        onUpdateStudent(student.id, { [field]: value });
+      });
+    }
+  };
 
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden animate-fade-in">
@@ -79,28 +92,36 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: Gra
                 <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
                 <TableHead className="text-center w-24">الحضور</TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>المهام الأدائية</span>
-                    <span className="text-xs text-muted-foreground">(10)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={10}
+                    label="المهام الأدائية"
+                    subLabel="(10)"
+                    onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>مشاركة</span>
-                    <span className="text-xs text-muted-foreground">(10)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={10}
+                    label="مشاركة"
+                    subLabel="(10)"
+                    onSelect={(value) => handleBulkScoreUpdate('participation', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>الأنشطة الصفية</span>
-                    <span className="text-xs text-muted-foreground">كتاب (10)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={10}
+                    label="الأنشطة الصفية"
+                    subLabel="كتاب (10)"
+                    onSelect={(value) => handleBulkScoreUpdate('book', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>واجبات</span>
-                    <span className="text-xs text-muted-foreground">(10)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={10}
+                    label="واجبات"
+                    subLabel="(10)"
+                    onSelect={(value) => handleBulkScoreUpdate('homework', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-24">
                   <div className="flex flex-col items-center">
@@ -109,16 +130,20 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent }: Gra
                   </div>
                 </TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>اختبار ١</span>
-                    <span className="text-xs text-muted-foreground">(30)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={30}
+                    label="اختبار ١"
+                    subLabel="(30)"
+                    onSelect={(value) => handleBulkScoreUpdate('exam1', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-20">
-                  <div className="flex flex-col items-center">
-                    <span>اختبار ٢</span>
-                    <span className="text-xs text-muted-foreground">(30)</span>
-                  </div>
+                  <BulkScoreSelector
+                    max={30}
+                    label="اختبار ٢"
+                    subLabel="(30)"
+                    onSelect={(value) => handleBulkScoreUpdate('exam2', value)}
+                  />
                 </TableHead>
                 <TableHead className="text-center w-28">
                   <div className="flex flex-col items-center">
