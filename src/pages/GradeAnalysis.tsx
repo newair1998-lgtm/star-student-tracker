@@ -113,6 +113,11 @@ const GradeAnalysis = () => {
   const exam1Max = parseInt(localStorage.getItem(`exam1Max_${grade}`) || '30');
   const exam2Max = parseInt(localStorage.getItem(`exam2Max_${grade}`) || '30');
   const finalTotalMax = parseInt(localStorage.getItem(`finalTotalMax_${grade}`) || '100');
+  
+  // Load metadata from localStorage
+  const subject = localStorage.getItem('subject') || '';
+  const teacherName = localStorage.getItem('teacherName') || '';
+  const semester = localStorage.getItem('semester') || '';
 
   const exportToExcel = (studentsData: StudentType[]) => {
     const subject = localStorage.getItem('subject') || '';
@@ -340,15 +345,41 @@ const GradeAnalysis = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card shadow-soft border-b border-border/50 py-4">
-        <div className="container flex items-center justify-between">
-          <Button variant="outline" onClick={() => navigate('/')}>
-            <ArrowRight className="w-4 h-4 ml-2" />
-            العودة
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">
-            تحليل نتائج {gradeLabels[grade as Grade]}
-          </h1>
-          <div className="w-24"></div>
+        <div className="container flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              <ArrowRight className="w-4 h-4 ml-2" />
+              العودة
+            </Button>
+            <h1 className="text-xl font-bold text-foreground">
+              تحليل نتائج {gradeLabels[grade as Grade]}
+            </h1>
+            <div className="w-24"></div>
+          </div>
+          
+          {/* Metadata Display */}
+          {(subject || teacherName || semester) && (
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm bg-primary/5 rounded-lg py-2 px-4">
+              {subject && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">المادة:</span>
+                  <span className="font-semibold text-foreground">{subject}</span>
+                </div>
+              )}
+              {teacherName && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">المعلمة:</span>
+                  <span className="font-semibold text-foreground">{teacherName}</span>
+                </div>
+              )}
+              {semester && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">الفصل الدراسي:</span>
+                  <span className="font-semibold text-foreground">{semester}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

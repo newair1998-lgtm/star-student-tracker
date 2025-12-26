@@ -13,6 +13,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [studentNames, setStudentNames] = useState('');
   const [subject, setSubject] = useState(() => localStorage.getItem('subject') || '');
   const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
+  const [semester, setSemester] = useState(() => localStorage.getItem('semester') || '');
 
   useEffect(() => {
     localStorage.setItem('subject', subject);
@@ -21,6 +22,10 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   useEffect(() => {
     localStorage.setItem('teacherName', teacherName);
   }, [teacherName]);
+
+  useEffect(() => {
+    localStorage.setItem('semester', semester);
+  }, [semester]);
 
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
@@ -47,8 +52,8 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
       </div>
       
       <div className="space-y-4">
-        {/* Subject and Teacher Name Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Subject, Teacher Name, and Semester Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -71,6 +76,19 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
               value={teacherName}
               onChange={(e) => setTeacherName(e.target.value)}
               placeholder="أدخلي اسم المعلمة..."
+              className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
+              dir="rtl"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              الفصل الدراسي
+            </label>
+            <Input
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              placeholder="مثال: الفصل الأول..."
               className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
               dir="rtl"
             />
