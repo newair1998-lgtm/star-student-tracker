@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, Users, BookOpen, User } from 'lucide-react';
+import { UserPlus, Users, BookOpen, User, School } from 'lucide-react';
 import { Grade } from '@/types/student';
 
 interface AddStudentsSectionProps {
@@ -16,6 +16,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
   const [semester, setSemester] = useState(() => localStorage.getItem('semester') || '');
   const [academicYear, setAcademicYear] = useState(() => localStorage.getItem('academicYear') || '');
+  const [educationStage, setEducationStage] = useState<string>('');
 
   useEffect(() => {
     localStorage.setItem('subject', subject);
@@ -140,56 +141,135 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
           />
         </div>
         
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="gradeOne"
-            onClick={() => handleAddToGrade('first')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف الأول
-          </Button>
-          <Button
-            variant="gradeTwo"
-            onClick={() => handleAddToGrade('second')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف الثاني
-          </Button>
-          <Button
-            variant="gradeThree"
-            onClick={() => handleAddToGrade('third')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف الثالث
-          </Button>
-          <Button
-            variant="gradeFour"
-            onClick={() => handleAddToGrade('fourth')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف الرابع
-          </Button>
-          <Button
-            variant="gradeFive"
-            onClick={() => handleAddToGrade('fifth')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف الخامس
-          </Button>
-          <Button
-            variant="gradeSix"
-            onClick={() => handleAddToGrade('sixth')}
-            className="flex-1 min-w-[140px]"
-          >
-            <Users className="w-4 h-4" />
-            إضافة إلى الصف السادس
-          </Button>
+        {/* Education Stage Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+            <School className="w-4 h-4" />
+            المرحلة الدراسية
+          </label>
+          <Select value={educationStage} onValueChange={setEducationStage} dir="rtl">
+            <SelectTrigger className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20">
+              <SelectValue placeholder="اختاري المرحلة الدراسية..." />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border z-50">
+              <SelectItem value="primary">ابتدائي</SelectItem>
+              <SelectItem value="middle">متوسط</SelectItem>
+              <SelectItem value="secondary">ثانوي</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+
+        {/* Grade Buttons - Show based on selected education stage */}
+        {educationStage === 'primary' && (
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="gradeOne"
+              onClick={() => handleAddToGrade('first')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الأول
+            </Button>
+            <Button
+              variant="gradeTwo"
+              onClick={() => handleAddToGrade('second')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثاني
+            </Button>
+            <Button
+              variant="gradeThree"
+              onClick={() => handleAddToGrade('third')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثالث
+            </Button>
+            <Button
+              variant="gradeFour"
+              onClick={() => handleAddToGrade('fourth')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الرابع
+            </Button>
+            <Button
+              variant="gradeFive"
+              onClick={() => handleAddToGrade('fifth')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الخامس
+            </Button>
+            <Button
+              variant="gradeSix"
+              onClick={() => handleAddToGrade('sixth')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف السادس
+            </Button>
+          </div>
+        )}
+
+        {educationStage === 'middle' && (
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="gradeOne"
+              onClick={() => handleAddToGrade('first')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الأول متوسط
+            </Button>
+            <Button
+              variant="gradeTwo"
+              onClick={() => handleAddToGrade('second')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثاني متوسط
+            </Button>
+            <Button
+              variant="gradeThree"
+              onClick={() => handleAddToGrade('third')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثالث متوسط
+            </Button>
+          </div>
+        )}
+
+        {educationStage === 'secondary' && (
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="gradeOne"
+              onClick={() => handleAddToGrade('first')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الأول ثانوي
+            </Button>
+            <Button
+              variant="gradeTwo"
+              onClick={() => handleAddToGrade('second')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثاني ثانوي
+            </Button>
+            <Button
+              variant="gradeThree"
+              onClick={() => handleAddToGrade('third')}
+              className="flex-1 min-w-[140px]"
+            >
+              <Users className="w-4 h-4" />
+              إضافة إلى الصف الثالث ثانوي
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
