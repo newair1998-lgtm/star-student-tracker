@@ -68,9 +68,9 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
           onChange={(value) => onUpdate(student.id, { homework: value })}
         />
       </TableCell>
-      <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 50))}>
+      <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 40))}>
         <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
-          {tasksTotal}/50
+          {tasksTotal}/40
         </div>
       </TableCell>
       <TableCell className="text-center">
