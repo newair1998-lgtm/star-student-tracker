@@ -26,6 +26,32 @@ const DEFAULT_ATTENDANCE: AttendanceRecord = {
   absent: [false, false, false, false],
 };
 
+const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'];
+
+const getGradeLevel = (total: number) => {
+  if (total >= 90) return 'ممتاز';
+  if (total >= 80) return 'جيد جداً';
+  if (total >= 70) return 'جيد';
+  if (total >= 60) return 'مقبول';
+  return 'ضعيف';
+};
+
+interface StudentType {
+  id: string;
+  name: string;
+  performanceTasks: number;
+  participation: number;
+  book: number;
+  homework: number;
+  exam1: number;
+  exam2: number;
+  attendance?: AttendanceRecord;
+}
+
+const calculateTotal = (student: StudentType) => {
+  return student.performanceTasks + student.participation + student.book + student.homework + student.exam1 + student.exam2;
+};
+
 const GradeAnalysis = () => {
   const { grade } = useParams<{ grade: Grade }>();
   const navigate = useNavigate();
@@ -175,26 +201,12 @@ const GradeAnalysis = () => {
     );
   }
 
-  // Calculate statistics
-  const calculateTotal = (student: typeof students[0]) => {
-    return student.performanceTasks + student.participation + student.book + student.homework + student.exam1 + student.exam2;
-  };
-
   const totals = students.map(calculateTotal);
   const totalSum = totals.reduce((a, b) => a + b, 0);
   const average = totalSum / students.length;
   const maxScore = Math.max(...totals);
   const minScore = Math.min(...totals);
   const achievementPercentage = (average / 100) * 100;
-
-  // Grade distribution
-  const getGradeLevel = (total: number) => {
-    if (total >= 90) return 'ممتاز';
-    if (total >= 80) return 'جيد جداً';
-    if (total >= 70) return 'جيد';
-    if (total >= 60) return 'مقبول';
-    return 'ضعيف';
-  };
 
   const gradeDistribution = {
     'ممتاز': totals.filter(t => t >= 90).length,
@@ -205,7 +217,6 @@ const GradeAnalysis = () => {
   };
 
   const pieData = Object.entries(gradeDistribution).map(([name, value]) => ({ name, value }));
-  const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'];
 
   // Student scores for bar chart
   const studentScoresData = students.map((s, i) => ({
