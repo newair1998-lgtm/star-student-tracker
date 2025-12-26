@@ -57,6 +57,12 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Load performance tasks max from localStorage
+  const [performanceTasksMax, setPerformanceTasksMax] = useState<number>(() => {
+    const saved = localStorage.getItem(`performanceTasksMax_${grade}`);
+    return saved ? parseInt(saved) : 10;
+  });
+  
   // Load exam max scores from localStorage
   const [exam1Max, setExam1Max] = useState<number>(() => {
     const saved = localStorage.getItem(`exam1Max_${grade}`);
@@ -70,6 +76,10 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     const saved = localStorage.getItem(`finalTotalMax_${grade}`);
     return saved ? parseInt(saved) : 100;
   });
+
+  useEffect(() => {
+    localStorage.setItem(`performanceTasksMax_${grade}`, performanceTasksMax.toString());
+  }, [performanceTasksMax, grade]);
 
   useEffect(() => {
     localStorage.setItem(`exam1Max_${grade}`, exam1Max.toString());
@@ -152,22 +162,36 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                       </Button>
                     </div>
                   </TableHead>
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={10}
-                      label="المهام الأدائية"
-                      subLabel="(10)"
-                      onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
-                    />
+                  <TableHead className="text-center w-28">
+                    <div className="flex flex-col items-center gap-1">
+                      <span>المهام الأدائية</span>
+                      <Select value={performanceTasksMax.toString()} onValueChange={(val) => setPerformanceTasksMax(parseInt(val))}>
+                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <BulkScoreSelector
+                        max={performanceTasksMax}
+                        label=""
+                        subLabel=""
+                        onSelect={(value) => handleBulkScoreUpdate('performanceTasks', value)}
+                      />
+                    </div>
                   </TableHead>
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={10}
-                      label="مشاركة"
-                      subLabel="(10)"
-                      onSelect={(value) => handleBulkScoreUpdate('participation', value)}
-                    />
-                  </TableHead>
+                  {performanceTasksMax === 10 && (
+                    <TableHead className="text-center w-20">
+                      <BulkScoreSelector
+                        max={10}
+                        label="مشاركة"
+                        subLabel="(10)"
+                        onSelect={(value) => handleBulkScoreUpdate('participation', value)}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="text-center w-20">
                     <BulkScoreSelector
                       max={10}
@@ -255,6 +279,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     index={index}
                     onUpdate={onUpdateStudent}
                     onDelete={onDeleteStudent}
+                    performanceTasksMax={performanceTasksMax}
                     exam1Max={exam1Max}
                     exam2Max={exam2Max}
                     finalTotalMax={finalTotalMax}

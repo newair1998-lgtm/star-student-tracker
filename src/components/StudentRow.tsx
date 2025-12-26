@@ -16,13 +16,16 @@ interface StudentRowProps {
   index: number;
   onUpdate: (id: string, updates: Partial<Student>) => void;
   onDelete: (id: string) => void;
+  performanceTasksMax?: number;
   exam1Max?: number;
   exam2Max?: number;
   finalTotalMax?: number;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Max = 30, finalTotalMax = 100 }: StudentRowProps) => {
-  const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
+const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100 }: StudentRowProps) => {
+  const tasksTotal = performanceTasksMax === 20 
+    ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
+    : student.performanceTasks + student.participation + student.book + student.homework;
   const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
   const finalTotal = finalTotalMax === 60 
     ? Math.min(tasksTotal + examsTotal, 60) 
@@ -61,17 +64,19 @@ const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Ma
       <TableCell className="text-center">
         <ScoreInput
           value={student.performanceTasks}
-          max={10}
+          max={performanceTasksMax}
           onChange={(value) => onUpdate(student.id, { performanceTasks: value })}
         />
       </TableCell>
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.participation}
-          max={10}
-          onChange={(value) => onUpdate(student.id, { participation: value })}
-        />
-      </TableCell>
+      {performanceTasksMax === 10 && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.participation}
+            max={10}
+            onChange={(value) => onUpdate(student.id, { participation: value })}
+          />
+        </TableCell>
+      )}
       <TableCell className="text-center">
         <ScoreInput
           value={student.book}
