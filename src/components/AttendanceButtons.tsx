@@ -7,12 +7,12 @@ interface AttendanceButtonsProps {
 }
 
 const AttendanceButtons = ({ attendance, onAttendanceChange }: AttendanceButtonsProps) => {
-  // Ensure we always have 5 items
-  const attendanceArray = [...(attendance || []), null, null, null, null, null].slice(0, 5);
+  // Ensure we always have 4 items
+  const attendanceArray = [...(attendance || []), null, null, null, null].slice(0, 4);
 
   return (
-    <div className="flex gap-2 justify-center">
-      {/* 5 Present buttons */}
+    <div className="flex flex-col gap-1 items-center">
+      {/* 4 Present buttons on top */}
       <div className="flex gap-0.5">
         {attendanceArray.map((status, index) => (
           <button
@@ -30,7 +30,7 @@ const AttendanceButtons = ({ attendance, onAttendanceChange }: AttendanceButtons
         ))}
       </div>
       
-      {/* 5 Absent buttons */}
+      {/* 4 Absent buttons below */}
       <div className="flex gap-0.5">
         {attendanceArray.map((status, index) => (
           <button

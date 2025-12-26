@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Student, Grade } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
 
-const DEFAULT_ATTENDANCE: ('present' | 'absent' | null)[] = [null, null, null, null, null];
+const DEFAULT_ATTENDANCE: ('present' | 'absent' | null)[] = [null, null, null, null];
 
 export const useStudents = () => {
   const [students, setStudents] = useState<Student[]>([]);
