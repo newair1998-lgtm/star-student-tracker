@@ -29,11 +29,12 @@ const DEFAULT_ATTENDANCE: AttendanceRecord = {
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'];
 
-const getGradeLevel = (total: number) => {
-  if (total >= 90) return 'ممتاز';
-  if (total >= 80) return 'جيد جداً';
-  if (total >= 70) return 'جيد';
-  if (total >= 60) return 'مقبول';
+const getGradeLevel = (total: number, maxTotal: number) => {
+  const percentage = (total / maxTotal) * 100;
+  if (percentage >= 90) return 'ممتاز';
+  if (percentage >= 80) return 'جيد جداً';
+  if (percentage >= 70) return 'جيد';
+  if (percentage >= 60) return 'مقبول';
   return 'ضعيف';
 };
 
@@ -49,8 +50,11 @@ interface StudentType {
   attendance?: AttendanceRecord;
 }
 
-const calculateTotal = (student: StudentType) => {
-  return student.performanceTasks + student.participation + student.book + student.homework + student.exam1 + student.exam2;
+const calculateTotal = (student: StudentType, exam1Max: number, exam2Max: number, finalTotalMax: number) => {
+  const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
+  const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
+  const rawTotal = tasksTotal + examsTotal;
+  return finalTotalMax === 60 ? Math.min(rawTotal, 60) : rawTotal;
 };
 
 const GradeAnalysis = () => {
@@ -62,6 +66,10 @@ const GradeAnalysis = () => {
 
   const STUDENTS_PER_PAGE = 25;
 
+  // Load exam max scores from localStorage
+  const exam1Max = parseInt(localStorage.getItem(`exam1Max_${grade}`) || '30');
+  const exam2Max = parseInt(localStorage.getItem(`exam2Max_${grade}`) || '30');
+  const finalTotalMax = parseInt(localStorage.getItem(`finalTotalMax_${grade}`) || '100');
 
   const exportToExcel = (studentsData: StudentType[]) => {
     const subject = localStorage.getItem('subject') || '';
@@ -69,8 +77,8 @@ const GradeAnalysis = () => {
     
     // Prepare data for Excel
     const excelData = studentsData.map((student, index) => {
-      const total = calculateTotal(student);
-      const gradeLevel = getGradeLevel(total);
+      const total = calculateTotal(student, exam1Max, exam2Max, finalTotalMax);
+      const gradeLevel = getGradeLevel(total, finalTotalMax);
       return {
         '#': index + 1,
         'الاسم': student.name,
@@ -148,19 +156,20 @@ const GradeAnalysis = () => {
     );
   }
 
-  const totals = students.map(calculateTotal);
+  const totals = students.map(s => calculateTotal(s, exam1Max, exam2Max, finalTotalMax));
   const totalSum = totals.reduce((a, b) => a + b, 0);
   const average = totalSum / students.length;
   const maxScore = Math.max(...totals);
   const minScore = Math.min(...totals);
-  const achievementPercentage = (average / 100) * 100;
+  const achievementPercentage = (average / finalTotalMax) * 100;
 
+  // Calculate grade distribution based on percentage
   const gradeDistribution = {
-    'ممتاز': totals.filter(t => t >= 90).length,
-    'جيد جداً': totals.filter(t => t >= 80 && t < 90).length,
-    'جيد': totals.filter(t => t >= 70 && t < 80).length,
-    'مقبول': totals.filter(t => t >= 60 && t < 70).length,
-    'ضعيف': totals.filter(t => t < 60).length,
+    'ممتاز': totals.filter(t => (t / finalTotalMax) * 100 >= 90).length,
+    'جيد جداً': totals.filter(t => (t / finalTotalMax) * 100 >= 80 && (t / finalTotalMax) * 100 < 90).length,
+    'جيد': totals.filter(t => (t / finalTotalMax) * 100 >= 70 && (t / finalTotalMax) * 100 < 80).length,
+    'مقبول': totals.filter(t => (t / finalTotalMax) * 100 >= 60 && (t / finalTotalMax) * 100 < 70).length,
+    'ضعيف': totals.filter(t => (t / finalTotalMax) * 100 < 60).length,
   };
 
   const pieData = Object.entries(gradeDistribution).map(([name, value]) => ({ name, value }));
@@ -168,7 +177,7 @@ const GradeAnalysis = () => {
   // Student scores for bar chart
   const studentScoresData = students.map((s, i) => ({
     name: s.name.split(' ')[0],
-    الدرجة: calculateTotal(s),
+    الدرجة: calculateTotal(s, exam1Max, exam2Max, finalTotalMax),
   }));
 
   // Category breakdown
@@ -295,7 +304,7 @@ const GradeAnalysis = () => {
               <BarChart data={studentScoresData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
+                <YAxis domain={[0, finalTotalMax]} />
                 <Tooltip />
                 <Bar dataKey="الدرجة" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -343,7 +352,7 @@ const GradeAnalysis = () => {
             <LineChart data={studentScoresData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis domain={[0, 100]} />
+              <YAxis domain={[0, finalTotalMax]} />
               <Tooltip />
               <Line type="monotone" dataKey="الدرجة" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6', strokeWidth: 2 }} />
             </LineChart>
@@ -382,8 +391,8 @@ const GradeAnalysis = () => {
               </thead>
               <tbody>
                 {students.map((student, index) => {
-                  const total = calculateTotal(student);
-                  const gradeLevel = getGradeLevel(total);
+                  const total = calculateTotal(student, exam1Max, exam2Max, finalTotalMax);
+                  const gradeLevel = getGradeLevel(total, finalTotalMax);
                   const colorIndex = ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'].indexOf(gradeLevel);
                   return (
                     <tr key={student.id} className="border-b border-gray-200">
