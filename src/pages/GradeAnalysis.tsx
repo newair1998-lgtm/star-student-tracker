@@ -33,37 +33,112 @@ const GradeAnalysis = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const STUDENTS_PER_PAGE = 25;
+
   const exportToPDF = async () => {
     if (!tableRef.current) return;
     
     try {
       const html2pdf = (await import('html2pdf.js')).default;
-      const element = tableRef.current;
       
-      // Calculate height based on content
-      const elementHeight = element.scrollHeight;
-      const elementWidth = element.scrollWidth;
+      // Create a temporary container for PDF generation
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.background = 'white';
+      document.body.appendChild(tempContainer);
+
+      const subject = localStorage.getItem('subject');
+      const teacherName = localStorage.getItem('teacherName');
       
-      // Use custom page size that fits the content
+      // Split students into pages of 25
+      const totalPages = Math.ceil(students.length / STUDENTS_PER_PAGE);
+      
+      for (let page = 0; page < totalPages; page++) {
+        const startIndex = page * STUDENTS_PER_PAGE;
+        const endIndex = Math.min(startIndex + STUDENTS_PER_PAGE, students.length);
+        const pageStudents = students.slice(startIndex, endIndex);
+        
+        // Create page content
+        const pageDiv = document.createElement('div');
+        pageDiv.style.padding = '20px';
+        pageDiv.style.background = 'white';
+        pageDiv.innerHTML = `
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #1f2937;">
+              تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}
+            </h3>
+            ${subject ? `<p style="color: #374151; margin-top: 8px;">المادة: ${subject}</p>` : ''}
+            ${teacherName ? `<p style="color: #374151;">المعلمة: ${teacherName}</p>` : ''}
+            <p style="color: #6b7280; font-size: 12px; margin-top: 4px;">صفحة ${page + 1} من ${totalPages}</p>
+          </div>
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse; direction: rtl;">
+            <thead>
+              <tr style="border-bottom: 2px solid #d1d5db; background-color: #f3f4f6;">
+                <th style="padding: 12px 8px; text-align: right; color: #1f2937;">#</th>
+                <th style="padding: 12px 8px; text-align: right; color: #1f2937;">الاسم</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">المهام الأدائية</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">المشاركة</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">الأنشطة</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">الواجبات</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">اختبار ١</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">اختبار ٢</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">المجموع</th>
+                <th style="padding: 12px 8px; text-align: center; color: #1f2937;">التقدير</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pageStudents.map((student, idx) => {
+                const total = calculateTotal(student);
+                const gradeLevel = getGradeLevel(total);
+                const colorIndex = ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'].indexOf(gradeLevel);
+                const color = COLORS[colorIndex];
+                return `
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 8px; color: #1f2937;">${startIndex + idx + 1}</td>
+                    <td style="padding: 8px; font-weight: 500; color: #1f2937;">${student.name}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.performanceTasks}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.participation}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.book}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.homework}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.exam1}</td>
+                    <td style="padding: 8px; text-align: center; color: #1f2937;">${student.exam2}</td>
+                    <td style="padding: 8px; text-align: center; font-weight: bold; color: #1f2937;">${total}</td>
+                    <td style="padding: 8px; text-align: center; font-weight: bold; color: ${color};">${gradeLevel}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+        
+        if (page < totalPages - 1) {
+          pageDiv.style.pageBreakAfter = 'always';
+        }
+        
+        tempContainer.appendChild(pageDiv);
+      }
+      
       const opt = {
-        margin: 5,
+        margin: 10,
         filename: `تفاصيل_درجات_${gradeLabels[grade as Grade]}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
           useCORS: true,
-          scrollY: 0,
-          windowHeight: elementHeight
         },
         jsPDF: { 
-          unit: 'px' as const, 
-          format: [elementWidth + 40, elementHeight + 40] as [number, number], 
+          unit: 'mm' as const, 
+          format: 'a4' as const, 
           orientation: 'landscape' as const,
-          hotfixes: ['px_scaling']
-        }
+        },
+        pagebreak: { mode: ['css', 'legacy'] as const }
       };
       
-      await html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(tempContainer).save();
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
       
       toast({
         title: 'تم الحفظ بنجاح',
