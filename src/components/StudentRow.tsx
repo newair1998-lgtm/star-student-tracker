@@ -16,11 +16,13 @@ interface StudentRowProps {
   index: number;
   onUpdate: (id: string, updates: Partial<Student>) => void;
   onDelete: (id: string) => void;
+  exam1Max?: number;
+  exam2Max?: number;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, exam1Max = 30, exam2Max = 30 }: StudentRowProps) => {
   const tasksTotal = student.performanceTasks + student.participation + student.book + student.homework;
-  const examsTotal = student.exam1 + student.exam2;
+  const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
   const finalTotal = tasksTotal + examsTotal;
 
   const getScoreColor = (score: number, max: number) => {
@@ -89,14 +91,14 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
       <TableCell className="text-center">
         <ScoreInput
           value={student.exam1}
-          max={30}
+          max={exam1Max}
           onChange={(value) => onUpdate(student.id, { exam1: value })}
         />
       </TableCell>
       <TableCell className="text-center">
         <ScoreInput
           value={student.exam2}
-          max={30}
+          max={exam2Max}
           onChange={(value) => onUpdate(student.id, { exam2: value })}
         />
       </TableCell>
