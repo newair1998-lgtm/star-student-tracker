@@ -1,26 +1,33 @@
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AttendanceRecord } from '@/types/student';
 
 interface AttendanceButtonsProps {
-  attendance: ('present' | 'absent' | null)[];
-  onAttendanceChange: (index: number, status: 'present' | 'absent') => void;
+  attendance: AttendanceRecord;
+  onAttendanceChange: (type: 'present' | 'absent', index: number) => void;
 }
 
+const DEFAULT_ATTENDANCE: AttendanceRecord = {
+  present: [false, false, false, false],
+  absent: [false, false, false, false],
+};
+
 const AttendanceButtons = ({ attendance, onAttendanceChange }: AttendanceButtonsProps) => {
-  // Ensure we always have 4 items
-  const attendanceArray = [...(attendance || []), null, null, null, null].slice(0, 4);
+  const safeAttendance = attendance || DEFAULT_ATTENDANCE;
+  const presentArray = safeAttendance.present || [false, false, false, false];
+  const absentArray = safeAttendance.absent || [false, false, false, false];
 
   return (
     <div className="flex flex-col gap-1 items-center">
       {/* 4 Present buttons on top */}
       <div className="flex gap-0.5">
-        {attendanceArray.map((status, index) => (
+        {presentArray.map((isPresent, index) => (
           <button
             key={`present-${index}`}
-            onClick={() => onAttendanceChange(index, 'present')}
+            onClick={() => onAttendanceChange('present', index)}
             className={cn(
               "w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200",
-              status === 'present'
+              isPresent
                 ? "bg-success border-success text-success-foreground"
                 : "border-muted-foreground/30 text-muted-foreground hover:border-success hover:text-success hover:bg-success/10"
             )}
@@ -32,13 +39,13 @@ const AttendanceButtons = ({ attendance, onAttendanceChange }: AttendanceButtons
       
       {/* 4 Absent buttons below */}
       <div className="flex gap-0.5">
-        {attendanceArray.map((status, index) => (
+        {absentArray.map((isAbsent, index) => (
           <button
             key={`absent-${index}`}
-            onClick={() => onAttendanceChange(index, 'absent')}
+            onClick={() => onAttendanceChange('absent', index)}
             className={cn(
               "w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200",
-              status === 'absent'
+              isAbsent
                 ? "bg-destructive border-destructive text-destructive-foreground"
                 : "border-muted-foreground/30 text-muted-foreground hover:border-destructive hover:text-destructive hover:bg-destructive/10"
             )}

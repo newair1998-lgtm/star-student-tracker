@@ -1,10 +1,15 @@
 export type Grade = 'first' | 'second' | 'third' | 'fourth' | 'fifth' | 'sixth';
 
+export interface AttendanceRecord {
+  present: boolean[];
+  absent: boolean[];
+}
+
 export interface Student {
   id: string;
   name: string;
   grade: Grade;
-  attendance: ('present' | 'absent' | null)[];
+  attendance: AttendanceRecord;
   performanceTasks: number;
   participation: number;
   book: number;
