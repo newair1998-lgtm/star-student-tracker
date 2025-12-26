@@ -93,19 +93,6 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
               </p>
             </div>
           </div>
-          
-          {students.length > 0 && (
-            <div className="flex gap-4 text-sm">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-success"></span>
-                <span className="text-muted-foreground">حاضرات: {presentCount}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-destructive"></span>
-                <span className="text-muted-foreground">غائبات: {absentCount}</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
