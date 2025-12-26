@@ -15,6 +15,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [subject, setSubject] = useState(() => localStorage.getItem('subject') || '');
   const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
   const [semester, setSemester] = useState(() => localStorage.getItem('semester') || '');
+  const [academicYear, setAcademicYear] = useState(() => localStorage.getItem('academicYear') || '');
 
   useEffect(() => {
     localStorage.setItem('subject', subject);
@@ -27,6 +28,10 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   useEffect(() => {
     localStorage.setItem('semester', semester);
   }, [semester]);
+
+  useEffect(() => {
+    localStorage.setItem('academicYear', academicYear);
+  }, [academicYear]);
 
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
@@ -53,8 +58,8 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
       </div>
       
       <div className="space-y-4">
-        {/* Subject, Teacher Name, and Semester Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Subject, Teacher Name, Semester, and Academic Year Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -93,6 +98,23 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
               <SelectContent className="bg-card border-border z-50">
                 <SelectItem value="الفصل الأول">الفصل الأول</SelectItem>
                 <SelectItem value="الفصل الثاني">الفصل الثاني</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              العام الدراسي
+            </label>
+            <Select value={academicYear} onValueChange={setAcademicYear} dir="rtl">
+              <SelectTrigger className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20">
+                <SelectValue placeholder="اختاري العام الدراسي..." />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-50">
+                <SelectItem value="1445-1446">1445-1446</SelectItem>
+                <SelectItem value="1446-1447">1446-1447</SelectItem>
+                <SelectItem value="1447-1448">1447-1448</SelectItem>
+                <SelectItem value="1448-1449">1448-1449</SelectItem>
               </SelectContent>
             </Select>
           </div>
