@@ -44,6 +44,7 @@ interface GradeSectionProps {
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
+  educationStage?: string;
 }
 
 const gradeHeaderColors: Record<Grade, string> = {
@@ -64,7 +65,7 @@ const gradeIconColors: Record<Grade, string> = {
   sixth: 'bg-grade-six/20 text-grade-six',
 };
 
-const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
+const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, educationStage }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -168,7 +169,11 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">{gradeLabels[grade]}</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                {gradeLabels[grade]}
+                {educationStage === 'middle' && ' متوسط'}
+                {educationStage === 'secondary' && ' ثانوي'}
+              </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
                 {students.length} طالبة

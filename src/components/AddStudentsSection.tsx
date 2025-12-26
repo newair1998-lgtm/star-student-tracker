@@ -16,7 +16,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
   const [semester, setSemester] = useState(() => localStorage.getItem('semester') || '');
   const [academicYear, setAcademicYear] = useState(() => localStorage.getItem('academicYear') || '');
-  const [educationStage, setEducationStage] = useState<string>('');
+  const [educationStage, setEducationStage] = useState<string>(() => localStorage.getItem('educationStage') || '');
 
   useEffect(() => {
     localStorage.setItem('subject', subject);
@@ -33,6 +33,10 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   useEffect(() => {
     localStorage.setItem('academicYear', academicYear);
   }, [academicYear]);
+
+  useEffect(() => {
+    localStorage.setItem('educationStage', educationStage);
+  }, [educationStage]);
 
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
