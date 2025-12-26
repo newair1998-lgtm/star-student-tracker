@@ -1,3 +1,4 @@
+// Grade Analysis Page - Export to Word with charts
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
@@ -6,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 import {
   BarChart,
   Bar,
@@ -106,6 +108,7 @@ const GradeAnalysis = () => {
   const navigate = useNavigate();
   const { getStudentsByGrade, loading } = useStudents();
   const tableRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const STUDENTS_PER_PAGE = 25;
@@ -205,248 +208,97 @@ const GradeAnalysis = () => {
     });
   };
 
-  const exportFullReportToWord = async (studentsData: StudentType[]) => {
-    // Calculate all statistics
-    const allTotals = studentsData.map(s => calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax));
-    const totalSum = allTotals.reduce((a, b) => a + b, 0);
-    const avg = totalSum / studentsData.length;
-    const maxScore = Math.max(...allTotals);
-    const minScore = Math.min(...allTotals);
-    const achievementPct = (avg / finalTotalMax) * 100;
-    
-    const sortedAllTotals = [...allTotals].sort((a, b) => a - b);
-    const calcMedian = sortedAllTotals.length % 2 === 0
-      ? (sortedAllTotals[sortedAllTotals.length / 2 - 1] + sortedAllTotals[sortedAllTotals.length / 2]) / 2
-      : sortedAllTotals[Math.floor(sortedAllTotals.length / 2)];
-    
-    const freqMap: Record<number, number> = {};
-    allTotals.forEach(t => { freqMap[t] = (freqMap[t] || 0) + 1; });
-    const maxFreq = Math.max(...Object.values(freqMap));
-    const modeValues = Object.entries(freqMap).filter(([_, freq]) => freq === maxFreq).map(([val]) => Number(val));
-    const modeStr = modeValues.length === allTotals.length ? 'لا يوجد' : modeValues.join('، ');
-    
-    const calcVariance = allTotals.reduce((sum, t) => sum + Math.pow(t - avg, 2), 0) / allTotals.length;
-    const calcStdDev = Math.sqrt(calcVariance);
-
-    // Grade distribution
-    const distribution = finalTotalMax === 60
-      ? {
-          'ممتاز': allTotals.filter(t => t >= 54).length,
-          'جيد جداً': allTotals.filter(t => t >= 48 && t < 54).length,
-          'جيد': allTotals.filter(t => t >= 36 && t < 48).length,
-          'مقبول': allTotals.filter(t => t >= 30 && t < 36).length,
-          'ضعيف': allTotals.filter(t => t < 30).length,
-        }
-      : {
-          'ممتاز': allTotals.filter(t => t >= 90).length,
-          'جيد جداً': allTotals.filter(t => t >= 80 && t < 90).length,
-          'جيد': allTotals.filter(t => t >= 60 && t < 80).length,
-          'مقبول': allTotals.filter(t => t >= 50 && t < 60).length,
-          'ضعيف': allTotals.filter(t => t < 50).length,
-        };
-
-    const ranges = getGradeRanges(finalTotalMax);
-
-    // Helper to create table cell
-    const createCell = (text: string, isHeader = false) => new TableCell({
-      children: [new Paragraph({
-        children: [new TextRun({ text, bold: isHeader, size: 24, font: "Arial" })],
-        alignment: AlignmentType.CENTER,
-        bidirectional: true,
-      })],
-      width: { size: 1500, type: WidthType.DXA },
-    });
-
-    // Create document sections
-    const doc = new Document({
-      sections: [{
-        properties: { 
-          page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } }
-        },
-        children: [
-          // Title
-          new Paragraph({
-            children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}`, bold: true, size: 36, font: "Arial" })],
-            heading: HeadingLevel.HEADING_1,
-            alignment: AlignmentType.CENTER,
-            bidirectional: true,
-            spacing: { after: 300 },
-          }),
-          // Metadata
-          ...(subject ? [new Paragraph({
-            children: [new TextRun({ text: `المادة: ${subject}`, size: 28, font: "Arial" })],
-            alignment: AlignmentType.CENTER,
-            bidirectional: true,
-          })] : []),
-          ...(teacherName ? [new Paragraph({
-            children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 28, font: "Arial" })],
-            alignment: AlignmentType.CENTER,
-            bidirectional: true,
-          })] : []),
-          ...(semester ? [new Paragraph({
-            children: [new TextRun({ text: `الفصل الدراسي: ${semester}`, size: 28, font: "Arial" })],
-            alignment: AlignmentType.CENTER,
-            bidirectional: true,
-            spacing: { after: 400 },
-          })] : []),
-          
-          // Summary Statistics Section
-          new Paragraph({
-            children: [new TextRun({ text: "الإحصائيات العامة", bold: true, size: 28, font: "Arial" })],
-            heading: HeadingLevel.HEADING_2,
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 300, after: 200 },
-          }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({ children: [createCell("البيان", true), createCell("القيمة", true)] }),
-              new TableRow({ children: [createCell("عدد الطالبات"), createCell(String(studentsData.length))] }),
-              new TableRow({ children: [createCell("مجموع الدرجات"), createCell(totalSum.toFixed(2))] }),
-              new TableRow({ children: [createCell("المتوسط الحسابي"), createCell(avg.toFixed(2))] }),
-              new TableRow({ children: [createCell("أعلى درجة"), createCell(String(maxScore))] }),
-              new TableRow({ children: [createCell("أدنى درجة"), createCell(String(minScore))] }),
-              new TableRow({ children: [createCell("نسبة التحصيل"), createCell(`${achievementPct.toFixed(2)}%`)] }),
-              new TableRow({ children: [createCell("الوسيط"), createCell(calcMedian.toFixed(2))] }),
-              new TableRow({ children: [createCell("المنوال"), createCell(modeStr)] }),
-              new TableRow({ children: [createCell("الانحراف المعياري"), createCell(calcStdDev.toFixed(2))] }),
-            ],
-          }),
-
-          // Grade Distribution Section
-          new Paragraph({
-            children: [new TextRun({ text: "توزيع التقديرات", bold: true, size: 28, font: "Arial" })],
-            heading: HeadingLevel.HEADING_2,
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 400, after: 200 },
-          }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({ children: [createCell("المستوى", true), createCell("نطاق الدرجات", true), createCell("الوصف", true), createCell("العدد", true), createCell("النسبة", true)] }),
-              ...ranges.map(item => {
-                const count = distribution[item.level as keyof typeof distribution] || 0;
-                return new TableRow({ children: [
-                  createCell(item.level),
-                  createCell(item.range),
-                  createCell(item.description),
-                  createCell(String(count)),
-                  createCell(`${((count / studentsData.length) * 100).toFixed(2)}%`),
-                ]});
-              }),
-            ],
-          }),
-
-          // Mastery Analysis Section
-          new Paragraph({
-            children: [new TextRun({ text: "تحليل مستوى الإتقان", bold: true, size: 28, font: "Arial" })],
-            heading: HeadingLevel.HEADING_2,
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 400, after: 200 },
-          }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({ children: [createCell("المستوى", true), createCell("العدد", true), createCell("النسبة", true)] }),
-              new TableRow({ children: [
-                createCell("إتقان عالٍ (≥ 85%)"),
-                createCell(String(studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length)),
-                createCell(`${((studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length / studentsData.length) * 100).toFixed(1)}%`),
-              ]}),
-              new TableRow({ children: [
-                createCell("إتقان متوسط (70% - 85%)"),
-                createCell(String(studentsData.filter(s => { const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100; return pct >= 70 && pct < 85; }).length)),
-                createCell(`${((studentsData.filter(s => { const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100; return pct >= 70 && pct < 85; }).length / studentsData.length) * 100).toFixed(1)}%`),
-              ]}),
-              new TableRow({ children: [
-                createCell("إتقان منخفض (< 70%)"),
-                createCell(String(studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length)),
-                createCell(`${((studentsData.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length / studentsData.length) * 100).toFixed(1)}%`),
-              ]}),
-            ],
-          }),
-
-          // Enrichment Plan
-          new Paragraph({
-            children: [new TextRun({ text: "الخطة الإثرائية - طالبات تحتاج تحديات إضافية", bold: true, size: 24, font: "Arial" })],
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 300, after: 100 },
-          }),
-          ...studentsData
-            .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85)
-            .map((s, i) => new Paragraph({
-              children: [new TextRun({ text: `${i + 1}. ${s.name} - ${((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%`, size: 22, font: "Arial" })],
-              alignment: AlignmentType.RIGHT,
-              bidirectional: true,
-            })),
-
-          // Remedial Plan
-          new Paragraph({
-            children: [new TextRun({ text: "الخطة العلاجية - طالبات تحتاج دعم إضافي", bold: true, size: 24, font: "Arial" })],
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 300, after: 100 },
-          }),
-          ...studentsData
-            .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70)
-            .sort((a, b) => calculateTotal(a, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) - calculateTotal(b, performanceTasksMax, exam1Max, exam2Max, finalTotalMax))
-            .map((s, i) => new Paragraph({
-              children: [new TextRun({ text: `${i + 1}. ${s.name} - ${((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%`, size: 22, font: "Arial" })],
-              alignment: AlignmentType.RIGHT,
-              bidirectional: true,
-            })),
-
-          // Student Details Section
-          new Paragraph({
-            children: [new TextRun({ text: "تفاصيل درجات الطالبات", bold: true, size: 28, font: "Arial" })],
-            heading: HeadingLevel.HEADING_2,
-            alignment: AlignmentType.RIGHT,
-            bidirectional: true,
-            spacing: { before: 400, after: 200 },
-          }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({ 
-                children: performanceTasksMax === 20 
-                  ? (exam1Max !== 20 
-                    ? [createCell("#", true), createCell("الاسم", true), createCell("المهام", true), createCell("الأنشطة", true), createCell("الواجبات", true), createCell("اختبار ١", true), createCell("اختبار ٢", true), createCell("المجموع", true), createCell("التقدير", true)]
-                    : [createCell("#", true), createCell("الاسم", true), createCell("المهام", true), createCell("الأنشطة", true), createCell("الواجبات", true), createCell("اختبار ١", true), createCell("المجموع", true), createCell("التقدير", true)])
-                  : (exam1Max !== 20 
-                    ? [createCell("#", true), createCell("الاسم", true), createCell("المهام", true), createCell("المشاركة", true), createCell("الأنشطة", true), createCell("الواجبات", true), createCell("اختبار ١", true), createCell("اختبار ٢", true), createCell("المجموع", true), createCell("التقدير", true)]
-                    : [createCell("#", true), createCell("الاسم", true), createCell("المهام", true), createCell("المشاركة", true), createCell("الأنشطة", true), createCell("الواجبات", true), createCell("اختبار ١", true), createCell("المجموع", true), createCell("التقدير", true)])
-              }),
-              ...studentsData.map((student, index) => {
-                const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
-                const gradeLevel = getGradeLevel(total, finalTotalMax);
-                return new TableRow({
-                  children: performanceTasksMax === 20
-                    ? (exam1Max !== 20
-                      ? [createCell(String(index + 1)), createCell(student.name), createCell(String(student.performanceTasks)), createCell(String(student.book)), createCell(String(student.homework)), createCell(String(student.exam1)), createCell(String(student.exam2)), createCell(String(total)), createCell(gradeLevel)]
-                      : [createCell(String(index + 1)), createCell(student.name), createCell(String(student.performanceTasks)), createCell(String(student.book)), createCell(String(student.homework)), createCell(String(student.exam1)), createCell(String(total)), createCell(gradeLevel)])
-                    : (exam1Max !== 20
-                      ? [createCell(String(index + 1)), createCell(student.name), createCell(String(student.performanceTasks)), createCell(String(student.participation)), createCell(String(student.book)), createCell(String(student.homework)), createCell(String(student.exam1)), createCell(String(student.exam2)), createCell(String(total)), createCell(gradeLevel)]
-                      : [createCell(String(index + 1)), createCell(student.name), createCell(String(student.performanceTasks)), createCell(String(student.participation)), createCell(String(student.book)), createCell(String(student.homework)), createCell(String(student.exam1)), createCell(String(total)), createCell(gradeLevel)])
-                });
-              }),
-            ],
-          }),
-        ],
-      }],
-    });
-
-    // Generate and save
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}.docx`);
+  const exportFullReportToWord = async () => {
+    if (!reportRef.current) {
+      toast({
+        title: 'خطأ',
+        description: 'لم يتم العثور على التقرير',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     toast({
-      title: 'تم الحفظ بنجاح',
-      description: 'تم حفظ التقرير الكامل بصيغة Word',
+      title: 'جاري التحضير',
+      description: 'يتم التقاط التقرير وتحويله إلى Word...',
     });
+
+    try {
+      // Capture the entire report as an image
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      // Convert canvas to base64
+      const imageData = canvas.toDataURL('image/png');
+      const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+
+      // Create Word document with the image
+      const doc = new Document({
+        sections: [{
+          properties: {
+            page: { margin: { top: 500, right: 500, bottom: 500, left: 500 } }
+          },
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}`, bold: true, size: 36, font: "Arial" })],
+              heading: HeadingLevel.HEADING_1,
+              alignment: AlignmentType.CENTER,
+              bidirectional: true,
+              spacing: { after: 200 },
+            }),
+            ...(subject ? [new Paragraph({
+              children: [new TextRun({ text: `المادة: ${subject}`, size: 24, font: "Arial" })],
+              alignment: AlignmentType.CENTER,
+              bidirectional: true,
+            })] : []),
+            ...(teacherName ? [new Paragraph({
+              children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 24, font: "Arial" })],
+              alignment: AlignmentType.CENTER,
+              bidirectional: true,
+            })] : []),
+            ...(semester ? [new Paragraph({
+              children: [new TextRun({ text: `الفصل الدراسي: ${semester}`, size: 24, font: "Arial" })],
+              alignment: AlignmentType.CENTER,
+              bidirectional: true,
+              spacing: { after: 300 },
+            })] : []),
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+                  transformation: {
+                    width: 650,
+                    height: Math.round((canvas.height / canvas.width) * 650),
+                  },
+                  type: 'png',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+          ],
+        }],
+      });
+
+      // Generate and save
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}.docx`);
+
+      toast({
+        title: 'تم الحفظ بنجاح',
+        description: 'تم حفظ التقرير الكامل بصيغة Word مع الرسوم البيانية',
+      });
+    } catch (error) {
+      console.error('Error exporting to Word:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تصدير التقرير',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -629,7 +481,7 @@ const GradeAnalysis = () => {
         </div>
       </header>
 
-      <main className="container py-6 space-y-6">
+      <main ref={reportRef} className="container py-6 space-y-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-card rounded-xl p-4 shadow-card text-center">
@@ -973,7 +825,7 @@ const GradeAnalysis = () => {
               <FileSpreadsheet className="w-4 h-4 ml-2" />
               حفظ Excel
             </Button>
-            <Button onClick={() => exportFullReportToWord(students)} variant="outline" className="border-primary text-primary hover:bg-primary/10">
+            <Button onClick={() => exportFullReportToWord()} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
               حفظ التقرير Word
             </Button>
