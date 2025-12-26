@@ -306,9 +306,17 @@ const GradeAnalysis = () => {
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">تفاصيل درجات الطالبات</h2>
           <div ref={tableRef} className="overflow-x-auto bg-white p-4 rounded-lg">
-            <h3 className="text-center font-bold text-lg mb-4 text-gray-800">
-              تفاصيل درجات طالبات {gradeLabels[grade as Grade]}
-            </h3>
+            <div className="text-center mb-4">
+              <h3 className="font-bold text-lg text-gray-800">
+                تفاصيل درجات طالبات {gradeLabels[grade as Grade]}
+              </h3>
+              {localStorage.getItem('subject') && (
+                <p className="text-gray-700 mt-2">المادة: {localStorage.getItem('subject')}</p>
+              )}
+              {localStorage.getItem('teacherName') && (
+                <p className="text-gray-700">المعلمة: {localStorage.getItem('teacherName')}</p>
+              )}
+            </div>
             <table className="w-full text-sm" style={{ direction: 'rtl' }}>
               <thead>
                 <tr className="border-b-2 border-gray-300 bg-gray-100">
