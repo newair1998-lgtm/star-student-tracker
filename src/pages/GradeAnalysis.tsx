@@ -309,7 +309,7 @@ const GradeAnalysis = () => {
           </div>
         </div>
 
-        {/* Charts Row 1 */}
+        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pie Chart - Grade Distribution */}
           <div className="bg-card rounded-xl p-6 shadow-card">
@@ -336,37 +336,6 @@ const GradeAnalysis = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Bar Chart - Student Scores */}
-          <div className="bg-card rounded-xl p-6 shadow-card">
-            <h2 className="text-lg font-bold text-foreground mb-4">درجات الطالبات</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={studentScoresData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, finalTotalMax]} />
-                <Tooltip />
-                <Bar dataKey="الدرجة" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Category Breakdown */}
-          <div className="bg-card rounded-xl p-6 shadow-card">
-            <h2 className="text-lg font-bold text-foreground mb-4">متوسط الدرجات حسب الفئة</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={categoryData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={80} />
-                <Tooltip />
-                <Bar dataKey="المتوسط" fill="#10B981" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
           {/* Attendance Chart */}
           <div className="bg-card rounded-xl p-6 shadow-card">
             <h2 className="text-lg font-bold text-foreground mb-4">الحضور والغياب</h2>
@@ -382,20 +351,6 @@ const GradeAnalysis = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-
-        {/* Line Chart - Score Trend */}
-        <div className="bg-card rounded-xl p-6 shadow-card">
-          <h2 className="text-lg font-bold text-foreground mb-4">منحنى الدرجات</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={studentScoresData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis domain={[0, finalTotalMax]} />
-              <Tooltip />
-              <Line type="monotone" dataKey="الدرجة" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6', strokeWidth: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
         </div>
 
         {/* Students Details Table */}
