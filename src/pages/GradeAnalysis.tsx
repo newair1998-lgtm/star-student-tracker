@@ -587,7 +587,11 @@ const GradeAnalysis = () => {
                     formatter={(value: number) => [`${value} طالبة`, 'العدد']}
                     labelFormatter={(label) => `الفئة: ${label}`}
                   />
-                  <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} name="التكرار" />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]} name="التكرار">
+                    {frequencyDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#EF4444', '#F97316', '#F59E0B', '#3B82F6', '#10B981'][index]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
