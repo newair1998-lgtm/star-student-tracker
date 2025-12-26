@@ -25,7 +25,10 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
       .split('\n')
-      .map(name => name.trim())
+      .map(name => {
+        // Remove leading numbers, dots, dashes, and spaces (e.g., "1. فاطمة" or "1- فاطمة" or "1 فاطمة")
+        return name.trim().replace(/^[\d\s.\-\)]+/, '').trim();
+      })
       .filter(name => name.length > 0);
     
     if (names.length > 0) {
