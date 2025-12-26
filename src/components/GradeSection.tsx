@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Student, Grade, gradeLabels, AttendanceRecord } from '@/types/student';
 import {
   Table,
@@ -7,6 +8,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Users, GraduationCap, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudentRow from './StudentRow';
@@ -48,6 +56,24 @@ const gradeIconColors: Record<Grade, string> = {
 const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Load exam max scores from localStorage
+  const [exam1Max, setExam1Max] = useState<number>(() => {
+    const saved = localStorage.getItem(`exam1Max_${grade}`);
+    return saved ? parseInt(saved) : 30;
+  });
+  const [exam2Max, setExam2Max] = useState<number>(() => {
+    const saved = localStorage.getItem(`exam2Max_${grade}`);
+    return saved ? parseInt(saved) : 30;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`exam1Max_${grade}`, exam1Max.toString());
+  }, [exam1Max, grade]);
+
+  useEffect(() => {
+    localStorage.setItem(`exam2Max_${grade}`, exam2Max.toString());
+  }, [exam2Max, grade]);
 
   const handleBulkScoreUpdate = (field: keyof Student, value: number) => {
     if (onBulkUpdate) {
@@ -156,21 +182,45 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                       <span className="text-xs text-muted-foreground">(40)</span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={30}
-                      label="اختبار ١"
-                      subLabel="(30)"
-                      onSelect={(value) => handleBulkScoreUpdate('exam1', value)}
-                    />
+                  <TableHead className="text-center w-28">
+                    <div className="flex flex-col items-center gap-1">
+                      <span>اختبار ١</span>
+                      <Select value={exam1Max.toString()} onValueChange={(val) => setExam1Max(parseInt(val))}>
+                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <BulkScoreSelector
+                        max={exam1Max}
+                        label=""
+                        subLabel=""
+                        onSelect={(value) => handleBulkScoreUpdate('exam1', value)}
+                      />
+                    </div>
                   </TableHead>
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={30}
-                      label="اختبار ٢"
-                      subLabel="(30)"
-                      onSelect={(value) => handleBulkScoreUpdate('exam2', value)}
-                    />
+                  <TableHead className="text-center w-28">
+                    <div className="flex flex-col items-center gap-1">
+                      <span>اختبار ٢</span>
+                      <Select value={exam2Max.toString()} onValueChange={(val) => setExam2Max(parseInt(val))}>
+                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <BulkScoreSelector
+                        max={exam2Max}
+                        label=""
+                        subLabel=""
+                        onSelect={(value) => handleBulkScoreUpdate('exam2', value)}
+                      />
+                    </div>
                   </TableHead>
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center">
@@ -189,6 +239,8 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     index={index}
                     onUpdate={onUpdateStudent}
                     onDelete={onDeleteStudent}
+                    exam1Max={exam1Max}
+                    exam2Max={exam2Max}
                   />
                 ))}
               </TableBody>
