@@ -37,7 +37,11 @@ const StudentRow = ({ student, index, onUpdate, onDelete }: StudentRowProps) => 
       <TableCell>
         <AttendanceButtons
           attendance={student.attendance}
-          onAttendanceChange={(status) => onUpdate(student.id, { attendance: status })}
+          onAttendanceChange={(index, status) => {
+            const newAttendance = [...(student.attendance || [null, null, null, null, null])];
+            newAttendance[index] = status;
+            onUpdate(student.id, { attendance: newAttendance });
+          }}
         />
       </TableCell>
       <TableCell className="text-center">

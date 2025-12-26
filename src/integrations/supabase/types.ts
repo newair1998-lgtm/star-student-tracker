@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       students: {
         Row: {
-          attendance: string | null
+          attendance: Json | null
           book: number
           created_at: string
           exam1: number
@@ -30,7 +30,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          attendance?: string | null
+          attendance?: Json | null
           book?: number
           created_at?: string
           exam1?: number
@@ -44,7 +44,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          attendance?: string | null
+          attendance?: Json | null
           book?: number
           created_at?: string
           exam1?: number
