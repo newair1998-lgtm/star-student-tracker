@@ -186,7 +186,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     title="إزالة جميع البيانات"
                   >
                     <Eraser className="w-4 h-4 ml-1" />
-                    إزالة الكل
+                    إزالة جميع الدرجات
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
