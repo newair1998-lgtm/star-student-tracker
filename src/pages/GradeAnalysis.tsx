@@ -39,13 +39,28 @@ const GradeAnalysis = () => {
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       const element = tableRef.current;
+      
+      // Calculate height based on content
+      const elementHeight = element.scrollHeight;
+      const elementWidth = element.scrollWidth;
+      
+      // Use custom page size that fits the content
       const opt = {
         margin: 5,
         filename: `تفاصيل_درجات_${gradeLabels[grade as Grade]}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 1.5, useCORS: true },
-        jsPDF: { unit: 'mm' as const, format: 'a3' as const, orientation: 'landscape' as const },
-        pagebreak: { mode: 'avoid-all' as const }
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          scrollY: 0,
+          windowHeight: elementHeight
+        },
+        jsPDF: { 
+          unit: 'px' as const, 
+          format: [elementWidth + 40, elementHeight + 40] as [number, number], 
+          orientation: 'landscape' as const,
+          hotfixes: ['px_scaling']
+        }
       };
       
       await html2pdf().set(opt).from(element).save();
