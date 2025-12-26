@@ -91,13 +91,18 @@ const GradeAnalysis = () => {
         pageDiv.style.padding = '20px';
         pageDiv.style.background = 'white';
         pageDiv.innerHTML = `
-          <div style="text-align: center; margin-bottom: 16px;">
-            <h3 style="font-weight: bold; font-size: 18px; color: #1f2937;">
-              تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}
-            </h3>
-            ${subject ? `<p style="color: #374151; margin-top: 8px;">المادة: ${subject}</p>` : ''}
-            ${teacherName ? `<p style="color: #374151;">المعلمة: ${teacherName}</p>` : ''}
-            <p style="color: #6b7280; font-size: 12px; margin-top: 4px;">صفحة ${page + 1} من ${totalPages}</p>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; direction: rtl;">
+            <div style="flex: 1; text-align: center;">
+              <h3 style="font-weight: bold; font-size: 18px; color: #1f2937;">
+                تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}
+              </h3>
+              ${subject ? `<p style="color: #374151; margin-top: 8px;">المادة: ${subject}</p>` : ''}
+              ${teacherName ? `<p style="color: #374151;">المعلمة: ${teacherName}</p>` : ''}
+              <p style="color: #6b7280; font-size: 12px; margin-top: 4px;">صفحة ${page + 1} من ${totalPages}</p>
+            </div>
+            <div style="width: 80px;">
+              <img src="${window.location.origin}/images/ministry-logo.jpeg" style="width: 80px; height: auto;" />
+            </div>
           </div>
           <table style="width: 100%; font-size: 14px; border-collapse: collapse; direction: rtl;">
             <thead>
@@ -215,10 +220,15 @@ const GradeAnalysis = () => {
         </style>
       </head>
       <body>
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2>تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}</h2>
-          ${subject ? `<p>المادة: ${subject}</p>` : ''}
-          ${teacherName ? `<p>المعلمة: ${teacherName}</p>` : ''}
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; direction: rtl;">
+          <div style="flex: 1; text-align: center;">
+            <h2>تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}</h2>
+            ${subject ? `<p>المادة: ${subject}</p>` : ''}
+            ${teacherName ? `<p>المعلمة: ${teacherName}</p>` : ''}
+          </div>
+          <div style="width: 100px;">
+            <img src="${window.location.origin}/images/ministry-logo.jpeg" style="width: 100px; height: auto;" />
+          </div>
         </div>
         <table>
           <thead>
