@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Users, BookOpen, User } from 'lucide-react';
 import { Grade } from '@/types/student';
 
@@ -85,13 +86,15 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
               <BookOpen className="w-4 h-4" />
               الفصل الدراسي
             </label>
-            <Input
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-              placeholder="مثال: الفصل الأول..."
-              className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
-              dir="rtl"
-            />
+            <Select value={semester} onValueChange={setSemester} dir="rtl">
+              <SelectTrigger className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20">
+                <SelectValue placeholder="اختاري الفصل الدراسي..." />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-50">
+                <SelectItem value="الفصل الأول">الفصل الأول</SelectItem>
+                <SelectItem value="الفصل الثاني">الفصل الثاني</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
