@@ -405,6 +405,107 @@ const GradeAnalysis = () => {
           </div>
         </div>
 
+        {/* Mastery Level Analysis */}
+        <div className="bg-card rounded-xl p-6 shadow-card">
+          <h2 className="text-lg font-bold text-foreground mb-4">تحليل مستوى الإتقان</h2>
+          
+          {/* Mastery Levels */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-success/10 rounded-lg p-4 border-2 border-success/30">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-3 h-3 rounded-full bg-success"></div>
+                <p className="font-bold text-success">إتقان عالٍ (≥ 85%)</p>
+              </div>
+              <p className="text-3xl font-bold text-success mb-1">
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {((students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length / students.length) * 100).toFixed(1)}% من الطالبات
+              </p>
+            </div>
+            <div className="bg-warning/10 rounded-lg p-4 border-2 border-warning/30">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-3 h-3 rounded-full bg-warning"></div>
+                <p className="font-bold text-warning">إتقان متوسط (70% - 85%)</p>
+              </div>
+              <p className="text-3xl font-bold text-warning mb-1">
+                {students.filter(s => {
+                  const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100;
+                  return pct >= 70 && pct < 85;
+                }).length}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {((students.filter(s => {
+                  const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100;
+                  return pct >= 70 && pct < 85;
+                }).length / students.length) * 100).toFixed(1)}% من الطالبات
+              </p>
+            </div>
+            <div className="bg-destructive/10 rounded-lg p-4 border-2 border-destructive/30">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-3 h-3 rounded-full bg-destructive"></div>
+                <p className="font-bold text-destructive">إتقان منخفض (&lt; 70%)</p>
+              </div>
+              <p className="text-3xl font-bold text-destructive mb-1">
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {((students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length / students.length) * 100).toFixed(1)}% من الطالبات
+              </p>
+            </div>
+          </div>
+
+          {/* Student Classification */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Enrichment Plan */}
+            <div className="bg-success/5 rounded-lg p-4 border border-success/20">
+              <h3 className="font-bold text-success mb-3 flex items-center gap-2">
+                <span className="bg-success text-white text-xs px-2 py-1 rounded">الخطة الإثرائية</span>
+                طالبات تحتاج تحديات إضافية
+              </h3>
+              <div className="max-h-40 overflow-y-auto">
+                {students
+                  .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85)
+                  .map((s, i) => (
+                    <div key={s.id} className="flex justify-between items-center py-1 border-b border-success/10 last:border-0">
+                      <span className="text-sm">{i + 1}. {s.name}</span>
+                      <span className="text-sm font-bold text-success">
+                        {((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  ))}
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-2">لا توجد طالبات في هذه الفئة</p>
+                )}
+              </div>
+            </div>
+
+            {/* Remedial Plan */}
+            <div className="bg-destructive/5 rounded-lg p-4 border border-destructive/20">
+              <h3 className="font-bold text-destructive mb-3 flex items-center gap-2">
+                <span className="bg-destructive text-white text-xs px-2 py-1 rounded">الخطة العلاجية</span>
+                طالبات تحتاج دعم إضافي
+              </h3>
+              <div className="max-h-40 overflow-y-auto">
+                {students
+                  .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70)
+                  .sort((a, b) => calculateTotal(a, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) - calculateTotal(b, performanceTasksMax, exam1Max, exam2Max, finalTotalMax))
+                  .map((s, i) => (
+                    <div key={s.id} className="flex justify-between items-center py-1 border-b border-destructive/10 last:border-0">
+                      <span className="text-sm">{i + 1}. {s.name}</span>
+                      <span className="text-sm font-bold text-destructive">
+                        {((calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  ))}
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-2">لا توجد طالبات في هذه الفئة</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Grade Distribution Table */}
         <div className="bg-card rounded-xl p-6 shadow-card">
           <h2 className="text-lg font-bold text-foreground mb-4">توزيع التقديرات</h2>
