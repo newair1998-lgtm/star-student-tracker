@@ -72,10 +72,9 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
     const saved = localStorage.getItem(`exam2Max_${grade}`);
     return saved ? parseInt(saved) : 30;
   });
-  const [finalTotalMax, setFinalTotalMax] = useState<number>(() => {
-    const saved = localStorage.getItem(`finalTotalMax_${grade}`);
-    return saved ? parseInt(saved) : 100;
-  });
+  
+  // Calculate finalTotalMax based on exam1Max
+  const finalTotalMax = exam1Max === 20 ? 60 : 100;
 
   useEffect(() => {
     localStorage.setItem(`performanceTasksMax_${grade}`, performanceTasksMax.toString());
@@ -273,15 +272,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center gap-1">
                       <span>المجموع النهائي</span>
-                      <Select value={finalTotalMax.toString()} onValueChange={(val) => setFinalTotalMax(parseInt(val))}>
-                        <SelectTrigger className="h-7 w-16 text-xs bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="60">60</SelectItem>
-                          <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <span className="text-xs text-muted-foreground">({finalTotalMax})</span>
                     </div>
                   </TableHead>
                   <TableHead className="w-12"></TableHead>
