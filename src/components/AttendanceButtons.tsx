@@ -1,5 +1,4 @@
 import { Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface AttendanceButtonsProps {
@@ -9,33 +8,29 @@ interface AttendanceButtonsProps {
 
 const AttendanceButtons = ({ attendance, onAttendanceChange }: AttendanceButtonsProps) => {
   return (
-    <div className="flex gap-1.5 justify-center">
-      <Button
-        variant="attendance"
-        size="iconSm"
+    <div className="flex gap-1 justify-center">
+      <button
         onClick={() => onAttendanceChange('present')}
         className={cn(
-          "rounded-full",
+          "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
           attendance === 'present'
             ? "bg-success border-success text-success-foreground"
             : "border-muted-foreground/30 text-muted-foreground hover:border-success hover:text-success hover:bg-success/10"
         )}
       >
-        <Check className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="attendance"
-        size="iconSm"
+        <Check className="w-3 h-3" />
+      </button>
+      <button
         onClick={() => onAttendanceChange('absent')}
         className={cn(
-          "rounded-full",
+          "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200",
           attendance === 'absent'
             ? "bg-destructive border-destructive text-destructive-foreground"
             : "border-muted-foreground/30 text-muted-foreground hover:border-destructive hover:text-destructive hover:bg-destructive/10"
         )}
       >
-        <X className="w-4 h-4" />
-      </Button>
+        <X className="w-3 h-3" />
+      </button>
     </div>
   );
 };
