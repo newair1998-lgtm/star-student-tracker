@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, RotateCcw } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,7 +173,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     title="مسح جميع البيانات"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <Eraser className="w-4 h-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
