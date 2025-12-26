@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import Header from '@/components/Header';
 import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
 import { Loader2 } from 'lucide-react';
+import { Grade } from '@/types/student';
 
 const Index = () => {
   const {
@@ -12,6 +14,44 @@ const Index = () => {
     deleteStudent,
     getStudentsByGrade,
   } = useStudents();
+
+  const [educationStage, setEducationStage] = useState(() => localStorage.getItem('educationStage') || '');
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setEducationStage(localStorage.getItem('educationStage') || '');
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check for changes periodically (for same-tab updates)
+    const interval = setInterval(() => {
+      const currentStage = localStorage.getItem('educationStage') || '';
+      if (currentStage !== educationStage) {
+        setEducationStage(currentStage);
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [educationStage]);
+
+  const getGradesToShow = (): Grade[] => {
+    switch (educationStage) {
+      case 'primary':
+        return ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+      case 'middle':
+        return ['first', 'second', 'third'];
+      case 'secondary':
+        return ['first', 'second', 'third'];
+      default:
+        return ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+    }
+  };
+
+  const gradesToShow = getGradesToShow();
 
   if (loading) {
     return (
@@ -32,42 +72,16 @@ const Index = () => {
         <AddStudentsSection onAddStudents={addStudents} />
         
         <div className="space-y-5">
-          <GradeSection
-            grade="first"
-            students={getStudentsByGrade('first')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
-          <GradeSection
-            grade="second"
-            students={getStudentsByGrade('second')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
-          <GradeSection
-            grade="third"
-            students={getStudentsByGrade('third')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
-          <GradeSection
-            grade="fourth"
-            students={getStudentsByGrade('fourth')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
-          <GradeSection
-            grade="fifth"
-            students={getStudentsByGrade('fifth')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
-          <GradeSection
-            grade="sixth"
-            students={getStudentsByGrade('sixth')}
-            onUpdateStudent={updateStudent}
-            onDeleteStudent={deleteStudent}
-          />
+          {gradesToShow.map((grade) => (
+            <GradeSection
+              key={grade}
+              grade={grade}
+              students={getStudentsByGrade(grade)}
+              onUpdateStudent={updateStudent}
+              onDeleteStudent={deleteStudent}
+              educationStage={educationStage}
+            />
+          ))}
         </div>
       </main>
 
