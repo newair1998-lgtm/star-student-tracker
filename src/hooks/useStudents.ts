@@ -26,7 +26,7 @@ export const useStudents = () => {
       const { data, error } = await supabase
         .from('students')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('name', { ascending: true });
 
       if (error) throw error;
 
