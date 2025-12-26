@@ -3,8 +3,9 @@ import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, AttendanceRecord } from '@/types/student';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileDown, FileText } from 'lucide-react';
+import { ArrowRight, FileDown, FileText, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 import {
   BarChart,
   Bar,
@@ -255,6 +256,69 @@ const GradeAnalysis = () => {
     toast({
       title: 'تم الحفظ بنجاح',
       description: 'تم حفظ الملف بصيغة Word',
+    });
+  };
+
+  const exportToExcel = (studentsData: StudentType[]) => {
+    const subject = localStorage.getItem('subject') || '';
+    const teacherName = localStorage.getItem('teacherName') || '';
+    
+    // Prepare data for Excel
+    const excelData = studentsData.map((student, index) => {
+      const total = calculateTotal(student);
+      const gradeLevel = getGradeLevel(total);
+      return {
+        '#': index + 1,
+        'الاسم': student.name,
+        'المهام الأدائية': student.performanceTasks,
+        'المشاركة': student.participation,
+        'الأنشطة': student.book,
+        'الواجبات': student.homework,
+        'اختبار ١': student.exam1,
+        'اختبار ٢': student.exam2,
+        'المجموع': total,
+        'التقدير': gradeLevel,
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Add header info
+    const headerInfo = [
+      [`تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}`],
+      [subject ? `المادة: ${subject}` : ''],
+      [teacherName ? `المعلمة: ${teacherName}` : ''],
+      [''],
+    ];
+
+    // Create worksheet with header
+    const wsWithHeader = XLSX.utils.aoa_to_sheet(headerInfo);
+    XLSX.utils.sheet_add_json(wsWithHeader, excelData, { origin: 'A5' });
+
+    // Set column widths
+    wsWithHeader['!cols'] = [
+      { wch: 5 },   // #
+      { wch: 25 },  // الاسم
+      { wch: 15 },  // المهام الأدائية
+      { wch: 10 },  // المشاركة
+      { wch: 10 },  // الأنشطة
+      { wch: 10 },  // الواجبات
+      { wch: 10 },  // اختبار ١
+      { wch: 10 },  // اختبار ٢
+      { wch: 10 },  // المجموع
+      { wch: 10 },  // التقدير
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsWithHeader, 'الدرجات');
+
+    // Save file
+    XLSX.writeFile(wb, `تفاصيل_درجات_${gradeLabels[grade as Grade]}.xlsx`);
+
+    toast({
+      title: 'تم الحفظ بنجاح',
+      description: 'تم حفظ الملف بصيغة Excel',
     });
   };
 
@@ -535,7 +599,7 @@ const GradeAnalysis = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-4 flex justify-center gap-4 flex-wrap">
             <Button onClick={exportToPDF} className="bg-primary hover:bg-primary/90">
               <FileDown className="w-4 h-4 ml-2" />
               حفظ PDF
@@ -543,6 +607,10 @@ const GradeAnalysis = () => {
             <Button onClick={() => exportToWord(students)} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
               حفظ Word
+            </Button>
+            <Button onClick={() => exportToExcel(students)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+              <FileSpreadsheet className="w-4 h-4 ml-2" />
+              حفظ Excel
             </Button>
           </div>
         </div>
