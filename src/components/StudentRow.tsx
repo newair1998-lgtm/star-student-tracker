@@ -20,13 +20,16 @@ interface StudentRowProps {
   exam1Max?: number;
   exam2Max?: number;
   finalTotalMax?: number;
+  hideExam2?: boolean;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100 }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
   const tasksTotal = performanceTasksMax === 20 
     ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
     : student.performanceTasks + student.participation + student.book + student.homework;
-  const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
+  const examsTotal = hideExam2 
+    ? Math.min(student.exam1, exam1Max) 
+    : Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
   const finalTotal = finalTotalMax === 60 
     ? Math.min(tasksTotal + examsTotal, 60) 
     : tasksTotal + examsTotal;
@@ -103,13 +106,15 @@ const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 
           onChange={(value) => onUpdate(student.id, { exam1: value })}
         />
       </TableCell>
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.exam2}
-          max={exam2Max}
-          onChange={(value) => onUpdate(student.id, { exam2: value })}
-        />
-      </TableCell>
+      {!hideExam2 && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.exam2}
+            max={exam2Max}
+            onChange={(value) => onUpdate(student.id, { exam2: value })}
+          />
+        </TableCell>
+      )}
       <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, finalTotalMax))}>
         <div className="bg-primary/10 rounded-md py-1 px-2 inline-block min-w-[50px]">
           {finalTotal}/{finalTotalMax}
