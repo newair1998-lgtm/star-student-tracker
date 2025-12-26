@@ -54,7 +54,9 @@ const calculateTotal = (student: StudentType, performanceTasksMax: number, exam1
   const tasksTotal = performanceTasksMax === 20 
     ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
     : student.performanceTasks + student.participation + student.book + student.homework;
-  const examsTotal = Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
+  const examsTotal = exam1Max === 20 
+    ? Math.min(student.exam1, exam1Max) 
+    : Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
   const rawTotal = tasksTotal + examsTotal;
   return finalTotalMax === 60 ? Math.min(rawTotal, 60) : rawTotal;
 };
@@ -83,32 +85,38 @@ const GradeAnalysis = () => {
       const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
       const gradeLevel = getGradeLevel(total, finalTotalMax);
       
-      if (performanceTasksMax === 20) {
-        return {
-          '#': index + 1,
-          'الاسم': student.name,
-          'المهام الأدائية': student.performanceTasks,
-          'الأنشطة': student.book,
-          'الواجبات': student.homework,
-          'اختبار ١': student.exam1,
-          'اختبار ٢': student.exam2,
-          'المجموع': total,
-          'التقدير': gradeLevel,
-        };
-      }
-      
-      return {
+    if (performanceTasksMax === 20) {
+      const baseData = {
         '#': index + 1,
         'الاسم': student.name,
         'المهام الأدائية': student.performanceTasks,
-        'المشاركة': student.participation,
         'الأنشطة': student.book,
         'الواجبات': student.homework,
         'اختبار ١': student.exam1,
-        'اختبار ٢': student.exam2,
         'المجموع': total,
         'التقدير': gradeLevel,
       };
+      if (exam1Max !== 20) {
+        return { ...baseData, 'اختبار ٢': student.exam2 };
+      }
+      return baseData;
+    }
+    
+    const baseData = {
+      '#': index + 1,
+      'الاسم': student.name,
+      'المهام الأدائية': student.performanceTasks,
+      'المشاركة': student.participation,
+      'الأنشطة': student.book,
+      'الواجبات': student.homework,
+      'اختبار ١': student.exam1,
+      'المجموع': total,
+      'التقدير': gradeLevel,
+    };
+    if (exam1Max !== 20) {
+      return { ...baseData, 'اختبار ٢': student.exam2 };
+    }
+    return baseData;
     });
 
     // Create workbook and worksheet
@@ -198,23 +206,28 @@ const GradeAnalysis = () => {
     الدرجة: calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax),
   }));
 
-  // Category breakdown - hide participation if performanceTasksMax is 20
-  const categoryData = performanceTasksMax === 20 
-    ? [
-        { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
-        { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
-        { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
-        { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
-        { name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length },
-      ]
-    : [
-        { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
-        { name: 'المشاركة', المتوسط: students.reduce((a, s) => a + s.participation, 0) / students.length },
-        { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
-        { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
-        { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
-        { name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length },
-      ];
+  // Category breakdown - hide participation if performanceTasksMax is 20, hide exam2 if exam1Max is 20
+  const categoryData = (() => {
+    const baseCategories = performanceTasksMax === 20 
+      ? [
+          { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
+          { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
+          { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
+          { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
+        ]
+      : [
+          { name: 'المهام الأدائية', المتوسط: students.reduce((a, s) => a + s.performanceTasks, 0) / students.length },
+          { name: 'المشاركة', المتوسط: students.reduce((a, s) => a + s.participation, 0) / students.length },
+          { name: 'الأنشطة', المتوسط: students.reduce((a, s) => a + s.book, 0) / students.length },
+          { name: 'الواجبات', المتوسط: students.reduce((a, s) => a + s.homework, 0) / students.length },
+          { name: 'اختبار ١', المتوسط: students.reduce((a, s) => a + s.exam1, 0) / students.length },
+        ];
+    
+    if (exam1Max !== 20) {
+      baseCategories.push({ name: 'اختبار ٢', المتوسط: students.reduce((a, s) => a + s.exam2, 0) / students.length });
+    }
+    return baseCategories;
+  })();
 
   // Attendance data
   const attendanceData = students.map(s => {
@@ -412,7 +425,9 @@ const GradeAnalysis = () => {
                   <th className="py-3 px-4 text-center text-gray-800">الأنشطة</th>
                   <th className="py-3 px-4 text-center text-gray-800">الواجبات</th>
                   <th className="py-3 px-4 text-center text-gray-800">اختبار ١</th>
-                  <th className="py-3 px-4 text-center text-gray-800">اختبار ٢</th>
+                  {exam1Max !== 20 && (
+                    <th className="py-3 px-4 text-center text-gray-800">اختبار ٢</th>
+                  )}
                   <th className="py-3 px-4 text-center text-gray-800">المجموع</th>
                   <th className="py-3 px-4 text-center text-gray-800">التقدير</th>
                 </tr>
@@ -433,7 +448,9 @@ const GradeAnalysis = () => {
                       <td className="py-2 px-4 text-center text-gray-800">{student.book}</td>
                       <td className="py-2 px-4 text-center text-gray-800">{student.homework}</td>
                       <td className="py-2 px-4 text-center text-gray-800">{student.exam1}</td>
-                      <td className="py-2 px-4 text-center text-gray-800">{student.exam2}</td>
+                      {exam1Max !== 20 && (
+                        <td className="py-2 px-4 text-center text-gray-800">{student.exam2}</td>
+                      )}
                       <td className="py-2 px-4 text-center font-bold text-gray-800">{total}</td>
                       <td className="py-2 px-4 text-center font-bold" style={{ color: COLORS[colorIndex] }}>{gradeLevel}</td>
                     </tr>

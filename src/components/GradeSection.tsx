@@ -242,32 +242,34 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                       </div>
                     </div>
                   </TableHead>
-                  <TableHead className="text-center w-28">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>اختبار ٢</span>
-                      <div className="flex items-center gap-1">
-                        <Select value={exam2Max.toString()} onValueChange={(val) => setExam2Max(parseInt(val))}>
-                          <SelectTrigger className="h-7 w-14 text-xs bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover z-50">
-                            <SelectItem value="0">0</SelectItem>
-                            <SelectItem value="20">20</SelectItem>
-                            <SelectItem value="30">30</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleBulkScoreUpdate('exam2', exam2Max)}
-                          className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
-                          title="تعبئة الكل"
-                        >
-                          {exam2Max}
-                        </Button>
+                  {exam1Max !== 20 && (
+                    <TableHead className="text-center w-28">
+                      <div className="flex flex-col items-center gap-1">
+                        <span>اختبار ٢</span>
+                        <div className="flex items-center gap-1">
+                          <Select value={exam2Max.toString()} onValueChange={(val) => setExam2Max(parseInt(val))}>
+                            <SelectTrigger className="h-7 w-14 text-xs bg-background">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover z-50">
+                              <SelectItem value="0">0</SelectItem>
+                              <SelectItem value="20">20</SelectItem>
+                              <SelectItem value="30">30</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleBulkScoreUpdate('exam2', exam2Max)}
+                            className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
+                            title="تعبئة الكل"
+                          >
+                            {exam2Max}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </TableHead>
+                    </TableHead>
+                  )}
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center gap-1">
                       <span>المجموع النهائي</span>
@@ -297,6 +299,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     exam1Max={exam1Max}
                     exam2Max={exam2Max}
                     finalTotalMax={finalTotalMax}
+                    hideExam2={exam1Max === 20}
                   />
                 ))}
               </TableBody>
