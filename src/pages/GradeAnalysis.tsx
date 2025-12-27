@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
-import { Grade, gradeLabels, AttendanceRecord } from '@/types/student';
+import { Grade, gradeLabels, AttendanceRecord, getStageFromGrade, stageLabels } from '@/types/student';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -127,20 +127,14 @@ const GradeAnalysis = () => {
   const teacherName = localStorage.getItem('teacherName') || '';
   const semester = localStorage.getItem('semester') || '';
   const academicYear = localStorage.getItem('academicYear') || '';
-  const educationStage = localStorage.getItem('educationStage') || '';
-
   const getEducationStageName = () => {
-    switch (educationStage) {
-      case 'primary': return 'ابتدائي';
-      case 'middle': return 'متوسط';
-      case 'secondary': return 'ثانوي';
-      default: return '';
-    }
+    if (!grade) return '';
+    const stage = getStageFromGrade(grade as Grade);
+    return stageLabels[stage];
   };
 
   const getFullGradeName = () => {
-    const stageName = getEducationStageName();
-    return stageName ? `${gradeLabels[grade as Grade]} ${stageName}` : gradeLabels[grade as Grade];
+    return gradeLabels[grade as Grade];
   };
 
   const exportToExcel = (studentsData: StudentType[]) => {
@@ -506,9 +500,9 @@ const GradeAnalysis = () => {
           </div>
           
           {/* Metadata Display */}
-          {(subject || teacherName || semester || academicYear || educationStage) && (
+          {(subject || teacherName || semester || academicYear || grade) && (
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm bg-primary/5 rounded-lg py-2 px-4">
-              {educationStage && (
+              {grade && (
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">المرحلة:</span>
                   <span className="font-semibold text-foreground">{getEducationStageName()}</span>

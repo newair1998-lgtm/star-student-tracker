@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Student, Grade, gradeLabels, AttendanceRecord } from '@/types/student';
+import { Student, Grade, gradeLabels, gradeShortLabels, AttendanceRecord, getStageFromGrade, stageLabels } from '@/types/student';
 import {
   Table,
   TableBody,
@@ -44,30 +44,43 @@ interface GradeSectionProps {
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
-  educationStage?: string;
 }
 
-const gradeHeaderColors: Record<Grade, string> = {
-  first: 'from-grade-one/20 to-grade-one/5 border-grade-one/30',
-  second: 'from-grade-two/20 to-grade-two/5 border-grade-two/30',
-  third: 'from-grade-three/20 to-grade-three/5 border-grade-three/30',
-  fourth: 'from-grade-four/20 to-grade-four/5 border-grade-four/30',
-  fifth: 'from-grade-five/20 to-grade-five/5 border-grade-five/30',
-  sixth: 'from-grade-six/20 to-grade-six/5 border-grade-six/30',
+const getGradeColorIndex = (grade: Grade): number => {
+  if (grade.includes('first')) return 0;
+  if (grade.includes('second')) return 1;
+  if (grade.includes('third')) return 2;
+  if (grade.includes('fourth')) return 3;
+  if (grade.includes('fifth')) return 4;
+  if (grade.includes('sixth')) return 5;
+  return 0;
 };
 
-const gradeIconColors: Record<Grade, string> = {
-  first: 'bg-grade-one/20 text-grade-one',
-  second: 'bg-grade-two/20 text-grade-two',
-  third: 'bg-grade-three/20 text-grade-three',
-  fourth: 'bg-grade-four/20 text-grade-four',
-  fifth: 'bg-grade-five/20 text-grade-five',
-  sixth: 'bg-grade-six/20 text-grade-six',
-};
+const gradeHeaderColorsList = [
+  'from-grade-one/20 to-grade-one/5 border-grade-one/30',
+  'from-grade-two/20 to-grade-two/5 border-grade-two/30',
+  'from-grade-three/20 to-grade-three/5 border-grade-three/30',
+  'from-grade-four/20 to-grade-four/5 border-grade-four/30',
+  'from-grade-five/20 to-grade-five/5 border-grade-five/30',
+  'from-grade-six/20 to-grade-six/5 border-grade-six/30',
+];
 
-const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, educationStage }: GradeSectionProps) => {
+const gradeIconColorsList = [
+  'bg-grade-one/20 text-grade-one',
+  'bg-grade-two/20 text-grade-two',
+  'bg-grade-three/20 text-grade-three',
+  'bg-grade-four/20 text-grade-four',
+  'bg-grade-five/20 text-grade-five',
+  'bg-grade-six/20 text-grade-six',
+];
+
+const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const colorIndex = getGradeColorIndex(grade);
+  const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
+  const gradeIconColor = gradeIconColorsList[colorIndex];
   
   // Load performance tasks max from localStorage
   const [performanceTasksMax, setPerformanceTasksMax] = useState<number>(() => {
@@ -161,18 +174,16 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
       {/* Header */}
       <div className={cn(
         "px-5 py-4 bg-gradient-to-l border-b",
-        gradeHeaderColors[grade]
+        gradeHeaderColor
       )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg", gradeIconColors[grade])}>
+            <div className={cn("p-2 rounded-lg", gradeIconColor)}>
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
                 {gradeLabels[grade]}
-                {educationStage === 'middle' && ' متوسط'}
-                {educationStage === 'secondary' && ' ثانوي'}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
@@ -419,9 +430,13 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
         </>
       ) : (
         <div className="py-12 text-center">
-          <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground">لا توجد طالبات في هذا الصف</p>
-          <p className="text-sm text-muted-foreground/70 mt-1">أضيفي طالبات من القسم أعلاه</p>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-secondary/50 mb-3">
+            <Users className="w-7 h-7 text-muted-foreground" />
+          </div>
+          <p className="text-muted-foreground font-medium">لا توجد طالبات في هذا الصف</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">
+            أضيفي طالبات من قسم الإضافة أعلاه
+          </p>
         </div>
       )}
     </div>
