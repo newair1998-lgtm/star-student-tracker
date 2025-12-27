@@ -1,10 +1,12 @@
-import { Student, AttendanceRecord } from '@/types/student';
+import { useState } from 'react';
+import { Student, AttendanceRecord, Grade } from '@/types/student';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowLeftRight } from 'lucide-react';
 import AttendanceButtons from './AttendanceButtons';
 import ScoreInput from './ScoreInput';
 import { cn } from '@/lib/utils';
+import { TransferStudentDialog } from './TransferStudentDialog';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
   present: [false, false, false, false],
@@ -16,6 +18,7 @@ interface StudentRowProps {
   index: number;
   onUpdate: (id: string, updates: Partial<Student>) => void;
   onDelete: (id: string) => void;
+  onTransfer?: (id: string, newGrade: Grade) => void;
   performanceTasksMax?: number;
   exam1Max?: number;
   exam2Max?: number;
@@ -23,7 +26,8 @@ interface StudentRowProps {
   hideExam2?: boolean;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const tasksTotal = performanceTasksMax === 20 
     ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
     : student.performanceTasks + student.participation + student.book + student.homework;
@@ -121,14 +125,37 @@ const StudentRow = ({ student, index, onUpdate, onDelete, performanceTasksMax = 
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <Button
-          variant="ghost"
-          size="iconSm"
-          onClick={() => onDelete(student.id)}
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center justify-center gap-1">
+          {onTransfer && (
+            <Button
+              variant="ghost"
+              size="iconSm"
+              onClick={() => setTransferDialogOpen(true)}
+              className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+              title="نقل الطالبة"
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="iconSm"
+            onClick={() => onDelete(student.id)}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        {onTransfer && (
+          <TransferStudentDialog
+            open={transferDialogOpen}
+            onOpenChange={setTransferDialogOpen}
+            studentName={student.name}
+            currentGrade={student.grade}
+            onTransfer={(newGrade) => onTransfer(student.id, newGrade)}
+          />
+        )}
       </TableCell>
     </TableRow>
   );
