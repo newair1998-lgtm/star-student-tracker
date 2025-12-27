@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Student, Grade, AttendanceRecord, gradeLabels } from '@/types/student';
+import { Student, Grade, AttendanceRecord, gradeLabels, GradeSection } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
@@ -34,6 +34,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
+        subject: s.subject || 'default',
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
@@ -60,12 +61,13 @@ export const useStudents = () => {
     fetchStudents();
   }, [fetchStudents]);
 
-  const addStudents = useCallback(async (names: string[], grade: Grade) => {
+  const addStudents = useCallback(async (names: string[], grade: Grade, subject: string = 'default') => {
     try {
       const defaultAttendanceJson = { present: [false, false, false, false], absent: [false, false, false, false] };
       const newStudents = names.map(name => ({
         name,
         grade,
+        subject,
         attendance: defaultAttendanceJson,
         performance_tasks: 0,
         participation: 0,
@@ -86,6 +88,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
+        subject: s.subject || 'default',
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
@@ -117,6 +120,7 @@ export const useStudents = () => {
       
       if (updates.name !== undefined) dbUpdates.name = updates.name;
       if (updates.grade !== undefined) dbUpdates.grade = updates.grade;
+      if (updates.subject !== undefined) dbUpdates.subject = updates.subject;
       if (updates.attendance !== undefined) dbUpdates.attendance = updates.attendance;
       if (updates.performanceTasks !== undefined) dbUpdates.performance_tasks = updates.performanceTasks;
       if (updates.participation !== undefined) dbUpdates.participation = updates.participation;
@@ -172,24 +176,42 @@ export const useStudents = () => {
     }
   }, [toast]);
 
-  const getStudentsByGrade = useCallback((grade: Grade) =>
-    students.filter(student => student.grade === grade), [students]);
+  // Get students by grade and subject
+  const getStudentsByGradeAndSubject = useCallback((grade: Grade, subject: string) =>
+    students.filter(student => student.grade === grade && student.subject === subject), [students]);
 
-  // Transfer a student to a different grade
-  const transferStudent = useCallback(async (id: string, newGrade: Grade) => {
+  // Get all unique grade sections (grade + subject combinations)
+  const getGradeSections = useCallback((): GradeSection[] => {
+    const sections = new Map<string, GradeSection>();
+    students.forEach(student => {
+      const key = `${student.grade}_${student.subject}`;
+      if (!sections.has(key)) {
+        sections.set(key, { grade: student.grade, subject: student.subject });
+      }
+    });
+    return Array.from(sections.values());
+  }, [students]);
+
+  // Transfer a student to a different grade/subject
+  const transferStudent = useCallback(async (id: string, newGrade: Grade, newSubject?: string) => {
     try {
       const student = students.find(s => s.id === id);
       if (!student) return;
 
+      const updates: Record<string, unknown> = { grade: newGrade };
+      if (newSubject !== undefined) {
+        updates.subject = newSubject;
+      }
+
       const { error } = await supabase
         .from('students')
-        .update({ grade: newGrade })
+        .update(updates)
         .eq('id', id);
 
       if (error) throw error;
 
       setStudents(prev =>
-        prev.map(s => s.id === id ? { ...s, grade: newGrade } : s)
+        prev.map(s => s.id === id ? { ...s, grade: newGrade, ...(newSubject !== undefined ? { subject: newSubject } : {}) } : s)
       );
 
       toast({
@@ -206,10 +228,16 @@ export const useStudents = () => {
     }
   }, [students, toast]);
 
-  // Duplicate all students from one grade to another
-  const duplicateGrade = useCallback(async (sourceGrade: Grade, targetGrade: Grade, includeScores: boolean) => {
+  // Duplicate grade section to another grade or same grade with new subject
+  const duplicateGradeSection = useCallback(async (
+    sourceGrade: Grade, 
+    sourceSubject: string,
+    targetGrade: Grade, 
+    targetSubject: string,
+    includeScores: boolean
+  ) => {
     try {
-      const sourceStudents = students.filter(s => s.grade === sourceGrade);
+      const sourceStudents = students.filter(s => s.grade === sourceGrade && s.subject === sourceSubject);
       
       if (sourceStudents.length === 0) {
         toast({
@@ -225,6 +253,7 @@ export const useStudents = () => {
       const newStudents = sourceStudents.map(student => ({
         name: student.name,
         grade: targetGrade,
+        subject: targetSubject,
         attendance: includeScores ? student.attendance : defaultAttendanceJson,
         performance_tasks: includeScores ? student.performanceTasks : 0,
         participation: includeScores ? student.participation : 0,
@@ -245,6 +274,7 @@ export const useStudents = () => {
         id: s.id,
         name: s.name,
         grade: s.grade as Grade,
+        subject: s.subject || 'default',
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
@@ -256,12 +286,13 @@ export const useStudents = () => {
 
       setStudents(prev => [...prev, ...mappedStudents]);
 
+      const subjectLabel = targetSubject !== 'default' ? ` (${targetSubject})` : '';
       toast({
         title: 'تم التكرار بنجاح',
-        description: `تم نسخ ${sourceStudents.length} طالبة من ${gradeLabels[sourceGrade]} إلى ${gradeLabels[targetGrade]}`,
+        description: `تم نسخ ${sourceStudents.length} طالبة إلى ${gradeLabels[targetGrade]}${subjectLabel}`,
       });
     } catch (error) {
-      console.error('Error duplicating grade:', error);
+      console.error('Error duplicating grade section:', error);
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء تكرار الصف',
@@ -276,8 +307,9 @@ export const useStudents = () => {
     addStudents,
     updateStudent,
     deleteStudent,
-    getStudentsByGrade,
+    getStudentsByGradeAndSubject,
+    getGradeSections,
     transferStudent,
-    duplicateGrade,
+    duplicateGradeSection,
   };
 };

@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
 import { Loader2 } from 'lucide-react';
-import { Grade, EducationStage, getGradesForStage } from '@/types/student';
+import { Grade, EducationStage, getGradesForStage, GradeSection as GradeSectionType } from '@/types/student';
 
 const Index = () => {
   const {
@@ -12,9 +12,10 @@ const Index = () => {
     addStudents,
     updateStudent,
     deleteStudent,
-    getStudentsByGrade,
+    getStudentsByGradeAndSubject,
+    getGradeSections,
     transferStudent,
-    duplicateGrade,
+    duplicateGradeSection,
   } = useStudents();
 
   const [educationStage, setEducationStage] = useState<EducationStage | ''>(() => 
@@ -42,12 +43,36 @@ const Index = () => {
     };
   }, [educationStage]);
 
-  const getGradesToShow = (): Grade[] => {
+  // Get grade sections to show based on the education stage
+  const getSectionsToShow = (): GradeSectionType[] => {
     if (!educationStage) return [];
-    return getGradesForStage(educationStage);
+    const stageGrades = getGradesForStage(educationStage);
+    const allSections = getGradeSections();
+    
+    // Get sections that belong to this stage
+    const stageSections = allSections.filter(section => stageGrades.includes(section.grade));
+    
+    // Also include empty grades (grades without any students yet)
+    const sectionsWithStudents = new Set(stageSections.map(s => `${s.grade}_${s.subject}`));
+    const emptySections: GradeSectionType[] = stageGrades
+      .filter(grade => !allSections.some(s => s.grade === grade))
+      .map(grade => ({ grade, subject: 'default' }));
+    
+    // Combine and sort by grade order
+    const combined = [...stageSections, ...emptySections];
+    combined.sort((a, b) => {
+      const gradeOrder = stageGrades.indexOf(a.grade) - stageGrades.indexOf(b.grade);
+      if (gradeOrder !== 0) return gradeOrder;
+      // Same grade, sort by subject (default first)
+      if (a.subject === 'default') return -1;
+      if (b.subject === 'default') return 1;
+      return a.subject.localeCompare(b.subject, 'ar');
+    });
+    
+    return combined;
   };
 
-  const gradesToShow = getGradesToShow();
+  const sectionsToShow = getSectionsToShow();
 
   if (loading) {
     return (
@@ -68,15 +93,16 @@ const Index = () => {
         <AddStudentsSection onAddStudents={addStudents} />
         
         <div className="space-y-5">
-          {gradesToShow.map((grade) => (
+          {sectionsToShow.map((section) => (
             <GradeSection
-              key={grade}
-              grade={grade}
-              students={getStudentsByGrade(grade)}
+              key={`${section.grade}_${section.subject}`}
+              grade={section.grade}
+              subject={section.subject}
+              students={getStudentsByGradeAndSubject(section.grade, section.subject)}
               onUpdateStudent={updateStudent}
               onDeleteStudent={deleteStudent}
               onTransferStudent={transferStudent}
-              onDuplicateGrade={duplicateGrade}
+              onDuplicateGradeSection={duplicateGradeSection}
             />
           ))}
         </div>

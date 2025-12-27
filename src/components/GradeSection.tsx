@@ -42,12 +42,13 @@ const DEFAULT_ATTENDANCE: AttendanceRecord = {
 
 interface GradeSectionProps {
   grade: Grade;
+  subject: string;
   students: Student[];
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
-  onTransferStudent?: (id: string, newGrade: Grade) => void;
-  onDuplicateGrade?: (sourceGrade: Grade, targetGrade: Grade, includeScores: boolean) => void;
+  onTransferStudent?: (id: string, newGrade: Grade, newSubject?: string) => void;
+  onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, targetGrade: Grade, targetSubject: string, includeScores: boolean) => void;
 }
 
 const getGradeColorIndex = (grade: Grade): number => {
@@ -78,7 +79,7 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGrade }: GradeSectionProps) => {
+const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
@@ -190,6 +191,9 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
             <div>
               <h3 className="text-lg font-bold text-foreground">
                 {gradeLabels[grade]}
+                {subject !== 'default' && (
+                  <span className="text-sm font-normal text-primary mr-2">({subject})</span>
+                )}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
@@ -199,7 +203,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
           </div>
           {students.length > 0 && (
             <div className="flex items-center gap-2">
-              {onDuplicateGrade && (
+              {onDuplicateGradeSection && (
                 <>
                   <Button
                     variant="ghost"
@@ -288,21 +292,22 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
             </div>
           )}
           
-          {onDuplicateGrade && (
+          {onDuplicateGradeSection && (
             <>
               <DuplicateGradeDialog
                 open={duplicateDialogOpen}
                 onOpenChange={setDuplicateDialogOpen}
                 sourceGrade={grade}
                 studentsCount={students.length}
-                onDuplicate={(targetGrade, includeScores) => onDuplicateGrade(grade, targetGrade, includeScores)}
+                onDuplicate={(targetGrade, includeScores) => onDuplicateGradeSection(grade, subject, targetGrade, 'default', includeScores)}
               />
               <DuplicateSameGradeDialog
                 open={duplicateSameGradeDialogOpen}
                 onOpenChange={setDuplicateSameGradeDialogOpen}
                 grade={grade}
+                subject={subject}
                 studentsCount={students.length}
-                onConfirm={(includeScores) => onDuplicateGrade(grade, grade, includeScores)}
+                onConfirm={(newSubject, includeScores) => onDuplicateGradeSection(grade, subject, grade, newSubject, includeScores)}
               />
             </>
           )}
