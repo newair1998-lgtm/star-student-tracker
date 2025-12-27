@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { CopyPlus } from 'lucide-react';
 import { Grade, gradeLabels } from '@/types/student';
 
@@ -16,27 +17,40 @@ interface DuplicateSameGradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   grade: Grade;
+  subject: string;
   studentsCount: number;
-  onConfirm: (includeScores: boolean) => void;
+  onConfirm: (newSubject: string, includeScores: boolean) => void;
 }
 
 export const DuplicateSameGradeDialog = ({
   open,
   onOpenChange,
   grade,
+  subject,
   studentsCount,
   onConfirm,
 }: DuplicateSameGradeDialogProps) => {
   const [includeScores, setIncludeScores] = useState(true);
+  const [newSubject, setNewSubject] = useState('');
 
   const handleConfirm = () => {
-    onConfirm(includeScores);
+    const subjectName = newSubject.trim() || `مادة ${Date.now()}`;
+    onConfirm(subjectName, includeScores);
     onOpenChange(false);
     setIncludeScores(true);
+    setNewSubject('');
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    onOpenChange(isOpen);
+    if (!isOpen) {
+      setNewSubject('');
+      setIncludeScores(true);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -44,13 +58,22 @@ export const DuplicateSameGradeDialog = ({
             تكرار لمادة أخرى
           </DialogTitle>
           <DialogDescription>
-            سيتم نسخ {studentsCount} طالبة من {gradeLabels[grade]} إلى نفس الصف مرة أخرى.
-            <br />
-            هذا مفيد لاستخدام نفس الطالبات في مادة دراسية أخرى.
+            سيتم نسخ {studentsCount} طالبة من {gradeLabels[grade]}
+            {subject !== 'default' && ` (${subject})`} إلى نفس الصف لمادة جديدة.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">اسم المادة الجديدة</label>
+            <Input
+              placeholder="مثال: الرياضيات، العلوم، اللغة العربية..."
+              value={newSubject}
+              onChange={(e) => setNewSubject(e.target.value)}
+              className="bg-background"
+            />
+          </div>
+
           <div className="flex items-center space-x-2 space-x-reverse">
             <Checkbox 
               id="includeScoresSame" 
@@ -67,11 +90,11 @@ export const DuplicateSameGradeDialog = ({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
             إلغاء
           </Button>
           <Button onClick={handleConfirm}>
-            تكرار الطالبات
+            تكرار الصف
           </Button>
         </DialogFooter>
       </DialogContent>

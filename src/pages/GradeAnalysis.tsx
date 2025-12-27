@@ -106,7 +106,7 @@ const calculateTotal = (student: StudentType, performanceTasksMax: number, exam1
 const GradeAnalysis = () => {
   const { grade } = useParams<{ grade: Grade }>();
   const navigate = useNavigate();
-  const { getStudentsByGrade, loading } = useStudents();
+  const { getStudentsByGradeAndSubject, loading } = useStudents();
   const tableRef = useRef<HTMLDivElement>(null);
   const section1Ref = useRef<HTMLDivElement>(null);
   const section2Ref = useRef<HTMLDivElement>(null);
@@ -360,7 +360,7 @@ const GradeAnalysis = () => {
     );
   }
 
-  const students = getStudentsByGrade(grade as Grade);
+  const students = getStudentsByGradeAndSubject(grade as Grade, 'default');
 
   if (students.length === 0) {
     return (
