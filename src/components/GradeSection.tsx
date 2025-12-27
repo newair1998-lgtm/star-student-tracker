@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +50,7 @@ interface GradeSectionProps {
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
   onTransferStudent?: (id: string, newGrade: Grade, newSubject?: string) => void;
   onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, targetGrade: Grade, targetSubject: string, includeScores: boolean) => void;
+  onUpdateSubject?: (grade: Grade, oldSubject: string, newSubject: string) => void;
 }
 
 const getGradeColorIndex = (grade: Grade): number => {
@@ -79,11 +81,13 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection }: GradeSectionProps) => {
+const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [duplicateSameGradeDialogOpen, setDuplicateSameGradeDialogOpen] = useState(false);
+  const [isEditingSubject, setIsEditingSubject] = useState(false);
+  const [editedSubject, setEditedSubject] = useState(subject === 'default' ? '' : subject);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -145,7 +149,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
   };
 
   const goToAnalysis = () => {
-    navigate(`/analysis/${grade}`);
+    navigate(`/analysis/${grade}?subject=${encodeURIComponent(subject)}`);
   };
 
   const handleClearAllData = () => {
@@ -176,6 +180,23 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
     });
   };
 
+  const handleSaveSubject = () => {
+    if (onUpdateSubject) {
+      const newSubject = editedSubject.trim() || 'default';
+      onUpdateSubject(grade, subject, newSubject);
+      toast({
+        title: "تم تحديث المادة",
+        description: `تم تحديث اسم المادة بنجاح`,
+      });
+    }
+    setIsEditingSubject(false);
+  };
+
+  const handleCancelEditSubject = () => {
+    setEditedSubject(subject === 'default' ? '' : subject);
+    setIsEditingSubject(false);
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden animate-fade-in">
       {/* Header */}
@@ -188,13 +209,60 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
             <div className={cn("p-2 rounded-lg", gradeIconColor)}>
               <GraduationCap className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-foreground">
-                {gradeLabels[grade]}
-                {subject !== 'default' && (
-                  <span className="text-sm font-normal text-primary mr-2">({subject})</span>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold text-foreground">
+                  {gradeLabels[grade]}
+                </h3>
+                {isEditingSubject ? (
+                  <div className="flex items-center gap-1">
+                    <Input
+                      value={editedSubject}
+                      onChange={(e) => setEditedSubject(e.target.value)}
+                      placeholder="اسم المادة..."
+                      className="h-7 w-32 text-sm bg-background"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveSubject();
+                        if (e.key === 'Escape') handleCancelEditSubject();
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-success hover:text-success hover:bg-success/10"
+                      onClick={handleSaveSubject}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={handleCancelEditSubject}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-primary">
+                      {subject !== 'default' ? `(${subject})` : '(بدون مادة)'}
+                    </span>
+                    {onUpdateSubject && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                        onClick={() => setIsEditingSubject(true)}
+                        title="تعديل اسم المادة"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                 )}
-              </h3>
+              </div>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
                 {students.length} طالبة

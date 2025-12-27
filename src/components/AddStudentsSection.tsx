@@ -12,17 +12,12 @@ interface AddStudentsSectionProps {
 
 const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [studentNames, setStudentNames] = useState('');
-  const [subject, setSubject] = useState(() => localStorage.getItem('subject') || '');
   const [teacherName, setTeacherName] = useState(() => localStorage.getItem('teacherName') || '');
   const [semester, setSemester] = useState(() => localStorage.getItem('semester') || '');
   const [academicYear, setAcademicYear] = useState(() => localStorage.getItem('academicYear') || '');
   const [educationStage, setEducationStage] = useState<EducationStage | ''>(() => 
     (localStorage.getItem('educationStage') as EducationStage) || ''
   );
-
-  useEffect(() => {
-    localStorage.setItem('subject', subject);
-  }, [subject]);
 
   useEffect(() => {
     localStorage.setItem('teacherName', teacherName);
@@ -94,20 +89,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
       
       <div className="space-y-4">
         {/* Subject, Teacher Name, Semester, and Academic Year Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              المادة
-            </label>
-            <Input
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="أدخلي اسم المادة..."
-              className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20"
-              dir="rtl"
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
               <User className="w-4 h-4" />

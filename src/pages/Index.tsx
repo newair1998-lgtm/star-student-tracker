@@ -16,6 +16,7 @@ const Index = () => {
     getGradeSections,
     transferStudent,
     duplicateGradeSection,
+    updateSubject,
   } = useStudents();
 
   const [educationStage, setEducationStage] = useState<EducationStage | ''>(() => 
@@ -103,6 +104,7 @@ const Index = () => {
               onDeleteStudent={deleteStudent}
               onTransferStudent={transferStudent}
               onDuplicateGradeSection={duplicateGradeSection}
+              onUpdateSubject={updateSubject}
             />
           ))}
         </div>
