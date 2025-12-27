@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Student, Grade, AttendanceRecord } from '@/types/student';
+import { Student, Grade, AttendanceRecord, gradeLabels } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
@@ -97,18 +97,9 @@ export const useStudents = () => {
 
       setStudents(prev => [...prev, ...mappedStudents]);
 
-      const gradeNames: Record<Grade, string> = {
-        first: 'الأول',
-        second: 'الثاني',
-        third: 'الثالث',
-        fourth: 'الرابع',
-        fifth: 'الخامس',
-        sixth: 'السادس',
-      };
-
       toast({
         title: 'تمت الإضافة بنجاح',
-        description: `تم إضافة ${names.length} طالبة إلى الصف ${gradeNames[grade]}`,
+        description: `تم إضافة ${names.length} طالبة إلى ${gradeLabels[grade]}`,
       });
     } catch (error) {
       console.error('Error adding students:', error);

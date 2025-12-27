@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
 import { Loader2 } from 'lucide-react';
-import { Grade } from '@/types/student';
+import { Grade, EducationStage, getGradesForStage } from '@/types/student';
 
 const Index = () => {
   const {
@@ -15,18 +15,20 @@ const Index = () => {
     getStudentsByGrade,
   } = useStudents();
 
-  const [educationStage, setEducationStage] = useState(() => localStorage.getItem('educationStage') || '');
+  const [educationStage, setEducationStage] = useState<EducationStage | ''>(() => 
+    (localStorage.getItem('educationStage') as EducationStage) || ''
+  );
 
   useEffect(() => {
     const handleStorageChange = () => {
-      setEducationStage(localStorage.getItem('educationStage') || '');
+      setEducationStage((localStorage.getItem('educationStage') as EducationStage) || '');
     };
     
     window.addEventListener('storage', handleStorageChange);
     
     // Check for changes periodically (for same-tab updates)
     const interval = setInterval(() => {
-      const currentStage = localStorage.getItem('educationStage') || '';
+      const currentStage = (localStorage.getItem('educationStage') as EducationStage) || '';
       if (currentStage !== educationStage) {
         setEducationStage(currentStage);
       }
@@ -39,16 +41,8 @@ const Index = () => {
   }, [educationStage]);
 
   const getGradesToShow = (): Grade[] => {
-    switch (educationStage) {
-      case 'primary':
-        return ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
-      case 'middle':
-        return ['first', 'second', 'third'];
-      case 'secondary':
-        return ['first', 'second', 'third'];
-      default:
-        return ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
-    }
+    if (!educationStage) return [];
+    return getGradesForStage(educationStage);
   };
 
   const gradesToShow = getGradesToShow();
@@ -79,7 +73,6 @@ const Index = () => {
               students={getStudentsByGrade(grade)}
               onUpdateStudent={updateStudent}
               onDeleteStudent={deleteStudent}
-              educationStage={educationStage}
             />
           ))}
         </div>
