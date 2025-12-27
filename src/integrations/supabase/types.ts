@@ -29,6 +29,7 @@ export type Database = {
           performance_tasks: number
           subject: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           attendance?: Json | null
@@ -44,6 +45,7 @@ export type Database = {
           performance_tasks?: number
           subject?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           attendance?: Json | null
@@ -59,6 +61,7 @@ export type Database = {
           performance_tasks?: number
           subject?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
