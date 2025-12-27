@@ -302,7 +302,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                 onOpenChange={setDuplicateSameGradeDialogOpen}
                 grade={grade}
                 studentsCount={students.length}
-                onConfirm={() => onDuplicateGrade(grade, grade, false)}
+                onConfirm={(includeScores) => onDuplicateGrade(grade, grade, includeScores)}
               />
             </>
           )}
