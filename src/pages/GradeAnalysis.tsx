@@ -1,5 +1,5 @@
 // Grade Analysis Page - Export to Word with charts
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, AttendanceRecord, getStageFromGrade, stageLabels } from '@/types/student';
@@ -105,6 +105,7 @@ const calculateTotal = (student: StudentType, performanceTasksMax: number, exam1
 
 const GradeAnalysis = () => {
   const { grade } = useParams<{ grade: Grade }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getStudentsByGradeAndSubject, loading } = useStudents();
   const tableRef = useRef<HTMLDivElement>(null);
@@ -116,6 +117,9 @@ const GradeAnalysis = () => {
 
   const STUDENTS_PER_PAGE = 25;
 
+  // Get subject from URL query params
+  const subject = searchParams.get('subject') || 'default';
+
   // Load settings from localStorage
   const performanceTasksMax = parseInt(localStorage.getItem(`performanceTasksMax_${grade}`) || '10');
   const exam1Max = parseInt(localStorage.getItem(`exam1Max_${grade}`) || '30');
@@ -123,7 +127,6 @@ const GradeAnalysis = () => {
   const finalTotalMax = parseInt(localStorage.getItem(`finalTotalMax_${grade}`) || '100');
   
   // Load metadata from localStorage
-  const subject = localStorage.getItem('subject') || '';
   const teacherName = localStorage.getItem('teacherName') || '';
   const semester = localStorage.getItem('semester') || '';
   const academicYear = localStorage.getItem('academicYear') || '';
@@ -212,9 +215,9 @@ const GradeAnalysis = () => {
     const ws = XLSX.utils.json_to_sheet(excelData);
 
     // Add header info
+    const subjectLabel = subject !== 'default' ? subject : '';
     const headerInfo = [
-      [`تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}`],
-      [subject ? `المادة: ${subject}` : ''],
+      [`تفاصيل درجات طالبات ${gradeLabels[grade as Grade]}${subjectLabel ? ` - ${subjectLabel}` : ''}`],
       [teacherName ? `المعلمة: ${teacherName}` : ''],
       [''],
     ];
@@ -240,7 +243,7 @@ const GradeAnalysis = () => {
     XLSX.utils.book_append_sheet(wb, wsWithHeader, 'الدرجات');
 
     // Save file
-    XLSX.writeFile(wb, `تفاصيل_درجات_${gradeLabels[grade as Grade]}.xlsx`);
+    XLSX.writeFile(wb, `تفاصيل_درجات_${gradeLabels[grade as Grade]}${subject !== 'default' ? `_${subject}` : ''}.xlsx`);
 
     toast({
       title: 'تم الحفظ بنجاح',
@@ -290,17 +293,12 @@ const GradeAnalysis = () => {
         children: [
           ...(index === 0 ? [
             new Paragraph({
-              children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}`, bold: true, size: 36, font: "Arial" })],
+              children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}${subject !== 'default' ? ` - ${subject}` : ''}`, bold: true, size: 36, font: "Arial" })],
               heading: HeadingLevel.HEADING_1,
               alignment: AlignmentType.CENTER,
               bidirectional: true,
               spacing: { after: 200 },
             }),
-            ...(subject ? [new Paragraph({
-              children: [new TextRun({ text: `المادة: ${subject}`, size: 24, font: "Arial" })],
-              alignment: AlignmentType.CENTER,
-              bidirectional: true,
-            })] : []),
             ...(teacherName ? [new Paragraph({
               children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 24, font: "Arial" })],
               alignment: AlignmentType.CENTER,
@@ -336,7 +334,7 @@ const GradeAnalysis = () => {
       const doc = new Document({ sections: docSections });
 
       const blob = await Packer.toBlob(doc);
-      saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}.docx`);
+      saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}${subject !== 'default' ? `_${subject}` : ''}.docx`);
 
       toast({
         title: 'تم الحفظ بنجاح',
@@ -360,7 +358,7 @@ const GradeAnalysis = () => {
     );
   }
 
-  const students = getStudentsByGradeAndSubject(grade as Grade, 'default');
+  const students = getStudentsByGradeAndSubject(grade as Grade, subject);
 
   if (students.length === 0) {
     return (
@@ -839,12 +837,10 @@ const GradeAnalysis = () => {
             <div className="text-center mb-4">
               <h3 className="font-bold text-lg text-gray-800">
                 تفاصيل درجات طالبات {gradeLabels[grade as Grade]}
+                {subject !== 'default' && ` - ${subject}`}
               </h3>
-              {localStorage.getItem('subject') && (
-                <p className="text-gray-700 mt-2">المادة: {localStorage.getItem('subject')}</p>
-              )}
-              {localStorage.getItem('teacherName') && (
-                <p className="text-gray-700">المعلمة: {localStorage.getItem('teacherName')}</p>
+              {teacherName && (
+                <p className="text-gray-700">المعلمة: {teacherName}</p>
               )}
             </div>
             <table className="w-full text-sm" style={{ direction: 'rtl' }}>

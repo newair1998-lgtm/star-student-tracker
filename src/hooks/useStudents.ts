@@ -301,6 +301,34 @@ export const useStudents = () => {
     }
   }, [students, toast]);
 
+  // Update subject for all students in a grade section
+  const updateSubject = useCallback(async (grade: Grade, oldSubject: string, newSubject: string) => {
+    try {
+      const { error } = await supabase
+        .from('students')
+        .update({ subject: newSubject })
+        .eq('grade', grade)
+        .eq('subject', oldSubject);
+
+      if (error) throw error;
+
+      setStudents(prev =>
+        prev.map(student =>
+          student.grade === grade && student.subject === oldSubject
+            ? { ...student, subject: newSubject }
+            : student
+        )
+      );
+    } catch (error) {
+      console.error('Error updating subject:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تحديث المادة',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+
   return {
     students,
     loading,
@@ -311,5 +339,6 @@ export const useStudents = () => {
     getGradeSections,
     transferStudent,
     duplicateGradeSection,
+    updateSubject,
   };
 };
