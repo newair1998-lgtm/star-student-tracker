@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser, Trash2 } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ import StudentRow from './StudentRow';
 import BulkScoreSelector from './BulkScoreSelector';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { DuplicateGradeDialog } from './DuplicateGradeDialog';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
   present: [false, false, false, false],
@@ -44,6 +45,8 @@ interface GradeSectionProps {
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
+  onTransferStudent?: (id: string, newGrade: Grade) => void;
+  onDuplicateGrade?: (sourceGrade: Grade, targetGrade: Grade, includeScores: boolean) => void;
 }
 
 const getGradeColorIndex = (grade: Grade): number => {
@@ -74,9 +77,10 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate }: GradeSectionProps) => {
+const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGrade }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -193,6 +197,19 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
           </div>
           {students.length > 0 && (
             <div className="flex items-center gap-2">
+              {onDuplicateGrade && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  title="تكرار الصف"
+                  onClick={() => setDuplicateDialogOpen(true)}
+                >
+                  <Copy className="w-4 h-4 ml-1" />
+                  تكرار الصف
+                </Button>
+              )}
+              
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -255,6 +272,16 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+          )}
+          
+          {onDuplicateGrade && (
+            <DuplicateGradeDialog
+              open={duplicateDialogOpen}
+              onOpenChange={setDuplicateDialogOpen}
+              sourceGrade={grade}
+              studentsCount={students.length}
+              onDuplicate={(targetGrade, includeScores) => onDuplicateGrade(grade, targetGrade, includeScores)}
+            />
           )}
         </div>
       </div>
@@ -406,6 +433,7 @@ const GradeSection = ({ grade, students, onUpdateStudent, onDeleteStudent, onBul
                     index={index}
                     onUpdate={onUpdateStudent}
                     onDelete={onDeleteStudent}
+                    onTransfer={onTransferStudent}
                     performanceTasksMax={performanceTasksMax}
                     exam1Max={exam1Max}
                     exam2Max={exam2Max}

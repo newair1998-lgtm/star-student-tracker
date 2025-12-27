@@ -175,6 +175,101 @@ export const useStudents = () => {
   const getStudentsByGrade = useCallback((grade: Grade) =>
     students.filter(student => student.grade === grade), [students]);
 
+  // Transfer a student to a different grade
+  const transferStudent = useCallback(async (id: string, newGrade: Grade) => {
+    try {
+      const student = students.find(s => s.id === id);
+      if (!student) return;
+
+      const { error } = await supabase
+        .from('students')
+        .update({ grade: newGrade })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setStudents(prev =>
+        prev.map(s => s.id === id ? { ...s, grade: newGrade } : s)
+      );
+
+      toast({
+        title: 'تم النقل بنجاح',
+        description: `تم نقل الطالبة "${student.name}" إلى ${gradeLabels[newGrade]}`,
+      });
+    } catch (error) {
+      console.error('Error transferring student:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء نقل الطالبة',
+        variant: 'destructive',
+      });
+    }
+  }, [students, toast]);
+
+  // Duplicate all students from one grade to another
+  const duplicateGrade = useCallback(async (sourceGrade: Grade, targetGrade: Grade, includeScores: boolean) => {
+    try {
+      const sourceStudents = students.filter(s => s.grade === sourceGrade);
+      
+      if (sourceStudents.length === 0) {
+        toast({
+          title: 'لا توجد طالبات',
+          description: 'لا توجد طالبات في الصف المصدر للنسخ',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const defaultAttendanceJson = { present: [false, false, false, false], absent: [false, false, false, false] };
+      
+      const newStudents = sourceStudents.map(student => ({
+        name: student.name,
+        grade: targetGrade,
+        attendance: includeScores ? student.attendance : defaultAttendanceJson,
+        performance_tasks: includeScores ? student.performanceTasks : 0,
+        participation: includeScores ? student.participation : 0,
+        book: includeScores ? student.book : 0,
+        homework: includeScores ? student.homework : 0,
+        exam1: includeScores ? student.exam1 : 0,
+        exam2: includeScores ? student.exam2 : 0,
+      }));
+
+      const { data, error } = await supabase
+        .from('students')
+        .insert(newStudents as never[])
+        .select();
+
+      if (error) throw error;
+
+      const mappedStudents: Student[] = (data || []).map((s) => ({
+        id: s.id,
+        name: s.name,
+        grade: s.grade as Grade,
+        attendance: parseAttendance(s.attendance),
+        performanceTasks: s.performance_tasks,
+        participation: s.participation,
+        book: s.book,
+        homework: s.homework,
+        exam1: s.exam1,
+        exam2: s.exam2,
+      }));
+
+      setStudents(prev => [...prev, ...mappedStudents]);
+
+      toast({
+        title: 'تم التكرار بنجاح',
+        description: `تم نسخ ${sourceStudents.length} طالبة من ${gradeLabels[sourceGrade]} إلى ${gradeLabels[targetGrade]}`,
+      });
+    } catch (error) {
+      console.error('Error duplicating grade:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تكرار الصف',
+        variant: 'destructive',
+      });
+    }
+  }, [students, toast]);
+
   return {
     students,
     loading,
@@ -182,5 +277,7 @@ export const useStudents = () => {
     updateStudent,
     deleteStudent,
     getStudentsByGrade,
+    transferStudent,
+    duplicateGrade,
   };
 };
