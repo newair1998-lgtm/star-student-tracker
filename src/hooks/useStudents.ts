@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Student, Grade, AttendanceRecord, gradeLabels, GradeSection } from '@/types/student';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const DEFAULT_ATTENDANCE: AttendanceRecord = {
   present: [false, false, false, false],
@@ -12,7 +13,7 @@ export const useStudents = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
+  const { user } = useAuth();
   const parseAttendance = (data: unknown): AttendanceRecord => {
     if (data && typeof data === 'object' && 'present' in data && 'absent' in data) {
       return data as AttendanceRecord;
@@ -22,6 +23,12 @@ export const useStudents = () => {
 
   // Fetch students from database
   const fetchStudents = useCallback(async () => {
+    if (!user) {
+      setStudents([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('students')
@@ -55,19 +62,22 @@ export const useStudents = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
 
   const addStudents = useCallback(async (names: string[], grade: Grade, subject: string = 'default') => {
+    if (!user) return;
+
     try {
       const defaultAttendanceJson = { present: [false, false, false, false], absent: [false, false, false, false] };
       const newStudents = names.map(name => ({
         name,
         grade,
         subject,
+        user_id: user.id,
         attendance: defaultAttendanceJson,
         performance_tasks: 0,
         participation: 0,
@@ -112,7 +122,7 @@ export const useStudents = () => {
         variant: 'destructive',
       });
     }
-  }, [toast]);
+  }, [user, toast]);
 
   const updateStudent = useCallback(async (id: string, updates: Partial<Student>) => {
     try {
@@ -236,6 +246,8 @@ export const useStudents = () => {
     targetSubject: string,
     includeScores: boolean
   ) => {
+    if (!user) return;
+
     try {
       const sourceStudents = students.filter(s => s.grade === sourceGrade && s.subject === sourceSubject);
       
@@ -254,6 +266,7 @@ export const useStudents = () => {
         name: student.name,
         grade: targetGrade,
         subject: targetSubject,
+        user_id: user.id,
         attendance: includeScores ? student.attendance : defaultAttendanceJson,
         performance_tasks: includeScores ? student.performanceTasks : 0,
         participation: includeScores ? student.participation : 0,
@@ -299,7 +312,7 @@ export const useStudents = () => {
         variant: 'destructive',
       });
     }
-  }, [students, toast]);
+  }, [user, students, toast]);
 
   // Update subject for all students in a grade section
   const updateSubject = useCallback(async (grade: Grade, oldSubject: string, newSubject: string) => {
