@@ -398,19 +398,6 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 <TableRow className="bg-secondary/30 hover:bg-secondary/30">
                   <TableHead className="text-center w-10">#</TableHead>
                   <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
-                  <TableHead className="text-center w-24">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>الحضور</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleBulkAttendance()}
-                        className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
-                      >
-                        حضور الكل
-                      </Button>
-                    </div>
-                  </TableHead>
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center gap-1">
                       <span>المهام الأدائية</span>
