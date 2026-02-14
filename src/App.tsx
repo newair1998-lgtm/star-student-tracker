@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
+import FollowUp from "./pages/FollowUp";
 import GradeAnalysis from "./pages/GradeAnalysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/yearly-work" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/follow-up" element={<ProtectedRoute><FollowUp /></ProtectedRoute>} />
           <Route path="/analysis/:grade" element={<ProtectedRoute><GradeAnalysis /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
