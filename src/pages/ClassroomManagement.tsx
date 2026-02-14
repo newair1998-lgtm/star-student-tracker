@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudents } from '@/hooks/useStudents';
+import { useClassroom } from '@/hooks/useClassroom';
 import Header from '@/components/Header';
-import { ArrowRight, Armchair, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare } from 'lucide-react';
+import { ArrowRight, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,31 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSection as GradeSectionType } from '@/types/student';
-
-// Types for classroom management
-interface BehaviorRecord {
-  points: number;
-  notes: string[];
-}
-
-interface GroupRecord {
-  name: string;
-  members: string[];
-  points: number;
-}
-
-interface StudentNote {
-  id: string;
-  studentId: string;
-  studentName: string;
-  text: string;
-  date: string;
-  type: 'positive' | 'negative' | 'general';
-}
-
-interface DisturbanceRecord {
-  count: number;
-}
 
 const ClassroomManagement = () => {
   const navigate = useNavigate();
@@ -46,40 +22,28 @@ const ClassroomManagement = () => {
 
   const [selectedSection, setSelectedSection] = useState<string>('');
 
-  // Behavior points
-  const [behaviorRecords, setBehaviorRecords] = useState<Record<string, BehaviorRecord>>(() => {
-    const saved = localStorage.getItem('classroom_behavior');
-    return saved ? JSON.parse(saved) : {};
-  });
-
-  // Groups
-  const [groups, setGroups] = useState<GroupRecord[]>(() => {
-    const saved = localStorage.getItem('classroom_groups');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Notes
-  const [notes, setNotes] = useState<StudentNote[]>(() => {
-    const saved = localStorage.getItem('classroom_notes');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Disturbance
-  const [disturbanceRecords, setDisturbanceRecords] = useState<Record<string, DisturbanceRecord>>(() => {
-    const saved = localStorage.getItem('classroom_disturbance');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const {
+    loadingClassroom,
+    getBehavior,
+    addPoints,
+    resetBehavior,
+    getDisturbance,
+    addDisturbance,
+    resetDisturbance,
+    groups,
+    addGroup,
+    deleteGroup,
+    addGroupPoints,
+    toggleGroupMember,
+    notes,
+    addNote,
+    deleteNote,
+  } = useClassroom(selectedSection);
 
   const [newNoteText, setNewNoteText] = useState('');
   const [newNoteStudentId, setNewNoteStudentId] = useState('');
   const [newNoteType, setNewNoteType] = useState<'positive' | 'negative' | 'general'>('general');
   const [newGroupName, setNewGroupName] = useState('');
-
-  // Save to localStorage
-  useEffect(() => { localStorage.setItem('classroom_behavior', JSON.stringify(behaviorRecords)); }, [behaviorRecords]);
-  useEffect(() => { localStorage.setItem('classroom_groups', JSON.stringify(groups)); }, [groups]);
-  useEffect(() => { localStorage.setItem('classroom_notes', JSON.stringify(notes)); }, [notes]);
-  useEffect(() => { localStorage.setItem('classroom_disturbance', JSON.stringify(disturbanceRecords)); }, [disturbanceRecords]);
 
   const getSectionsToShow = (): GradeSectionType[] => {
     if (!educationStage) return [];
@@ -96,7 +60,6 @@ const ClassroomManagement = () => {
 
   const sectionsToShow = getSectionsToShow();
 
-  // Auto-select first section
   useEffect(() => {
     if (sectionsToShow.length > 0 && !selectedSection) {
       const first = sectionsToShow[0];
@@ -106,9 +69,6 @@ const ClassroomManagement = () => {
 
   const getSelectedStudents = () => {
     if (!selectedSection) return [];
-    const [grade, subject, sectionNum] = selectedSection.split('_');
-    const sectionNumber = parseInt(sectionNum) || 1;
-    // Reconstruct subject that might contain underscores
     const parts = selectedSection.split('_');
     const gradeKey = `${parts[0]}_${parts[1]}`;
     const subjectKey = parts.slice(2, -1).join('_');
@@ -118,80 +78,22 @@ const ClassroomManagement = () => {
 
   const selectedStudents = getSelectedStudents();
 
-  // Behavior functions
-  const getBehavior = (studentId: string): BehaviorRecord => behaviorRecords[studentId] || { points: 0, notes: [] };
-  const addPoints = (studentId: string, amount: number) => {
-    setBehaviorRecords(prev => ({
-      ...prev,
-      [studentId]: { ...getBehavior(studentId), points: getBehavior(studentId).points + amount },
-    }));
-  };
-
-  // Disturbance functions
-  const getDisturbance = (studentId: string): DisturbanceRecord => disturbanceRecords[studentId] || { count: 0 };
-  const addDisturbance = (studentId: string) => {
-    setDisturbanceRecords(prev => ({
-      ...prev,
-      [studentId]: { count: getDisturbance(studentId).count + 1 },
-    }));
-  };
-  const resetDisturbance = (studentId: string) => {
-    setDisturbanceRecords(prev => ({
-      ...prev,
-      [studentId]: { count: 0 },
-    }));
-  };
-
-  // Notes functions
-  const addNote = () => {
+  const handleAddNote = () => {
     if (!newNoteText.trim() || !newNoteStudentId) return;
     const student = selectedStudents.find(s => s.id === newNoteStudentId);
     if (!student) return;
-    const note: StudentNote = {
-      id: Date.now().toString(),
-      studentId: newNoteStudentId,
-      studentName: student.name,
-      text: newNoteText.trim(),
-      date: new Date().toLocaleDateString('ar-SA'),
-      type: newNoteType,
-    };
-    setNotes(prev => [note, ...prev]);
+    addNote(newNoteStudentId, student.name, newNoteText, newNoteType);
     setNewNoteText('');
     setNewNoteStudentId('');
   };
 
-  const deleteNote = (noteId: string) => {
-    setNotes(prev => prev.filter(n => n.id !== noteId));
-  };
-
-  // Groups functions
-  const addGroup = () => {
+  const handleAddGroup = () => {
     if (!newGroupName.trim()) return;
-    setGroups(prev => [...prev, { name: newGroupName.trim(), members: [], points: 0 }]);
+    addGroup(newGroupName);
     setNewGroupName('');
   };
 
-  const deleteGroup = (index: number) => {
-    setGroups(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const toggleGroupMember = (groupIndex: number, studentId: string) => {
-    setGroups(prev => prev.map((g, i) => {
-      if (i !== groupIndex) return g;
-      const members = g.members.includes(studentId)
-        ? g.members.filter(m => m !== studentId)
-        : [...g.members, studentId];
-      return { ...g, members };
-    }));
-  };
-
-  const addGroupPoints = (groupIndex: number, amount: number) => {
-    setGroups(prev => prev.map((g, i) =>
-      i === groupIndex ? { ...g, points: g.points + amount } : g
-    ));
-  };
-
-  if (loading) {
+  if (loading || loadingClassroom) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -216,7 +118,6 @@ const ClassroomManagement = () => {
           <h1 className="text-2xl font-bold text-foreground">الإدارة الصفية</h1>
         </div>
 
-        {/* Section Selector */}
         {sectionsToShow.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center">
             {sectionsToShow.map(section => {
@@ -305,7 +206,7 @@ const ClassroomManagement = () => {
                                 <Button size="iconSm" variant="ghost" onClick={() => addPoints(student.id, -1)} className="text-destructive hover:bg-destructive/10">
                                   <Minus className="w-4 h-4" />
                                 </Button>
-                                <Button size="iconSm" variant="ghost" onClick={() => setBehaviorRecords(prev => ({ ...prev, [student.id]: { points: 0, notes: [] } }))} className="text-muted-foreground hover:bg-muted">
+                                <Button size="iconSm" variant="ghost" onClick={() => resetBehavior(student.id)} className="text-muted-foreground hover:bg-muted">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -369,7 +270,6 @@ const ClassroomManagement = () => {
             {/* المجموعات التعاونية */}
             <TabsContent value="groups">
               <div className="space-y-4">
-                {/* Add new group */}
                 <div className="bg-card rounded-xl shadow-card p-4">
                   <div className="flex gap-2">
                     <Input
@@ -379,15 +279,15 @@ const ClassroomManagement = () => {
                       className="flex-1"
                       dir="rtl"
                     />
-                    <Button onClick={addGroup} className="gap-1">
+                    <Button onClick={handleAddGroup} className="gap-1">
                       <Plus className="w-4 h-4" />
                       إضافة
                     </Button>
                   </div>
                 </div>
 
-                {groups.map((group, groupIdx) => (
-                  <div key={groupIdx} className="bg-card rounded-xl shadow-card overflow-hidden">
+                {groups.map((group) => (
+                  <div key={group.id} className="bg-card rounded-xl shadow-card overflow-hidden">
                     <div className="bg-primary/10 px-4 py-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Users2 className="w-5 h-5 text-primary" />
@@ -400,13 +300,13 @@ const ClassroomManagement = () => {
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button size="iconSm" variant="ghost" onClick={() => addGroupPoints(groupIdx, 1)} className="text-success hover:bg-success/10">
+                        <Button size="iconSm" variant="ghost" onClick={() => addGroupPoints(group.id, 1)} className="text-success hover:bg-success/10">
                           <Plus className="w-4 h-4" />
                         </Button>
-                        <Button size="iconSm" variant="ghost" onClick={() => addGroupPoints(groupIdx, -1)} className="text-destructive hover:bg-destructive/10">
+                        <Button size="iconSm" variant="ghost" onClick={() => addGroupPoints(group.id, -1)} className="text-destructive hover:bg-destructive/10">
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <Button size="iconSm" variant="ghost" onClick={() => deleteGroup(groupIdx)} className="text-muted-foreground hover:text-destructive">
+                        <Button size="iconSm" variant="ghost" onClick={() => deleteGroup(group.id)} className="text-muted-foreground hover:text-destructive">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -418,7 +318,7 @@ const ClassroomManagement = () => {
                           return (
                             <button
                               key={student.id}
-                              onClick={() => toggleGroupMember(groupIdx, student.id)}
+                              onClick={() => toggleGroupMember(group.id, student.id)}
                               className={cn(
                                 "px-3 py-1.5 rounded-full text-sm border transition-all",
                                 isMember
@@ -447,7 +347,6 @@ const ClassroomManagement = () => {
             {/* سجل الملاحظات */}
             <TabsContent value="notes">
               <div className="space-y-4">
-                {/* Add new note */}
                 <div className="bg-card rounded-xl shadow-card p-4 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <select
@@ -486,13 +385,12 @@ const ClassroomManagement = () => {
                     className="min-h-[80px] resize-none"
                     dir="rtl"
                   />
-                  <Button onClick={addNote} className="gap-1">
+                  <Button onClick={handleAddNote} className="gap-1">
                     <Plus className="w-4 h-4" />
                     إضافة ملاحظة
                   </Button>
                 </div>
 
-                {/* Notes list */}
                 <div className="space-y-2">
                   {notes.filter(n => selectedStudents.some(s => s.id === n.studentId)).map(note => (
                     <div key={note.id} className={cn(
