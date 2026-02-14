@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudents } from '@/hooks/useStudents';
-import { useClassroom } from '@/hooks/useClassroom';
+import { useClassroom, StarsArray } from '@/hooks/useClassroom';
 import Header from '@/components/Header';
-import { ArrowRight, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare, Handshake, Sparkles } from 'lucide-react';
+import { ArrowRight, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare, Handshake, Sparkles, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,6 +11,39 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSection as GradeSectionType } from '@/types/student';
+
+const StarRating = ({ 
+  stars, 
+  onToggle, 
+  onReset 
+}: { 
+  stars: StarsArray; 
+  onToggle: (index: number) => void; 
+  onReset: () => void;
+}) => (
+  <div className="flex items-center gap-0.5">
+    {stars.map((value, i) => (
+      <button
+        key={i}
+        onClick={() => onToggle(i)}
+        className="p-0.5 transition-transform hover:scale-125 focus:outline-none"
+        title={value === 0 ? 'فارغ' : value === 1 ? 'أخضر' : 'أحمر'}
+      >
+        <Star
+          className={cn(
+            "w-5 h-5 transition-colors",
+            value === 0 && "text-muted-foreground/30",
+            value === 1 && "text-success fill-success",
+            value === 2 && "text-destructive fill-destructive"
+          )}
+        />
+      </button>
+    ))}
+    <button onClick={onReset} className="p-1 mr-1 text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="إعادة تعيين">
+      <RotateCcw className="w-3.5 h-3.5" />
+    </button>
+  </div>
+);
 
 const ClassroomManagement = () => {
   const navigate = useNavigate();
@@ -24,10 +57,10 @@ const ClassroomManagement = () => {
 
   const {
     loadingClassroom,
-    getBehavior, addPoints, resetBehavior,
-    getDisturbance, addDisturbance, resetDisturbance,
-    getCooperation, addCooperation, resetCooperation,
-    getCleanliness, addCleanliness, resetCleanliness,
+    getBehaviorStars, toggleBehaviorStar, resetBehaviorStars,
+    getDisturbanceStars, toggleDisturbanceStar, resetDisturbanceStars,
+    getCooperationStars, toggleCooperationStar, resetCooperationStars,
+    getCleanlinessStars, toggleCleanlinessStar, resetCleanlinessStars,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   } = useClassroom(selectedSection);
@@ -96,15 +129,14 @@ const ClassroomManagement = () => {
     );
   }
 
-  // Reusable points table component
-  const PointsTable = ({ 
-    title, getRecord, onAdd, onReset, fieldKey 
-  }: { 
-    title: string;
-    getRecord: (id: string) => { points?: number; count?: number };
-    onAdd: (id: string, amount: number) => void;
+  const StarsTable = ({
+    getStars,
+    onToggle,
+    onReset,
+  }: {
+    getStars: (id: string) => StarsArray;
+    onToggle: (id: string, index: number) => void;
     onReset: (id: string) => void;
-    fieldKey: 'points' | 'count';
   }) => (
     <div className="bg-card rounded-xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -112,47 +144,26 @@ const ClassroomManagement = () => {
           <TableHeader>
             <TableRow className="bg-secondary/30">
               <TableHead className="text-center w-10">#</TableHead>
-              <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
-              <TableHead className="text-center">{title}</TableHead>
-              <TableHead className="text-center">إجراءات</TableHead>
+              <TableHead className="min-w-[120px]">اسم الطالبة</TableHead>
+              <TableHead className="text-center min-w-[240px]">التقييم</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {selectedStudents.map((student, idx) => {
-              const record = getRecord(student.id);
-              const value = fieldKey === 'points' ? (record as any).points : (record as any).count;
-              return (
-                <TableRow key={student.id} className="hover:bg-accent/30">
-                  <TableCell className="text-center text-muted-foreground">{idx + 1}</TableCell>
-                  <TableCell className="font-medium text-foreground">{student.name}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={cn(
-                      "inline-block min-w-[40px] py-1 px-3 rounded-full font-bold text-sm",
-                      value > 0 && (fieldKey === 'count' ? "bg-destructive/15 text-destructive" : "bg-success/15 text-success"),
-                      value < 0 && "bg-destructive/15 text-destructive",
-                      value === 0 && "bg-muted text-muted-foreground"
-                    )}>
-                      {value}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Button size="iconSm" variant="ghost" onClick={() => onAdd(student.id, fieldKey === 'count' ? 1 : 1)} className={fieldKey === 'count' ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-success/10"}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                      {fieldKey === 'points' && (
-                        <Button size="iconSm" variant="ghost" onClick={() => onAdd(student.id, -1)} className="text-destructive hover:bg-destructive/10">
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <Button size="iconSm" variant="ghost" onClick={() => onReset(student.id)} className="text-muted-foreground hover:bg-muted">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {selectedStudents.map((student, idx) => (
+              <TableRow key={student.id} className="hover:bg-accent/30">
+                <TableCell className="text-center text-muted-foreground">{idx + 1}</TableCell>
+                <TableCell className="font-medium text-foreground">{student.name}</TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center">
+                    <StarRating
+                      stars={getStars(student.id)}
+                      onToggle={(i) => onToggle(student.id, i)}
+                      onReset={() => onReset(student.id)}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
@@ -171,6 +182,7 @@ const ClassroomManagement = () => {
 
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold text-foreground">الإدارة الصفية</h1>
+          <p className="text-xs text-muted-foreground mt-1">اضغط على النجمة: فارغ ← أخضر ← أحمر</p>
         </div>
 
         {sectionsToShow.length > 0 && (
@@ -212,13 +224,11 @@ const ClassroomManagement = () => {
               </TabsTrigger>
               <TabsTrigger value="disturbance" className="gap-1 text-xs sm:text-sm">
                 <ShieldAlert className="w-4 h-4" />
-                <span className="hidden sm:inline">الإزعاج</span>
-                <span className="sm:hidden">الإزعاج</span>
+                <span>الإزعاج</span>
               </TabsTrigger>
               <TabsTrigger value="cooperation" className="gap-1 text-xs sm:text-sm">
                 <Handshake className="w-4 h-4" />
-                <span className="hidden sm:inline">التعاون</span>
-                <span className="sm:hidden">التعاون</span>
+                <span>التعاون</span>
               </TabsTrigger>
               <TabsTrigger value="cleanliness" className="gap-1 text-xs sm:text-sm">
                 <Sparkles className="w-4 h-4" />
@@ -238,19 +248,19 @@ const ClassroomManagement = () => {
             </TabsList>
 
             <TabsContent value="behavior">
-              <PointsTable title="النقاط" getRecord={getBehavior} onAdd={addPoints} onReset={resetBehavior} fieldKey="points" />
+              <StarsTable getStars={getBehaviorStars} onToggle={toggleBehaviorStar} onReset={resetBehaviorStars} />
             </TabsContent>
 
             <TabsContent value="disturbance">
-              <PointsTable title="عدد المخالفات" getRecord={getDisturbance} onAdd={(id) => addDisturbance(id)} onReset={resetDisturbance} fieldKey="count" />
+              <StarsTable getStars={getDisturbanceStars} onToggle={toggleDisturbanceStar} onReset={resetDisturbanceStars} />
             </TabsContent>
 
             <TabsContent value="cooperation">
-              <PointsTable title="نقاط التعاون" getRecord={getCooperation} onAdd={addCooperation} onReset={resetCooperation} fieldKey="points" />
+              <StarsTable getStars={getCooperationStars} onToggle={toggleCooperationStar} onReset={resetCooperationStars} />
             </TabsContent>
 
             <TabsContent value="cleanliness">
-              <PointsTable title="نقاط النظافة" getRecord={getCleanliness} onAdd={addCleanliness} onReset={resetCleanliness} fieldKey="points" />
+              <StarsTable getStars={getCleanlinessStars} onToggle={toggleCleanlinessStar} onReset={resetCleanlinessStars} />
             </TabsContent>
 
             {/* المجموعات التعاونية */}
