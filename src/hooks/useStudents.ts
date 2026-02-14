@@ -42,6 +42,7 @@ export const useStudents = () => {
         name: s.name,
         grade: s.grade as Grade,
         subject: s.subject || 'default',
+        sectionNumber: (s as any).section_number || 1,
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
@@ -68,7 +69,7 @@ export const useStudents = () => {
     fetchStudents();
   }, [fetchStudents]);
 
-  const addStudents = useCallback(async (names: string[], grade: Grade, subject: string = 'default') => {
+  const addStudents = useCallback(async (names: string[], grade: Grade, subject: string = 'default', sectionNumber: number = 1) => {
     if (!user) return;
 
     try {
@@ -77,6 +78,7 @@ export const useStudents = () => {
         name,
         grade,
         subject,
+        section_number: sectionNumber,
         user_id: user.id,
         attendance: defaultAttendanceJson,
         performance_tasks: 0,
@@ -99,6 +101,7 @@ export const useStudents = () => {
         name: s.name,
         grade: s.grade as Grade,
         subject: s.subject || 'default',
+        sectionNumber: (s as any).section_number || 1,
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,
@@ -187,16 +190,16 @@ export const useStudents = () => {
   }, [toast]);
 
   // Get students by grade and subject
-  const getStudentsByGradeAndSubject = useCallback((grade: Grade, subject: string) =>
-    students.filter(student => student.grade === grade && student.subject === subject), [students]);
+  const getStudentsByGradeAndSubject = useCallback((grade: Grade, subject: string, sectionNumber: number) =>
+    students.filter(student => student.grade === grade && student.subject === subject && student.sectionNumber === sectionNumber), [students]);
 
-  // Get all unique grade sections (grade + subject combinations)
+  // Get all unique grade sections (grade + subject + section combinations)
   const getGradeSections = useCallback((): GradeSection[] => {
     const sections = new Map<string, GradeSection>();
     students.forEach(student => {
-      const key = `${student.grade}_${student.subject}`;
+      const key = `${student.grade}_${student.subject}_${student.sectionNumber}`;
       if (!sections.has(key)) {
-        sections.set(key, { grade: student.grade, subject: student.subject });
+        sections.set(key, { grade: student.grade, subject: student.subject, sectionNumber: student.sectionNumber });
       }
     });
     return Array.from(sections.values());
@@ -288,6 +291,7 @@ export const useStudents = () => {
         name: s.name,
         grade: s.grade as Grade,
         subject: s.subject || 'default',
+        sectionNumber: (s as any).section_number || 1,
         attendance: parseAttendance(s.attendance),
         performanceTasks: s.performance_tasks,
         participation: s.participation,

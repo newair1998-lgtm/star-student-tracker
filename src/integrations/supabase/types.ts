@@ -27,6 +27,7 @@ export type Database = {
           name: string
           participation: number
           performance_tasks: number
+          section_number: number
           subject: string
           updated_at: string
           user_id: string | null
@@ -43,6 +44,7 @@ export type Database = {
           name: string
           participation?: number
           performance_tasks?: number
+          section_number?: number
           subject?: string
           updated_at?: string
           user_id?: string | null
@@ -59,6 +61,7 @@ export type Database = {
           name?: string
           participation?: number
           performance_tasks?: number
+          section_number?: number
           subject?: string
           updated_at?: string
           user_id?: string | null

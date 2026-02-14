@@ -7,7 +7,7 @@ import { UserPlus, Users, BookOpen, User, School } from 'lucide-react';
 import { Grade, EducationStage, getGradesForStage, gradeShortLabels, stageLabels } from '@/types/student';
 
 interface AddStudentsSectionProps {
-  onAddStudents: (names: string[], grade: Grade) => void;
+  onAddStudents: (names: string[], grade: Grade, subject?: string, sectionNumber?: number) => void;
 }
 
 const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
@@ -17,6 +17,9 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
   const [academicYear, setAcademicYear] = useState(() => localStorage.getItem('academicYear') || '');
   const [educationStage, setEducationStage] = useState<EducationStage | ''>(() => 
     (localStorage.getItem('educationStage') as EducationStage) || ''
+  );
+  const [sectionNumber, setSectionNumber] = useState<number>(() => 
+    parseInt(localStorage.getItem('sectionNumber') || '1')
   );
 
   useEffect(() => {
@@ -35,6 +38,10 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
     localStorage.setItem('educationStage', educationStage);
   }, [educationStage]);
 
+  useEffect(() => {
+    localStorage.setItem('sectionNumber', sectionNumber.toString());
+  }, [sectionNumber]);
+
   const handleAddToGrade = (grade: Grade) => {
     const names = studentNames
       .split('\n')
@@ -45,7 +52,7 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
       .filter(name => name.length > 0);
     
     if (names.length > 0) {
-      onAddStudents(names, grade);
+      onAddStudents(names, grade, 'default', sectionNumber);
       setStudentNames('');
     }
   };
@@ -171,6 +178,23 @@ const AddStudentsSection = ({ onAddStudents }: AddStudentsSectionProps) => {
               <SelectItem value="primary">ابتدائي</SelectItem>
               <SelectItem value="middle">متوسط</SelectItem>
               <SelectItem value="secondary">ثانوي</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Section Number Selector */}
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            رقم الفصل
+          </label>
+          <Select value={sectionNumber.toString()} onValueChange={(val) => setSectionNumber(parseInt(val))} dir="rtl">
+            <SelectTrigger className="bg-secondary/30 border-border/50 focus:border-primary focus:ring-primary/20">
+              <SelectValue placeholder="اختاري رقم الفصل..." />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border z-50">
+              <SelectItem value="1">فصل ١</SelectItem>
+              <SelectItem value="2">فصل ٢</SelectItem>
             </SelectContent>
           </Select>
         </div>

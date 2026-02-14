@@ -20,6 +20,7 @@ export interface Student {
   name: string;
   grade: Grade;
   subject: string;
+  sectionNumber: number;
   attendance: AttendanceRecord;
   performanceTasks: number;
   participation: number;
@@ -29,10 +30,11 @@ export interface Student {
   exam2: number;
 }
 
-// Grade section key combines grade and subject
+// Grade section key combines grade, subject, and section number
 export interface GradeSection {
   grade: Grade;
   subject: string;
+  sectionNumber: number;
 }
 
 // Grade labels for display

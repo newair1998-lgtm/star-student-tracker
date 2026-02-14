@@ -53,10 +53,12 @@ const Index = () => {
     // Only show sections that have students
     const stageSections = allSections.filter(section => stageGrades.includes(section.grade));
     
-    // Sort by grade order
+    // Sort by grade order, then section number
     stageSections.sort((a, b) => {
       const gradeOrder = stageGrades.indexOf(a.grade) - stageGrades.indexOf(b.grade);
       if (gradeOrder !== 0) return gradeOrder;
+      const sectionOrder = a.sectionNumber - b.sectionNumber;
+      if (sectionOrder !== 0) return sectionOrder;
       if (a.subject === 'default') return -1;
       if (b.subject === 'default') return 1;
       return a.subject.localeCompare(b.subject, 'ar');
@@ -88,10 +90,11 @@ const Index = () => {
         <div className="space-y-5">
           {sectionsToShow.map((section) => (
             <GradeSection
-              key={`${section.grade}_${section.subject}`}
+              key={`${section.grade}_${section.subject}_${section.sectionNumber}`}
               grade={section.grade}
               subject={section.subject}
-              students={getStudentsByGradeAndSubject(section.grade, section.subject)}
+              sectionNumber={section.sectionNumber}
+              students={getStudentsByGradeAndSubject(section.grade, section.subject, section.sectionNumber)}
               onUpdateStudent={updateStudent}
               onDeleteStudent={deleteStudent}
               onTransferStudent={transferStudent}

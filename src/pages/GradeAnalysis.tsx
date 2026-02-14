@@ -119,6 +119,7 @@ const GradeAnalysis = () => {
 
   // Get subject from URL query params
   const subject = searchParams.get('subject') || 'default';
+  const sectionNumber = parseInt(searchParams.get('section') || '1');
 
   // Load settings from localStorage
   const performanceTasksMax = parseInt(localStorage.getItem(`performanceTasksMax_${grade}`) || '10');
@@ -358,7 +359,7 @@ const GradeAnalysis = () => {
     );
   }
 
-  const students = getStudentsByGradeAndSubject(grade as Grade, subject);
+  const students = getStudentsByGradeAndSubject(grade as Grade, subject, sectionNumber);
 
   if (students.length === 0) {
     return (
