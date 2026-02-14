@@ -40,7 +40,7 @@ const Home = () => {
 
             {/* الإدارة الصفية */}
             <button
-              onClick={() => {/* سيتم ربطها لاحقاً */}}
+              onClick={() => navigate('/classroom')}
               className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border bg-card shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-accent/30 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
