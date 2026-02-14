@@ -125,7 +125,17 @@ export const useClassroom = (sectionKey: string) => {
       );
     };
 
-    return { getStars, toggleStar, resetStars };
+    const fillAllGreen = async (studentId: string) => {
+      if (!user) return;
+      const allGreen: StarsArray = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      setRecords(prev => ({ ...prev, [studentId]: { stars: allGreen } }));
+      await supabase.from(table).upsert(
+        { user_id: user.id, student_id: studentId, stars: allGreen },
+        { onConflict: 'user_id,student_id' }
+      );
+    };
+
+    return { getStars, toggleStar, resetStars, fillAllGreen };
   };
 
   const behavior = createStarHandlers('behavior_records', behaviorRecords, setBehaviorRecords);
@@ -177,10 +187,10 @@ export const useClassroom = (sectionKey: string) => {
 
   return {
     loadingClassroom,
-    getBehaviorStars: behavior.getStars, toggleBehaviorStar: behavior.toggleStar, resetBehaviorStars: behavior.resetStars,
-    getDisturbanceStars: disturbance.getStars, toggleDisturbanceStar: disturbance.toggleStar, resetDisturbanceStars: disturbance.resetStars,
-    getCooperationStars: cooperation.getStars, toggleCooperationStar: cooperation.toggleStar, resetCooperationStars: cooperation.resetStars,
-    getCleanlinessStars: cleanliness.getStars, toggleCleanlinessStar: cleanliness.toggleStar, resetCleanlinessStars: cleanliness.resetStars,
+    getBehaviorStars: behavior.getStars, toggleBehaviorStar: behavior.toggleStar, resetBehaviorStars: behavior.resetStars, fillBehaviorGreen: behavior.fillAllGreen,
+    getDisturbanceStars: disturbance.getStars, toggleDisturbanceStar: disturbance.toggleStar, resetDisturbanceStars: disturbance.resetStars, fillDisturbanceGreen: disturbance.fillAllGreen,
+    getCooperationStars: cooperation.getStars, toggleCooperationStar: cooperation.toggleStar, resetCooperationStars: cooperation.resetStars, fillCooperationGreen: cooperation.fillAllGreen,
+    getCleanlinessStars: cleanliness.getStars, toggleCleanlinessStar: cleanliness.toggleStar, resetCleanlinessStars: cleanliness.resetStars, fillCleanlinessGreen: cleanliness.fillAllGreen,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   };
