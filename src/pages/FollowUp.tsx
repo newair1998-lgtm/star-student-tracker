@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import Header from '@/components/Header';
-import { Loader2, ArrowRight, Check, X, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, ArrowRight, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Grade, EducationStage, getGradesForStage, gradeLabels, GradeSection as GradeSectionType, stageLabels } from '@/types/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,18 @@ const FollowUp = () => {
     const saved = localStorage.getItem(`followup_${today}`);
     return saved ? JSON.parse(saved) : {};
   });
+
+  // Track collapsed sections
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  const toggleCollapse = (key: string) => {
+    setCollapsedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   // Save to localStorage whenever records change
   useEffect(() => {
@@ -184,15 +196,25 @@ const FollowUp = () => {
             const students = getStudentsByGradeAndSubject(section.grade, section.subject, section.sectionNumber);
             if (students.length === 0) return null;
 
+            const sectionKey = `${section.grade}_${section.subject}_${section.sectionNumber}`;
             const sectionLabel = `${gradeLabels[section.grade]} - فصل ${section.sectionNumber === 1 ? '١' : '٢'}`;
 
             return (
-              <div key={`${section.grade}_${section.subject}_${section.sectionNumber}`} className="bg-card rounded-xl shadow-card overflow-hidden">
+              <div key={sectionKey} className="bg-card rounded-xl shadow-card overflow-hidden">
                 {/* Section Header */}
-                <div className="bg-primary/10 px-4 py-3 border-b border-border/50">
+                <button
+                  onClick={() => toggleCollapse(sectionKey)}
+                  className="w-full bg-primary/10 px-4 py-3 border-b border-border/50 flex items-center justify-between hover:bg-primary/15 transition-colors"
+                >
                   <h2 className="text-lg font-bold text-foreground">{sectionLabel}</h2>
-                </div>
+                  {collapsedSections.has(sectionKey) ? (
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </button>
 
+                {!collapsedSections.has(sectionKey) && (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -303,6 +325,7 @@ const FollowUp = () => {
                     </TableBody>
                   </Table>
                 </div>
+                )}
               </div>
             );
           })}
