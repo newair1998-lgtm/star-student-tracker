@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStudents } from '@/hooks/useStudents';
 import Header from '@/components/Header';
 import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Grade, EducationStage, getGradesForStage, GradeSection as GradeSectionType } from '@/types/student';
 
 const Index = () => {
+  const navigate = useNavigate();
   const {
     loading,
     addStudents,
@@ -85,6 +88,15 @@ const Index = () => {
       <Header />
       
       <main className="container py-6 space-y-6">
+        <Button
+          variant="outline"
+          onClick={() => navigate('/')}
+          className="gap-2"
+        >
+          <ArrowRight className="w-4 h-4" />
+          الرجوع للرئيسية
+        </Button>
+
         <AddStudentsSection onAddStudents={addStudents} />
         
         <div className="space-y-5">
