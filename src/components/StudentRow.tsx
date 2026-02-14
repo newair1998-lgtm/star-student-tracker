@@ -57,13 +57,24 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
       <TableCell>
         <AttendanceButtons
           attendance={student.attendance || DEFAULT_ATTENDANCE}
-          onAttendanceChange={(type, idx) => {
+          onToggleSlot={(idx) => {
             const currentAttendance = student.attendance || DEFAULT_ATTENDANCE;
             const newAttendance: AttendanceRecord = {
               present: [...currentAttendance.present],
               absent: [...currentAttendance.absent],
             };
-            newAttendance[type][idx] = !newAttendance[type][idx];
+            if (newAttendance.present[idx]) {
+              // present → absent
+              newAttendance.present[idx] = false;
+              newAttendance.absent[idx] = true;
+            } else if (newAttendance.absent[idx]) {
+              // absent → present
+              newAttendance.absent[idx] = false;
+              newAttendance.present[idx] = true;
+            } else {
+              // none → present
+              newAttendance.present[idx] = true;
+            }
             onUpdate(student.id, { attendance: newAttendance });
           }}
         />

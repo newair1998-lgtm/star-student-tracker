@@ -141,11 +141,9 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
     }
   };
 
-  const handleBulkAttendance = (status: 'present' | 'absent') => {
+  const handleBulkAttendance = () => {
     students.forEach(student => {
-      const newAttendance: AttendanceRecord = status === 'present'
-        ? { present: [true, true, true, true], absent: [false, false, false, false] }
-        : { present: [false, false, false, false], absent: [true, true, true, true] };
+      const newAttendance: AttendanceRecord = { present: [true, true, true, true], absent: [false, false, false, false] };
       onUpdateStudent(student.id, { attendance: newAttendance });
     });
   };
@@ -406,7 +404,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleBulkAttendance('present')}
+                        onClick={() => handleBulkAttendance()}
                         className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
                       >
                         حضور الكل
