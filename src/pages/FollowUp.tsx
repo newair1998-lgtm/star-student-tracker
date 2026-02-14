@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import Header from '@/components/Header';
 import { Loader2, ArrowRight, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { Grade, EducationStage, getGradesForStage, gradeLabels, GradeSection as GradeSectionType, stageLabels } from '@/types/student';
+import { Grade, EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSection as GradeSectionType, stageLabels } from '@/types/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -198,15 +198,17 @@ const FollowUp = () => {
 
             const sectionKey = `${section.grade}_${section.subject}_${section.sectionNumber}`;
             const sectionLabel = `${gradeLabels[section.grade]} - فصل ${section.sectionNumber === 1 ? '١' : '٢'}`;
+            const colorClass = gradeColors[section.grade];
 
             return (
               <div key={sectionKey} className="bg-card rounded-xl shadow-card overflow-hidden">
                 {/* Section Header */}
                 <button
                   onClick={() => toggleCollapse(sectionKey)}
-                  className="w-full bg-primary/10 px-4 py-3 border-b border-border/50 flex items-center justify-between hover:bg-primary/15 transition-colors"
+                  className={`w-full px-4 py-3 border-b border-border/50 flex items-center justify-between transition-colors bg-${colorClass}/15 hover:bg-${colorClass}/25`}
+                  style={{ backgroundColor: `hsl(var(--${colorClass}) / 0.15)` }}
                 >
-                  <h2 className="text-lg font-bold text-foreground">{sectionLabel}</h2>
+                  <h2 className="text-lg font-bold" style={{ color: `hsl(var(--${colorClass}))` }}>{sectionLabel}</h2>
                   {collapsedSections.has(sectionKey) ? (
                     <ChevronDown className="w-5 h-5 text-muted-foreground" />
                   ) : (
