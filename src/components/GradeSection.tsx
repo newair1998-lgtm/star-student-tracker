@@ -44,6 +44,7 @@ const DEFAULT_ATTENDANCE: AttendanceRecord = {
 interface GradeSectionProps {
   grade: Grade;
   subject: string;
+  sectionNumber: number;
   students: Student[];
   onUpdateStudent: (id: string, updates: Partial<Student>) => void;
   onDeleteStudent: (id: string) => void;
@@ -81,7 +82,7 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject }: GradeSectionProps) => {
+const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
@@ -150,7 +151,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
   };
 
   const goToAnalysis = () => {
-    navigate(`/analysis/${grade}?subject=${encodeURIComponent(subject)}`);
+    navigate(`/analysis/${grade}?subject=${encodeURIComponent(subject)}&section=${sectionNumber}`);
   };
 
   const handleClearAllData = () => {
@@ -220,7 +221,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-foreground">
-                  {gradeLabels[grade]}
+                  {gradeLabels[grade]} - فصل {sectionNumber}
                 </h3>
                 {isEditingSubject ? (
                   <div className="flex items-center gap-1">
