@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
@@ -88,6 +88,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
   const [duplicateSameGradeDialogOpen, setDuplicateSameGradeDialogOpen] = useState(false);
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [editedSubject, setEditedSubject] = useState(subject === 'default' ? '' : subject);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -206,6 +207,13 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
       )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={cn("p-2 rounded-lg transition-colors cursor-pointer", gradeIconColor)}
+              title={isCollapsed ? "عرض الطالبات" : "إخفاء الطالبات"}
+            >
+              {isCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
             <div className={cn("p-2 rounded-lg", gradeIconColor)}>
               <GraduationCap className="w-5 h-5" />
             </div>
@@ -383,7 +391,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
       </div>
 
       {/* Table */}
-      {students.length > 0 ? (
+      {!isCollapsed && students.length > 0 ? (
         <>
           <div className="overflow-x-auto">
             <Table>
@@ -552,7 +560,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
             </Button>
           </div>
         </>
-      ) : (
+      ) : !isCollapsed ? (
         <div className="py-12 text-center">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-secondary/50 mb-3">
             <Users className="w-7 h-7 text-muted-foreground" />
@@ -562,7 +570,7 @@ const GradeSection = ({ grade, subject, students, onUpdateStudent, onDeleteStude
             أضيفي طالبات من قسم الإضافة أعلاه
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
