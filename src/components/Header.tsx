@@ -61,11 +61,6 @@ const Header = () => {
           </div>
 
           {/* Bottom Description */}
-          <div className="text-center bg-secondary/50 px-6 py-2 rounded-lg border border-border/30">
-            <p className="text-sm text-muted-foreground">
-              مبادرة <span className="font-bold text-foreground">الدكتورة نوير مسري الحربي</span> من إدارة تعليم مكة المكرمة
-            </p>
-          </div>
         </div>
       </div>
     </header>
