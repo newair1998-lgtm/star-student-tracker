@@ -14,6 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
+      behavior_records: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          student_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          student_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          student_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "behavior_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classroom_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "classroom_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classroom_group_members_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classroom_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          points: number
+          section_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          points?: number
+          section_key?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          points?: number
+          section_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      classroom_notes: {
+        Row: {
+          created_at: string
+          id: string
+          student_id: string
+          student_name: string
+          text: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          student_id: string
+          student_name: string
+          text: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          student_id?: string
+          student_name?: string
+          text?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_notes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disturbance_records: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          student_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          student_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          student_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disturbance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           attendance: Json | null
