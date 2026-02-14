@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import Home from "./pages/Home";
 import Index from "./pages/Index";
 import GradeAnalysis from "./pages/GradeAnalysis";
 import Auth from "./pages/Auth";
@@ -55,7 +56,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/yearly-work" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/analysis/:grade" element={<ProtectedRoute><GradeAnalysis /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
