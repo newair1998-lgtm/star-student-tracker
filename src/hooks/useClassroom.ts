@@ -3,16 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
-export interface BehaviorRecord {
-  points: number;
-}
+// Stars: array of 10 values - 0=empty, 1=green, 2=red
+export type StarValue = 0 | 1 | 2;
+export type StarsArray = [StarValue, StarValue, StarValue, StarValue, StarValue, StarValue, StarValue, StarValue, StarValue, StarValue];
 
-export interface DisturbanceRecord {
-  count: number;
-}
+const DEFAULT_STARS: StarsArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-export interface PointsRecord {
-  points: number;
+export interface StarRecord {
+  stars: StarsArray;
 }
 
 export interface ClassroomGroup {
@@ -32,14 +30,21 @@ export interface StudentNote {
   type: 'positive' | 'negative' | 'general';
 }
 
+type StarTable = 'behavior_records' | 'disturbance_records' | 'cooperation_records' | 'cleanliness_records';
+
+const parseStars = (data: unknown): StarsArray => {
+  if (Array.isArray(data) && data.length === 10) return data as StarsArray;
+  return [...DEFAULT_STARS] as StarsArray;
+};
+
 export const useClassroom = (sectionKey: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [behaviorRecords, setBehaviorRecords] = useState<Record<string, BehaviorRecord>>({});
-  const [disturbanceRecords, setDisturbanceRecords] = useState<Record<string, DisturbanceRecord>>({});
-  const [cooperationRecords, setCooperationRecords] = useState<Record<string, PointsRecord>>({});
-  const [cleanlinessRecords, setCleanlinessRecords] = useState<Record<string, PointsRecord>>({});
+  const [behaviorRecords, setBehaviorRecords] = useState<Record<string, StarRecord>>({});
+  const [disturbanceRecords, setDisturbanceRecords] = useState<Record<string, StarRecord>>({});
+  const [cooperationRecords, setCooperationRecords] = useState<Record<string, StarRecord>>({});
+  const [cleanlinessRecords, setCleanlinessRecords] = useState<Record<string, StarRecord>>({});
   const [groups, setGroups] = useState<ClassroomGroup[]>([]);
   const [notes, setNotes] = useState<StudentNote[]>([]);
   const [loadingClassroom, setLoadingClassroom] = useState(true);
@@ -57,26 +62,17 @@ export const useClassroom = (sectionKey: string) => {
         supabase.from('classroom_notes').select('*').order('created_at', { ascending: false }),
       ]);
 
-      if (behaviorRes.data) {
-        const map: Record<string, BehaviorRecord> = {};
-        behaviorRes.data.forEach((r: any) => { map[r.student_id] = { points: r.points }; });
-        setBehaviorRecords(map);
-      }
-      if (disturbanceRes.data) {
-        const map: Record<string, DisturbanceRecord> = {};
-        disturbanceRes.data.forEach((r: any) => { map[r.student_id] = { count: r.count }; });
-        setDisturbanceRecords(map);
-      }
-      if (cooperationRes.data) {
-        const map: Record<string, PointsRecord> = {};
-        cooperationRes.data.forEach((r: any) => { map[r.student_id] = { points: r.points }; });
-        setCooperationRecords(map);
-      }
-      if (cleanlinessRes.data) {
-        const map: Record<string, PointsRecord> = {};
-        cleanlinessRes.data.forEach((r: any) => { map[r.student_id] = { points: r.points }; });
-        setCleanlinessRecords(map);
-      }
+      const mapStars = (data: any[] | null): Record<string, StarRecord> => {
+        const map: Record<string, StarRecord> = {};
+        (data || []).forEach((r: any) => { map[r.student_id] = { stars: parseStars(r.stars) }; });
+        return map;
+      };
+
+      setBehaviorRecords(mapStars(behaviorRes.data));
+      setDisturbanceRecords(mapStars(disturbanceRes.data));
+      setCooperationRecords(mapStars(cooperationRes.data));
+      setCleanlinessRecords(mapStars(cleanlinessRes.data));
+
       if (groupsRes.data) {
         setGroups(groupsRes.data.map((g: any) => ({
           id: g.id, name: g.name, points: g.points, sectionKey: g.section_key,
@@ -99,57 +95,43 @@ export const useClassroom = (sectionKey: string) => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Behavior
-  const getBehavior = (studentId: string): BehaviorRecord => behaviorRecords[studentId] || { points: 0 };
-  const addPoints = useCallback(async (studentId: string, amount: number) => {
-    if (!user) return;
-    const newPoints = (behaviorRecords[studentId]?.points || 0) + amount;
-    setBehaviorRecords(prev => ({ ...prev, [studentId]: { points: newPoints } }));
-    await supabase.from('behavior_records').upsert({ user_id: user.id, student_id: studentId, points: newPoints }, { onConflict: 'user_id,student_id' });
-  }, [user, behaviorRecords]);
-  const resetBehavior = useCallback(async (studentId: string) => {
-    if (!user) return;
-    setBehaviorRecords(prev => ({ ...prev, [studentId]: { points: 0 } }));
-    await supabase.from('behavior_records').upsert({ user_id: user.id, student_id: studentId, points: 0 }, { onConflict: 'user_id,student_id' });
-  }, [user]);
-
-  // Disturbance
-  const getDisturbance = (studentId: string): DisturbanceRecord => disturbanceRecords[studentId] || { count: 0 };
-  const addDisturbance = useCallback(async (studentId: string) => {
-    if (!user) return;
-    const newCount = (disturbanceRecords[studentId]?.count || 0) + 1;
-    setDisturbanceRecords(prev => ({ ...prev, [studentId]: { count: newCount } }));
-    await supabase.from('disturbance_records').upsert({ user_id: user.id, student_id: studentId, count: newCount }, { onConflict: 'user_id,student_id' });
-  }, [user, disturbanceRecords]);
-  const resetDisturbance = useCallback(async (studentId: string) => {
-    if (!user) return;
-    setDisturbanceRecords(prev => ({ ...prev, [studentId]: { count: 0 } }));
-    await supabase.from('disturbance_records').upsert({ user_id: user.id, student_id: studentId, count: 0 }, { onConflict: 'user_id,student_id' });
-  }, [user]);
-
-  // Generic points helper for cooperation & cleanliness
-  const useGenericPoints = (
-    table: 'cooperation_records' | 'cleanliness_records',
-    records: Record<string, PointsRecord>,
-    setRecords: React.Dispatch<React.SetStateAction<Record<string, PointsRecord>>>
+  // Generic star toggle for all 4 tables
+  const createStarHandlers = (
+    table: StarTable,
+    records: Record<string, StarRecord>,
+    setRecords: React.Dispatch<React.SetStateAction<Record<string, StarRecord>>>
   ) => {
-    const get = (studentId: string): PointsRecord => records[studentId] || { points: 0 };
-    const add = async (studentId: string, amount: number) => {
+    const getStars = (studentId: string): StarsArray => records[studentId]?.stars || [...DEFAULT_STARS] as StarsArray;
+
+    const toggleStar = async (studentId: string, index: number) => {
       if (!user) return;
-      const newPoints = (records[studentId]?.points || 0) + amount;
-      setRecords(prev => ({ ...prev, [studentId]: { points: newPoints } }));
-      await supabase.from(table).upsert({ user_id: user.id, student_id: studentId, points: newPoints }, { onConflict: 'user_id,student_id' });
+      const current = [...getStars(studentId)] as StarsArray;
+      // Cycle: 0 → 1(green) → 2(red) → 0(empty)
+      current[index] = ((current[index] + 1) % 3) as StarValue;
+      setRecords(prev => ({ ...prev, [studentId]: { stars: current } }));
+      await supabase.from(table).upsert(
+        { user_id: user.id, student_id: studentId, stars: current },
+        { onConflict: 'user_id,student_id' }
+      );
     };
-    const reset = async (studentId: string) => {
+
+    const resetStars = async (studentId: string) => {
       if (!user) return;
-      setRecords(prev => ({ ...prev, [studentId]: { points: 0 } }));
-      await supabase.from(table).upsert({ user_id: user.id, student_id: studentId, points: 0 }, { onConflict: 'user_id,student_id' });
+      const empty = [...DEFAULT_STARS] as StarsArray;
+      setRecords(prev => ({ ...prev, [studentId]: { stars: empty } }));
+      await supabase.from(table).upsert(
+        { user_id: user.id, student_id: studentId, stars: empty },
+        { onConflict: 'user_id,student_id' }
+      );
     };
-    return { get, add, reset };
+
+    return { getStars, toggleStar, resetStars };
   };
 
-  const cooperation = useGenericPoints('cooperation_records', cooperationRecords, setCooperationRecords);
-  const cleanliness = useGenericPoints('cleanliness_records', cleanlinessRecords, setCleanlinessRecords);
+  const behavior = createStarHandlers('behavior_records', behaviorRecords, setBehaviorRecords);
+  const disturbance = createStarHandlers('disturbance_records', disturbanceRecords, setDisturbanceRecords);
+  const cooperation = createStarHandlers('cooperation_records', cooperationRecords, setCooperationRecords);
+  const cleanliness = createStarHandlers('cleanliness_records', cleanlinessRecords, setCleanlinessRecords);
 
   // Groups
   const addGroup = useCallback(async (name: string) => {
@@ -172,8 +154,7 @@ export const useClassroom = (sectionKey: string) => {
   const toggleGroupMember = useCallback(async (groupId: string, studentId: string) => {
     const group = groups.find(g => g.id === groupId);
     if (!group) return;
-    const isMember = group.members.includes(studentId);
-    if (isMember) {
+    if (group.members.includes(studentId)) {
       setGroups(prev => prev.map(g => g.id === groupId ? { ...g, members: g.members.filter(m => m !== studentId) } : g));
       await supabase.from('classroom_group_members').delete().eq('group_id', groupId).eq('student_id', studentId);
     } else {
@@ -196,10 +177,10 @@ export const useClassroom = (sectionKey: string) => {
 
   return {
     loadingClassroom,
-    getBehavior, addPoints, resetBehavior,
-    getDisturbance, addDisturbance, resetDisturbance,
-    getCooperation: cooperation.get, addCooperation: cooperation.add, resetCooperation: cooperation.reset,
-    getCleanliness: cleanliness.get, addCleanliness: cleanliness.add, resetCleanliness: cleanliness.reset,
+    getBehaviorStars: behavior.getStars, toggleBehaviorStar: behavior.toggleStar, resetBehaviorStars: behavior.resetStars,
+    getDisturbanceStars: disturbance.getStars, toggleDisturbanceStar: disturbance.toggleStar, resetDisturbanceStars: disturbance.resetStars,
+    getCooperationStars: cooperation.getStars, toggleCooperationStar: cooperation.toggleStar, resetCooperationStars: cooperation.resetStars,
+    getCleanlinessStars: cleanliness.getStars, toggleCleanlinessStar: cleanliness.toggleStar, resetCleanlinessStars: cleanliness.resetStars,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   };

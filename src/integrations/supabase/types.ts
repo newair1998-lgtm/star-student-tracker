@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           points: number
+          stars: Json
           student_id: string
           updated_at: string
           user_id: string
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id: string
           updated_at?: string
           user_id: string
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id?: string
           updated_at?: string
           user_id?: string
@@ -155,6 +158,7 @@ export type Database = {
           created_at: string
           id: string
           points: number
+          stars: Json
           student_id: string
           updated_at: string
           user_id: string
@@ -163,6 +167,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id: string
           updated_at?: string
           user_id: string
@@ -171,6 +176,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id?: string
           updated_at?: string
           user_id?: string
@@ -190,6 +196,7 @@ export type Database = {
           created_at: string
           id: string
           points: number
+          stars: Json
           student_id: string
           updated_at: string
           user_id: string
@@ -198,6 +205,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id: string
           updated_at?: string
           user_id: string
@@ -206,6 +214,7 @@ export type Database = {
           created_at?: string
           id?: string
           points?: number
+          stars?: Json
           student_id?: string
           updated_at?: string
           user_id?: string
@@ -225,6 +234,7 @@ export type Database = {
           count: number
           created_at: string
           id: string
+          stars: Json
           student_id: string
           updated_at: string
           user_id: string
@@ -233,6 +243,7 @@ export type Database = {
           count?: number
           created_at?: string
           id?: string
+          stars?: Json
           student_id: string
           updated_at?: string
           user_id: string
@@ -241,6 +252,7 @@ export type Database = {
           count?: number
           created_at?: string
           id?: string
+          stars?: Json
           student_id?: string
           updated_at?: string
           user_id?: string
