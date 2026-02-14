@@ -15,11 +15,13 @@ import { EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSecti
 const StarRating = ({ 
   stars, 
   onToggle, 
-  onReset 
+  onReset,
+  onFillGreen,
 }: { 
   stars: StarsArray; 
   onToggle: (index: number) => void; 
   onReset: () => void;
+  onFillGreen: () => void;
 }) => (
   <div className="flex items-center gap-0.5">
     {stars.map((value, i) => (
@@ -42,6 +44,9 @@ const StarRating = ({
     <button onClick={onReset} className="p-1 mr-1 text-muted-foreground/50 hover:text-muted-foreground transition-colors" title="إعادة تعيين">
       <RotateCcw className="w-3.5 h-3.5" />
     </button>
+    <button onClick={onFillGreen} className="p-1 text-success/50 hover:text-success transition-colors" title="الكل أخضر">
+      <Star className="w-4 h-4 fill-current" />
+    </button>
   </div>
 );
 
@@ -57,10 +62,10 @@ const ClassroomManagement = () => {
 
   const {
     loadingClassroom,
-    getBehaviorStars, toggleBehaviorStar, resetBehaviorStars,
-    getDisturbanceStars, toggleDisturbanceStar, resetDisturbanceStars,
-    getCooperationStars, toggleCooperationStar, resetCooperationStars,
-    getCleanlinessStars, toggleCleanlinessStar, resetCleanlinessStars,
+    getBehaviorStars, toggleBehaviorStar, resetBehaviorStars, fillBehaviorGreen,
+    getDisturbanceStars, toggleDisturbanceStar, resetDisturbanceStars, fillDisturbanceGreen,
+    getCooperationStars, toggleCooperationStar, resetCooperationStars, fillCooperationGreen,
+    getCleanlinessStars, toggleCleanlinessStar, resetCleanlinessStars, fillCleanlinessGreen,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   } = useClassroom(selectedSection);
@@ -133,10 +138,12 @@ const ClassroomManagement = () => {
     getStars,
     onToggle,
     onReset,
+    onFillGreen,
   }: {
     getStars: (id: string) => StarsArray;
     onToggle: (id: string, index: number) => void;
     onReset: (id: string) => void;
+    onFillGreen: (id: string) => void;
   }) => (
     <div className="bg-card rounded-xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -145,7 +152,7 @@ const ClassroomManagement = () => {
             <TableRow className="bg-secondary/30">
               <TableHead className="text-center w-10">#</TableHead>
               <TableHead className="min-w-[120px]">اسم الطالبة</TableHead>
-              <TableHead className="text-center min-w-[240px]">التقييم</TableHead>
+              <TableHead className="text-center min-w-[280px]">التقييم</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -159,6 +166,7 @@ const ClassroomManagement = () => {
                       stars={getStars(student.id)}
                       onToggle={(i) => onToggle(student.id, i)}
                       onReset={() => onReset(student.id)}
+                      onFillGreen={() => onFillGreen(student.id)}
                     />
                   </div>
                 </TableCell>
@@ -248,19 +256,19 @@ const ClassroomManagement = () => {
             </TabsList>
 
             <TabsContent value="behavior">
-              <StarsTable getStars={getBehaviorStars} onToggle={toggleBehaviorStar} onReset={resetBehaviorStars} />
+              <StarsTable getStars={getBehaviorStars} onToggle={toggleBehaviorStar} onReset={resetBehaviorStars} onFillGreen={fillBehaviorGreen} />
             </TabsContent>
 
             <TabsContent value="disturbance">
-              <StarsTable getStars={getDisturbanceStars} onToggle={toggleDisturbanceStar} onReset={resetDisturbanceStars} />
+              <StarsTable getStars={getDisturbanceStars} onToggle={toggleDisturbanceStar} onReset={resetDisturbanceStars} onFillGreen={fillDisturbanceGreen} />
             </TabsContent>
 
             <TabsContent value="cooperation">
-              <StarsTable getStars={getCooperationStars} onToggle={toggleCooperationStar} onReset={resetCooperationStars} />
+              <StarsTable getStars={getCooperationStars} onToggle={toggleCooperationStar} onReset={resetCooperationStars} onFillGreen={fillCooperationGreen} />
             </TabsContent>
 
             <TabsContent value="cleanliness">
-              <StarsTable getStars={getCleanlinessStars} onToggle={toggleCleanlinessStar} onReset={resetCleanlinessStars} />
+              <StarsTable getStars={getCleanlinessStars} onToggle={toggleCleanlinessStar} onReset={resetCleanlinessStars} onFillGreen={fillCleanlinessGreen} />
             </TabsContent>
 
             {/* المجموعات التعاونية */}
