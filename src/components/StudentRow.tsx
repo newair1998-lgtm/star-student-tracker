@@ -1,17 +1,11 @@
 import { useState } from 'react';
-import { Student, AttendanceRecord, Grade } from '@/types/student';
+import { Student, Grade } from '@/types/student';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Trash2, ArrowLeftRight } from 'lucide-react';
-import AttendanceButtons from './AttendanceButtons';
 import ScoreInput from './ScoreInput';
 import { cn } from '@/lib/utils';
 import { TransferStudentDialog } from './TransferStudentDialog';
-
-const DEFAULT_ATTENDANCE: AttendanceRecord = {
-  present: [false, false, false, false],
-  absent: [false, false, false, false],
-};
 
 interface StudentRowProps {
   student: Student;
@@ -53,31 +47,6 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
       </TableCell>
       <TableCell className="font-medium text-foreground min-w-[140px]">
         {student.name}
-      </TableCell>
-      <TableCell>
-        <AttendanceButtons
-          attendance={student.attendance || DEFAULT_ATTENDANCE}
-          onToggleSlot={(idx) => {
-            const currentAttendance = student.attendance || DEFAULT_ATTENDANCE;
-            const newAttendance: AttendanceRecord = {
-              present: [...currentAttendance.present],
-              absent: [...currentAttendance.absent],
-            };
-            if (newAttendance.present[idx]) {
-              // present → absent
-              newAttendance.present[idx] = false;
-              newAttendance.absent[idx] = true;
-            } else if (newAttendance.absent[idx]) {
-              // absent → present
-              newAttendance.absent[idx] = false;
-              newAttendance.present[idx] = true;
-            } else {
-              // none → present
-              newAttendance.present[idx] = true;
-            }
-            onUpdate(student.id, { attendance: newAttendance });
-          }}
-        />
       </TableCell>
       <TableCell className="text-center">
         <ScoreInput
