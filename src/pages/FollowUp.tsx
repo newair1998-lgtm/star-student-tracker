@@ -55,11 +55,21 @@ const FollowUp = () => {
   }, [dailyRecords]);
 
   const getRecord = (studentId: string): DailyRecord => {
-    return dailyRecords[studentId] || {
-      attendance: ['none', 'none', 'none', 'none'],
-      homework: ['none', 'none', 'none', 'none'],
-      participation: ['none', 'none', 'none', 'none'],
-      performanceTasks: 'none',
+    const raw = dailyRecords[studentId];
+    if (!raw) {
+      return {
+        attendance: ['none', 'none', 'none', 'none'],
+        homework: ['none', 'none', 'none', 'none'],
+        participation: ['none', 'none', 'none', 'none'],
+        performanceTasks: 'none',
+      };
+    }
+    // Migrate old string format to array format
+    return {
+      attendance: Array.isArray(raw.attendance) ? raw.attendance : ['none', 'none', 'none', 'none'],
+      homework: Array.isArray(raw.homework) ? raw.homework : ['none', 'none', 'none', 'none'],
+      participation: Array.isArray(raw.participation) ? raw.participation : ['none', 'none', 'none', 'none'],
+      performanceTasks: typeof raw.performanceTasks === 'string' ? raw.performanceTasks : 'none',
     };
   };
 
