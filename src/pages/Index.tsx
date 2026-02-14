@@ -50,27 +50,19 @@ const Index = () => {
     const stageGrades = getGradesForStage(educationStage);
     const allSections = getGradeSections();
     
-    // Get sections that belong to this stage
+    // Only show sections that have students
     const stageSections = allSections.filter(section => stageGrades.includes(section.grade));
     
-    // Also include empty grades (grades without any students yet)
-    const sectionsWithStudents = new Set(stageSections.map(s => `${s.grade}_${s.subject}`));
-    const emptySections: GradeSectionType[] = stageGrades
-      .filter(grade => !allSections.some(s => s.grade === grade))
-      .map(grade => ({ grade, subject: 'default' }));
-    
-    // Combine and sort by grade order
-    const combined = [...stageSections, ...emptySections];
-    combined.sort((a, b) => {
+    // Sort by grade order
+    stageSections.sort((a, b) => {
       const gradeOrder = stageGrades.indexOf(a.grade) - stageGrades.indexOf(b.grade);
       if (gradeOrder !== 0) return gradeOrder;
-      // Same grade, sort by subject (default first)
       if (a.subject === 'default') return -1;
       if (b.subject === 'default') return 1;
       return a.subject.localeCompare(b.subject, 'ar');
     });
     
-    return combined;
+    return stageSections;
   };
 
   const sectionsToShow = getSectionsToShow();
