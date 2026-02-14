@@ -12,8 +12,8 @@ type DailyStatus = 'none' | 'done' | 'not_done';
 
 interface DailyRecord {
   attendance: ('present' | 'absent' | 'none')[];
-  homework: DailyStatus;
-  participation: DailyStatus;
+  homework: DailyStatus[];
+  participation: DailyStatus[];
   performanceTasks: DailyStatus;
 }
 
@@ -57,8 +57,8 @@ const FollowUp = () => {
   const getRecord = (studentId: string): DailyRecord => {
     return dailyRecords[studentId] || {
       attendance: ['none', 'none', 'none', 'none'],
-      homework: 'none',
-      participation: 'none',
+      homework: ['none', 'none', 'none', 'none'],
+      participation: ['none', 'none', 'none', 'none'],
       performanceTasks: 'none',
     };
   };
@@ -81,11 +81,18 @@ const FollowUp = () => {
     updateRecord(studentId, { attendance: newAttendance as DailyRecord['attendance'] });
   };
 
-  const toggleStatus = (studentId: string, field: 'homework' | 'participation' | 'performanceTasks') => {
+  const toggleStatus = (studentId: string, field: 'homework' | 'participation', index: number) => {
     const record = getRecord(studentId);
-    const current = record[field];
+    const arr = [...record[field]];
+    arr[index] = arr[index] === 'none' || arr[index] === 'not_done' ? 'done' : 'not_done';
+    updateRecord(studentId, { [field]: arr });
+  };
+
+  const togglePerformanceTasks = (studentId: string) => {
+    const record = getRecord(studentId);
+    const current = record.performanceTasks;
     const next: DailyStatus = current === 'none' ? 'done' : current === 'done' ? 'not_done' : 'done';
-    updateRecord(studentId, { [field]: next });
+    updateRecord(studentId, { performanceTasks: next });
   };
 
   const getSectionsToShow = (): GradeSectionType[] => {
@@ -101,33 +108,41 @@ const FollowUp = () => {
     return stageSections;
   };
 
+  const defaultRecord = (): DailyRecord => ({
+    attendance: ['none', 'none', 'none', 'none'],
+    homework: ['none', 'none', 'none', 'none'],
+    participation: ['none', 'none', 'none', 'none'],
+    performanceTasks: 'none',
+  });
+
   const markAllPresent = (students: { id: string }[]) => {
     setDailyRecords(prev => {
       const updated = { ...prev };
       students.forEach(s => {
-        const record = updated[s.id] || {
-          attendance: ['none', 'none', 'none', 'none'],
-          homework: 'none',
-          participation: 'none',
-          performanceTasks: 'none',
-        };
+        const record = updated[s.id] || defaultRecord();
         updated[s.id] = { ...record, attendance: ['present', 'present', 'present', 'present'] };
       });
       return updated;
     });
   };
 
-  const markAllField = (students: { id: string }[], field: 'homework' | 'participation' | 'performanceTasks') => {
+  const markAllField = (students: { id: string }[], field: 'homework' | 'participation') => {
     setDailyRecords(prev => {
       const updated = { ...prev };
       students.forEach(s => {
-        const record = updated[s.id] || {
-          attendance: ['none', 'none', 'none', 'none'],
-          homework: 'none',
-          participation: 'none',
-          performanceTasks: 'none',
-        };
-        updated[s.id] = { ...record, [field]: 'done' };
+        const record = updated[s.id] || defaultRecord();
+        updated[s.id] = { ...record, [field]: ['done', 'done', 'done', 'done'] };
+      });
+      return updated;
+    });
+  };
+
+  const markAllPerformance = (students: { id: string }[]) => {
+    setDailyRecords(prev => {
+      const updated = { ...prev };
+      students.forEach(s => {
+        const record = updated[s.id] || defaultRecord();
+        updated[s.id] = { ...record, performanceTasks: 'done' };
       });
       return updated;
     });
@@ -268,7 +283,7 @@ const FollowUp = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => markAllField(students, 'performanceTasks')}
+                              onClick={() => markAllPerformance(students)}
                               className="h-6 text-xs bg-success/10 border-success/20 hover:bg-success/20 text-success"
                             >
                               الكل ✓
@@ -306,19 +321,45 @@ const FollowUp = () => {
                                 ))}
                               </div>
                             </TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex justify-center">
-                                <StatusButton status={record.homework} onClick={() => toggleStatus(student.id, 'homework')} />
+                            <TableCell>
+                              <div className="flex gap-0.5 justify-center">
+                                {record.homework.map((status, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => toggleStatus(student.id, 'homework', i)}
+                                    className={cn(
+                                      "w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200",
+                                      status === 'done' && "bg-success border-success text-success-foreground",
+                                      status === 'not_done' && "bg-destructive border-destructive text-destructive-foreground",
+                                      status === 'none' && "border-muted-foreground/30 text-muted-foreground hover:border-success hover:text-success hover:bg-success/10"
+                                    )}
+                                  >
+                                    {status === 'not_done' ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                                  </button>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-0.5 justify-center">
+                                {record.participation.map((status, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => toggleStatus(student.id, 'participation', i)}
+                                    className={cn(
+                                      "w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200",
+                                      status === 'done' && "bg-success border-success text-success-foreground",
+                                      status === 'not_done' && "bg-destructive border-destructive text-destructive-foreground",
+                                      status === 'none' && "border-muted-foreground/30 text-muted-foreground hover:border-success hover:text-success hover:bg-success/10"
+                                    )}
+                                  >
+                                    {status === 'not_done' ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                                  </button>
+                                ))}
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
                               <div className="flex justify-center">
-                                <StatusButton status={record.participation} onClick={() => toggleStatus(student.id, 'participation')} />
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex justify-center">
-                                <StatusButton status={record.performanceTasks} onClick={() => toggleStatus(student.id, 'performanceTasks')} />
+                                <StatusButton status={record.performanceTasks} onClick={() => togglePerformanceTasks(student.id)} />
                               </div>
                             </TableCell>
                           </TableRow>
