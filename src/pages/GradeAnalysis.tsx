@@ -695,7 +695,7 @@ const GradeAnalysis = () => {
                 <span className="bg-success text-white text-xs px-2 py-1 rounded">الخطة الإثرائية</span>
                 طالبات تحتاج تحديات إضافية
               </h3>
-              <div className="max-h-40 overflow-y-auto">
+              <div>
                 {students
                   .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90)
                   .map((s, i) => (
@@ -728,7 +728,7 @@ const GradeAnalysis = () => {
                 <span className="bg-destructive text-white text-xs px-2 py-1 rounded">الخطة العلاجية</span>
                 طالبات تحتاج دعم إضافي
               </h3>
-              <div className="max-h-40 overflow-y-auto">
+              <div>
                 {students
                   .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70)
                   .sort((a, b) => calculateTotal(a, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) - calculateTotal(b, performanceTasksMax, exam1Max, exam2Max, finalTotalMax))
