@@ -756,7 +756,7 @@ const GradeAnalysis = () => {
                 <h3 className="font-bold text-orange-700 dark:text-orange-400 mb-3 flex items-center gap-2">
                   <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded">المهارات الغير متقنة</span>
                 </h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap">{unmasteredSkills}</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap" dir="rtl">{unmasteredSkills}</p>
               </div>
             );
           })()}
