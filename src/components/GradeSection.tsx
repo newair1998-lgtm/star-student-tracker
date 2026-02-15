@@ -588,8 +588,9 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               <Textarea
                 value={unmasteredSkills}
                 onChange={(e) => setUnmasteredSkills(e.target.value)}
-                placeholder="أضيفي المهارات الغير متقنة هنا... (ستظهر في تحليل النتائج تحت الخطة العلاجية)"
+                placeholder="أضيفي المهارات غير المتقنة هنا... (ستظهر في تحليل النتائج تحت الخطة العلاجية)"
                 className="text-sm min-h-[60px] resize-y"
+                dir="rtl"
               />
             </div>
           </div>
