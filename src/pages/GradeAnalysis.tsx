@@ -8,6 +8,7 @@ import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun } from 'docx';
+import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import {
@@ -709,6 +710,16 @@ const GradeAnalysis = () => {
                   <p className="text-sm text-muted-foreground text-center py-2">لا توجد طالبات في هذه الفئة</p>
                 )}
               </div>
+              {(() => {
+                const enrichmentLink = localStorage.getItem(`enrichmentLink_${grade}_${subject}_${sectionNumber}`) || '';
+                if (!enrichmentLink.trim()) return null;
+                return (
+                  <div className="mt-3 pt-3 border-t border-success/20 flex flex-col items-center gap-2">
+                    <p className="text-xs text-muted-foreground">باركود الخطة الإثرائية</p>
+                    <QRCodeSVG value={enrichmentLink} size={100} />
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Remedial Plan */}
@@ -749,8 +760,18 @@ const GradeAnalysis = () => {
               </div>
             );
           })()}
-        </div>
-        </div>
+              </div>
+              {(() => {
+                const remedialLink = localStorage.getItem(`remedialLink_${grade}_${subject}_${sectionNumber}`) || '';
+                if (!remedialLink.trim()) return null;
+                return (
+                  <div className="mt-3 pt-3 border-t border-destructive/20 flex flex-col items-center gap-2">
+                    <p className="text-xs text-muted-foreground">باركود الخطة العلاجية</p>
+                    <QRCodeSVG value={remedialLink} size={100} />
+                  </div>
+                );
+              })()}
+            </div>
         {/* End Section 3 */}
 
         {/* Section 4: Grade Distribution and Charts */}

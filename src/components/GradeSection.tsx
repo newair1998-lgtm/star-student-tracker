@@ -94,10 +94,24 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [unmasteredSkills, setUnmasteredSkills] = useState<string>(() => {
     return localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
   });
+  const [enrichmentLink, setEnrichmentLink] = useState<string>(() => {
+    return localStorage.getItem(`enrichmentLink_${grade}_${subject}_${sectionNumber}`) || '';
+  });
+  const [remedialLink, setRemedialLink] = useState<string>(() => {
+    return localStorage.getItem(`remedialLink_${grade}_${subject}_${sectionNumber}`) || '';
+  });
 
   useEffect(() => {
     localStorage.setItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`, unmasteredSkills);
   }, [unmasteredSkills, grade, subject, sectionNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`enrichmentLink_${grade}_${subject}_${sectionNumber}`, enrichmentLink);
+  }, [enrichmentLink, grade, subject, sectionNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`remedialLink_${grade}_${subject}_${sectionNumber}`, remedialLink);
+  }, [remedialLink, grade, subject, sectionNumber]);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -553,6 +567,22 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 <BarChart3 className="w-4 h-4 ml-2" />
                 تحليل النتائج
               </Button>
+            </div>
+            <div className="w-full max-w-lg grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Input
+                value={enrichmentLink}
+                onChange={(e) => setEnrichmentLink(e.target.value)}
+                placeholder="رابط الخطة الإثرائية..."
+                className="text-sm"
+                dir="ltr"
+              />
+              <Input
+                value={remedialLink}
+                onChange={(e) => setRemedialLink(e.target.value)}
+                placeholder="رابط الخطة العلاجية..."
+                className="text-sm"
+                dir="ltr"
+              />
             </div>
             <div className="w-full max-w-md">
               <Textarea
