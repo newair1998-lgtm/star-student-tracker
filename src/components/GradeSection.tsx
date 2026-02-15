@@ -100,6 +100,12 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [remedialLink, setRemedialLink] = useState<string>(() => {
     return localStorage.getItem(`remedialLink_${grade}_${subject}_${sectionNumber}`) || '';
   });
+  const [enrichmentLink2, setEnrichmentLink2] = useState<string>(() => {
+    return localStorage.getItem(`enrichmentLink2_${grade}_${subject}_${sectionNumber}`) || '';
+  });
+  const [remedialLink2, setRemedialLink2] = useState<string>(() => {
+    return localStorage.getItem(`remedialLink2_${grade}_${subject}_${sectionNumber}`) || '';
+  });
 
   useEffect(() => {
     localStorage.setItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`, unmasteredSkills);
@@ -112,6 +118,14 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   useEffect(() => {
     localStorage.setItem(`remedialLink_${grade}_${subject}_${sectionNumber}`, remedialLink);
   }, [remedialLink, grade, subject, sectionNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`enrichmentLink2_${grade}_${subject}_${sectionNumber}`, enrichmentLink2);
+  }, [enrichmentLink2, grade, subject, sectionNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`remedialLink2_${grade}_${subject}_${sectionNumber}`, remedialLink2);
+  }, [remedialLink2, grade, subject, sectionNumber]);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -572,14 +586,28 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               <Input
                 value={enrichmentLink}
                 onChange={(e) => setEnrichmentLink(e.target.value)}
-                placeholder="رابط الخطة الإثرائية..."
+                placeholder="رابط الخطة الإثرائية 1..."
+                className="text-sm"
+                dir="ltr"
+              />
+              <Input
+                value={enrichmentLink2}
+                onChange={(e) => setEnrichmentLink2(e.target.value)}
+                placeholder="رابط الخطة الإثرائية 2..."
                 className="text-sm"
                 dir="ltr"
               />
               <Input
                 value={remedialLink}
                 onChange={(e) => setRemedialLink(e.target.value)}
-                placeholder="رابط الخطة العلاجية..."
+                placeholder="رابط الخطة العلاجية 1..."
+                className="text-sm"
+                dir="ltr"
+              />
+              <Input
+                value={remedialLink2}
+                onChange={(e) => setRemedialLink2(e.target.value)}
+                placeholder="رابط الخطة العلاجية 2..."
                 className="text-sm"
                 dir="ltr"
               />
