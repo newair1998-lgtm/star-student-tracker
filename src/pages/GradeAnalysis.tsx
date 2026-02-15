@@ -645,40 +645,40 @@ const GradeAnalysis = () => {
             <div className="bg-success/10 rounded-lg p-4 border-2 border-success/30">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 rounded-full bg-success"></div>
-                <p className="font-bold text-success">إتقان عالٍ (≥ 85%)</p>
+                <p className="font-bold text-success">إتقان عالٍ (أكبر من 90%)</p>
               </div>
               <p className="text-3xl font-bold text-success mb-1">
-                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length}
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90).length} طالبة
               </p>
               <p className="text-sm text-muted-foreground">
-                {((students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length / students.length) * 100).toFixed(1)}% من الطالبات
+                {((students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90).length / students.length) * 100).toFixed(1)}% من الطالبات
               </p>
             </div>
             <div className="bg-warning/10 rounded-lg p-4 border-2 border-warning/30">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 rounded-full bg-warning"></div>
-                <p className="font-bold text-warning">إتقان متوسط (70% - 85%)</p>
+                <p className="font-bold text-warning">إتقان متوسط (من 70% إلى 90%)</p>
               </div>
               <p className="text-3xl font-bold text-warning mb-1">
                 {students.filter(s => {
                   const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100;
-                  return pct >= 70 && pct < 85;
-                }).length}
+                  return pct >= 70 && pct <= 90;
+                }).length} طالبة
               </p>
               <p className="text-sm text-muted-foreground">
                 {((students.filter(s => {
                   const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100;
-                  return pct >= 70 && pct < 85;
+                  return pct >= 70 && pct <= 90;
                 }).length / students.length) * 100).toFixed(1)}% من الطالبات
               </p>
             </div>
             <div className="bg-destructive/10 rounded-lg p-4 border-2 border-destructive/30">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 rounded-full bg-destructive"></div>
-                <p className="font-bold text-destructive">إتقان منخفض (&lt; 70%)</p>
+                <p className="font-bold text-destructive">إتقان منخفض (أقل من 70%)</p>
               </div>
               <p className="text-3xl font-bold text-destructive mb-1">
-                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length}
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length} طالبة
               </p>
               <p className="text-sm text-muted-foreground">
                 {((students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length / students.length) * 100).toFixed(1)}% من الطالبات
@@ -696,7 +696,7 @@ const GradeAnalysis = () => {
               </h3>
               <div className="max-h-40 overflow-y-auto">
                 {students
-                  .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85)
+                  .filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90)
                   .map((s, i) => (
                     <div key={s.id} className="flex justify-between items-center py-1 border-b border-success/10 last:border-0">
                       <span className="text-sm">{i + 1}. {s.name}</span>
@@ -705,7 +705,7 @@ const GradeAnalysis = () => {
                       </span>
                     </div>
                   ))}
-                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 >= 85).length === 0 && (
+                {students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90).length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-2">لا توجد طالبات في هذه الفئة</p>
                 )}
               </div>
