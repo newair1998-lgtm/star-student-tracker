@@ -239,8 +239,7 @@ const GradeAnalysis = () => {
     ];
 
     // Set RTL view so names appear on the right
-    if (!wsWithHeader['!views']) wsWithHeader['!views'] = [];
-    wsWithHeader['!views'].push({ RTL: true });
+    wsWithHeader['!sheetViews'] = [{ rightToLeft: true }];
 
     XLSX.utils.book_append_sheet(wb, wsWithHeader, 'الدرجات');
 
