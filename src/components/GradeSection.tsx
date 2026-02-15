@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +91,13 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [editedSubject, setEditedSubject] = useState(subject === 'default' ? '' : subject);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [unmasteredSkills, setUnmasteredSkills] = useState<string>(() => {
+    return localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`, unmasteredSkills);
+  }, [unmasteredSkills, grade, subject, sectionNumber]);
   
   const colorIndex = getGradeColorIndex(grade);
   const gradeHeaderColor = gradeHeaderColorsList[colorIndex];
@@ -535,15 +543,25 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
             </Table>
           </div>
           {/* Action Buttons */}
-          <div className="p-4 border-t border-border/50 flex gap-3 justify-center">
-            <Button
-              variant="outline"
-              onClick={goToAnalysis}
-              className="bg-grade-five/10 border-grade-five/30 text-grade-five hover:bg-grade-five/20"
-            >
-              <BarChart3 className="w-4 h-4 ml-2" />
-              تحليل النتائج
-            </Button>
+          <div className="p-4 border-t border-border/50 flex flex-col gap-3 items-center">
+            <div className="flex gap-3 items-center">
+              <Button
+                variant="outline"
+                onClick={goToAnalysis}
+                className="bg-grade-five/10 border-grade-five/30 text-grade-five hover:bg-grade-five/20"
+              >
+                <BarChart3 className="w-4 h-4 ml-2" />
+                تحليل النتائج
+              </Button>
+            </div>
+            <div className="w-full max-w-md">
+              <Textarea
+                value={unmasteredSkills}
+                onChange={(e) => setUnmasteredSkills(e.target.value)}
+                placeholder="أضيفي المهارات الغير متقنة هنا... (ستظهر في تحليل النتائج تحت الخطة العلاجية)"
+                className="text-sm min-h-[60px] resize-y"
+              />
+            </div>
           </div>
         </>
       ) : !isCollapsed ? (
