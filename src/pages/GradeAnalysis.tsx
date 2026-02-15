@@ -238,6 +238,10 @@ const GradeAnalysis = () => {
       { wch: 10 },  // التقدير
     ];
 
+    // Set RTL view so names appear on the right
+    if (!wsWithHeader['!views']) wsWithHeader['!views'] = [];
+    wsWithHeader['!views'].push({ RTL: true });
+
     XLSX.utils.book_append_sheet(wb, wsWithHeader, 'الدرجات');
 
     // Save file
