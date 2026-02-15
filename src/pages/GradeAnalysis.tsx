@@ -715,11 +715,22 @@ const GradeAnalysis = () => {
               </div>
               {(() => {
                 const enrichmentLink = localStorage.getItem(`enrichmentLink_${grade}_${subject}_${sectionNumber}`) || '';
-                if (!enrichmentLink.trim()) return null;
+                const enrichmentLink2 = localStorage.getItem(`enrichmentLink2_${grade}_${subject}_${sectionNumber}`) || '';
+                if (!enrichmentLink.trim() && !enrichmentLink2.trim()) return null;
                 return (
-                  <div className="mt-3 pt-3 border-t border-success/20 flex flex-col items-center gap-2">
-                    <p className="text-xs text-muted-foreground">باركود الخطة الإثرائية</p>
-                    <QRCodeSVG value={enrichmentLink} size={100} />
+                  <div className="mt-3 pt-3 border-t border-success/20 flex flex-row justify-center gap-6 flex-wrap">
+                    {enrichmentLink.trim() && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs text-muted-foreground">باركود الخطة الإثرائية 1</p>
+                        <QRCodeSVG value={enrichmentLink} size={100} />
+                      </div>
+                    )}
+                    {enrichmentLink2.trim() && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs text-muted-foreground">باركود الخطة الإثرائية 2</p>
+                        <QRCodeSVG value={enrichmentLink2} size={100} />
+                      </div>
+                    )}
                   </div>
                 );
               })()}
@@ -766,11 +777,22 @@ const GradeAnalysis = () => {
               </div>
               {(() => {
                 const remedialLink = localStorage.getItem(`remedialLink_${grade}_${subject}_${sectionNumber}`) || '';
-                if (!remedialLink.trim()) return null;
+                const remedialLink2 = localStorage.getItem(`remedialLink2_${grade}_${subject}_${sectionNumber}`) || '';
+                if (!remedialLink.trim() && !remedialLink2.trim()) return null;
                 return (
-                  <div className="mt-3 pt-3 border-t border-destructive/20 flex flex-col items-center gap-2">
-                    <p className="text-xs text-muted-foreground">باركود الخطة العلاجية</p>
-                    <QRCodeSVG value={remedialLink} size={100} />
+                  <div className="mt-3 pt-3 border-t border-destructive/20 flex flex-row justify-center gap-6 flex-wrap">
+                    {remedialLink.trim() && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs text-muted-foreground">باركود الخطة العلاجية 1</p>
+                        <QRCodeSVG value={remedialLink} size={100} />
+                      </div>
+                    )}
+                    {remedialLink2.trim() && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs text-muted-foreground">باركود الخطة العلاجية 2</p>
+                        <QRCodeSVG value={remedialLink2} size={100} />
+                      </div>
+                    )}
                   </div>
                 );
               })()}
