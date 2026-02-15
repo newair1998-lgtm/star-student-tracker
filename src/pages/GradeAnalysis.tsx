@@ -2,7 +2,7 @@
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useRef } from 'react';
 import { useStudents } from '@/hooks/useStudents';
-import { Grade, gradeLabels, AttendanceRecord, getStageFromGrade, stageLabels } from '@/types/student';
+import { Grade, gradeLabels, getStageFromGrade, stageLabels } from '@/types/student';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -26,10 +26,6 @@ import {
   Line,
 } from 'recharts';
 
-const DEFAULT_ATTENDANCE: AttendanceRecord = {
-  present: [false, false, false, false],
-  absent: [false, false, false, false],
-};
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#F97316', '#EF4444'];
 
@@ -89,7 +85,7 @@ interface StudentType {
   homework: number;
   exam1: number;
   exam2: number;
-  attendance?: AttendanceRecord;
+  
 }
 
 const calculateTotal = (student: StudentType, performanceTasksMax: number, exam1Max: number, exam2Max: number, finalTotalMax: number) => {
@@ -472,15 +468,6 @@ const GradeAnalysis = () => {
     return baseCategories;
   })();
 
-  // Attendance data
-  const attendanceData = students.map(s => {
-    const att = s.attendance || DEFAULT_ATTENDANCE;
-    return {
-      name: s.name.split(' ')[0],
-      حضور: att.present.filter(p => p).length,
-      غياب: att.absent.filter(a => a).length,
-    };
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -812,21 +799,6 @@ const GradeAnalysis = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Attendance Chart */}
-          <div className="bg-card rounded-xl p-6 shadow-card">
-            <h2 className="text-lg font-bold text-foreground mb-4">الحضور والغياب</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={attendanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 4]} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="حضور" fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="غياب" fill="#EF4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </div>
         </div>
         {/* End Section 4 */}
