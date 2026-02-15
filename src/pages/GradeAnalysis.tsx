@@ -735,6 +735,20 @@ const GradeAnalysis = () => {
               </div>
             </div>
           </div>
+
+          {/* Unmastered Skills */}
+          {(() => {
+            const unmasteredSkills = localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
+            if (!unmasteredSkills.trim()) return null;
+            return (
+              <div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800 mt-6">
+                <h3 className="font-bold text-orange-700 dark:text-orange-400 mb-3 flex items-center gap-2">
+                  <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded">المهارات الغير متقنة</span>
+                </h3>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{unmasteredSkills}</p>
+              </div>
+            );
+          })()}
         </div>
         </div>
         {/* End Section 3 */}
