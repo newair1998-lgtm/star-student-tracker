@@ -144,7 +144,12 @@ const ClassroomManagement = () => {
     onToggle: (id: string, index: number) => void;
     onReset: (id: string) => void;
     onFillGreen: (id: string) => void;
-  }) => (
+  }) => {
+    const fillAllStudentsGreen = () => {
+      selectedStudents.forEach(student => onFillGreen(student.id));
+    };
+
+    return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
@@ -152,7 +157,18 @@ const ClassroomManagement = () => {
             <TableRow className="bg-secondary/30">
               <TableHead className="text-center w-10">#</TableHead>
               <TableHead className="min-w-[120px]">اسم الطالبة</TableHead>
-              <TableHead className="text-center min-w-[280px]">التقييم</TableHead>
+              <TableHead className="text-center min-w-[280px]">
+                <div className="flex items-center justify-center gap-2">
+                  <span>التقييم</span>
+                  <button
+                    onClick={fillAllStudentsGreen}
+                    className="p-1 text-success/60 hover:text-success transition-colors"
+                    title="تعبئة الكل أخضر لجميع الطالبات"
+                  >
+                    <Star className="w-5 h-5 fill-current" />
+                  </button>
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,7 +192,8 @@ const ClassroomManagement = () => {
         </Table>
       </div>
     </div>
-  );
+  )};
+
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
