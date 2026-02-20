@@ -149,6 +149,10 @@ const ClassroomManagement = () => {
       selectedStudents.forEach(student => onFillGreen(student.id));
     };
 
+    const resetAllStudents = () => {
+      selectedStudents.forEach(student => onReset(student.id));
+    };
+
     return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -166,6 +170,13 @@ const ClassroomManagement = () => {
                     title="تعبئة الكل أخضر لجميع الطالبات"
                   >
                     <Star className="w-5 h-5 fill-current" />
+                  </button>
+                  <button
+                    onClick={resetAllStudents}
+                    className="p-1 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                    title="إعادة تعيين جميع الطالبات"
+                  >
+                    <RotateCcw className="w-4 h-4" />
                   </button>
                 </div>
               </TableHead>
