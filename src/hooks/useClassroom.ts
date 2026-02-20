@@ -135,7 +135,18 @@ export const useClassroom = (sectionKey: string) => {
       );
     };
 
-    return { getStars, toggleStar, resetStars, fillAllGreen };
+    const fillOneRed = async (studentId: string) => {
+      if (!user) return;
+      const current = [...(records[studentId]?.stars || DEFAULT_STARS)] as StarsArray;
+      current[0] = 2;
+      setRecords(prev => ({ ...prev, [studentId]: { stars: current } }));
+      await supabase.from(table).upsert(
+        { user_id: user.id, student_id: studentId, stars: current },
+        { onConflict: 'user_id,student_id' }
+      );
+    };
+
+    return { getStars, toggleStar, resetStars, fillAllGreen, fillOneRed };
   };
 
   const behavior = createStarHandlers('behavior_records', behaviorRecords, setBehaviorRecords);
@@ -187,10 +198,10 @@ export const useClassroom = (sectionKey: string) => {
 
   return {
     loadingClassroom,
-    getBehaviorStars: behavior.getStars, toggleBehaviorStar: behavior.toggleStar, resetBehaviorStars: behavior.resetStars, fillBehaviorGreen: behavior.fillAllGreen,
-    getDisturbanceStars: disturbance.getStars, toggleDisturbanceStar: disturbance.toggleStar, resetDisturbanceStars: disturbance.resetStars, fillDisturbanceGreen: disturbance.fillAllGreen,
-    getCooperationStars: cooperation.getStars, toggleCooperationStar: cooperation.toggleStar, resetCooperationStars: cooperation.resetStars, fillCooperationGreen: cooperation.fillAllGreen,
-    getCleanlinessStars: cleanliness.getStars, toggleCleanlinessStar: cleanliness.toggleStar, resetCleanlinessStars: cleanliness.resetStars, fillCleanlinessGreen: cleanliness.fillAllGreen,
+    getBehaviorStars: behavior.getStars, toggleBehaviorStar: behavior.toggleStar, resetBehaviorStars: behavior.resetStars, fillBehaviorGreen: behavior.fillAllGreen, fillBehaviorOneRed: behavior.fillOneRed,
+    getDisturbanceStars: disturbance.getStars, toggleDisturbanceStar: disturbance.toggleStar, resetDisturbanceStars: disturbance.resetStars, fillDisturbanceGreen: disturbance.fillAllGreen, fillDisturbanceOneRed: disturbance.fillOneRed,
+    getCooperationStars: cooperation.getStars, toggleCooperationStar: cooperation.toggleStar, resetCooperationStars: cooperation.resetStars, fillCooperationGreen: cooperation.fillAllGreen, fillCooperationOneRed: cooperation.fillOneRed,
+    getCleanlinessStars: cleanliness.getStars, toggleCleanlinessStar: cleanliness.toggleStar, resetCleanlinessStars: cleanliness.resetStars, fillCleanlinessGreen: cleanliness.fillAllGreen, fillCleanlinessOneRed: cleanliness.fillOneRed,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   };

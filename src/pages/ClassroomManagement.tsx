@@ -62,10 +62,10 @@ const ClassroomManagement = () => {
 
   const {
     loadingClassroom,
-    getBehaviorStars, toggleBehaviorStar, resetBehaviorStars, fillBehaviorGreen,
-    getDisturbanceStars, toggleDisturbanceStar, resetDisturbanceStars, fillDisturbanceGreen,
-    getCooperationStars, toggleCooperationStar, resetCooperationStars, fillCooperationGreen,
-    getCleanlinessStars, toggleCleanlinessStar, resetCleanlinessStars, fillCleanlinessGreen,
+    getBehaviorStars, toggleBehaviorStar, resetBehaviorStars, fillBehaviorGreen, fillBehaviorOneRed,
+    getDisturbanceStars, toggleDisturbanceStar, resetDisturbanceStars, fillDisturbanceGreen, fillDisturbanceOneRed,
+    getCooperationStars, toggleCooperationStar, resetCooperationStars, fillCooperationGreen, fillCooperationOneRed,
+    getCleanlinessStars, toggleCleanlinessStar, resetCleanlinessStars, fillCleanlinessGreen, fillCleanlinessOneRed,
     groups, addGroup, deleteGroup, addGroupPoints, toggleGroupMember,
     notes, addNote, deleteNote,
   } = useClassroom(selectedSection);
@@ -139,11 +139,13 @@ const ClassroomManagement = () => {
     onToggle,
     onReset,
     onFillGreen,
+    onFillOneRed,
   }: {
     getStars: (id: string) => StarsArray;
     onToggle: (id: string, index: number) => void;
     onReset: (id: string) => void;
     onFillGreen: (id: string) => void;
+    onFillOneRed: (id: string) => void;
   }) => {
     const fillAllStudentsGreen = () => {
       selectedStudents.forEach(student => onFillGreen(student.id));
@@ -151,6 +153,10 @@ const ClassroomManagement = () => {
 
     const resetAllStudents = () => {
       selectedStudents.forEach(student => onReset(student.id));
+    };
+
+    const fillAllStudentsOneRed = () => {
+      selectedStudents.forEach(student => onFillOneRed(student.id));
     };
 
     return (
@@ -168,6 +174,13 @@ const ClassroomManagement = () => {
                     onClick={fillAllStudentsGreen}
                     className="p-1 text-success/60 hover:text-success transition-colors"
                     title="تعبئة الكل أخضر لجميع الطالبات"
+                  >
+                    <Star className="w-5 h-5 fill-current" />
+                  </button>
+                  <button
+                    onClick={fillAllStudentsOneRed}
+                    className="p-1 text-destructive/60 hover:text-destructive transition-colors"
+                    title="تعبئة نجمة حمراء واحدة لجميع الطالبات"
                   >
                     <Star className="w-5 h-5 fill-current" />
                   </button>
@@ -284,19 +297,19 @@ const ClassroomManagement = () => {
             </TabsList>
 
             <TabsContent value="behavior">
-              <StarsTable getStars={getBehaviorStars} onToggle={toggleBehaviorStar} onReset={resetBehaviorStars} onFillGreen={fillBehaviorGreen} />
+              <StarsTable getStars={getBehaviorStars} onToggle={toggleBehaviorStar} onReset={resetBehaviorStars} onFillGreen={fillBehaviorGreen} onFillOneRed={fillBehaviorOneRed} />
             </TabsContent>
 
             <TabsContent value="disturbance">
-              <StarsTable getStars={getDisturbanceStars} onToggle={toggleDisturbanceStar} onReset={resetDisturbanceStars} onFillGreen={fillDisturbanceGreen} />
+              <StarsTable getStars={getDisturbanceStars} onToggle={toggleDisturbanceStar} onReset={resetDisturbanceStars} onFillGreen={fillDisturbanceGreen} onFillOneRed={fillDisturbanceOneRed} />
             </TabsContent>
 
             <TabsContent value="cooperation">
-              <StarsTable getStars={getCooperationStars} onToggle={toggleCooperationStar} onReset={resetCooperationStars} onFillGreen={fillCooperationGreen} />
+              <StarsTable getStars={getCooperationStars} onToggle={toggleCooperationStar} onReset={resetCooperationStars} onFillGreen={fillCooperationGreen} onFillOneRed={fillCooperationOneRed} />
             </TabsContent>
 
             <TabsContent value="cleanliness">
-              <StarsTable getStars={getCleanlinessStars} onToggle={toggleCleanlinessStar} onReset={resetCleanlinessStars} onFillGreen={fillCleanlinessGreen} />
+              <StarsTable getStars={getCleanlinessStars} onToggle={toggleCleanlinessStar} onReset={resetCleanlinessStars} onFillGreen={fillCleanlinessGreen} onFillOneRed={fillCleanlinessOneRed} />
             </TabsContent>
 
             {/* المجموعات التعاونية */}
