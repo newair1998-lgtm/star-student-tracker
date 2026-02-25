@@ -107,6 +107,16 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
     return localStorage.getItem(`remedialLink2_${grade}_${subject}_${sectionNumber}`) || '';
   });
 
+  // Locked states for fields that already have saved values
+  const [lockedFields, setLockedFields] = useState({
+    enrichmentLink: !!localStorage.getItem(`enrichmentLink_${grade}_${subject}_${sectionNumber}`),
+    enrichmentLink2: !!localStorage.getItem(`enrichmentLink2_${grade}_${subject}_${sectionNumber}`),
+    remedialLink: !!localStorage.getItem(`remedialLink_${grade}_${subject}_${sectionNumber}`),
+    remedialLink2: !!localStorage.getItem(`remedialLink2_${grade}_${subject}_${sectionNumber}`),
+    unmasteredSkills: !!localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`),
+  });
+  const [confirmField, setConfirmField] = useState<string | null>(null);
+
   useEffect(() => {
     localStorage.setItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`, unmasteredSkills);
   }, [unmasteredSkills, grade, subject, sectionNumber]);
@@ -586,29 +596,37 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               <Input
                 value={enrichmentLink}
                 onChange={(e) => setEnrichmentLink(e.target.value)}
+                onFocus={(e) => { if (lockedFields.enrichmentLink) { e.target.blur(); setConfirmField('enrichmentLink'); } }}
+                onBlur={() => { if (enrichmentLink) setLockedFields(prev => ({...prev, enrichmentLink: true})); }}
                 placeholder="رابط الخطة الإثرائية 1..."
-                className="text-sm"
+                className={cn("text-sm", lockedFields.enrichmentLink && "cursor-pointer")}
                 dir="ltr"
               />
               <Input
                 value={enrichmentLink2}
                 onChange={(e) => setEnrichmentLink2(e.target.value)}
+                onFocus={(e) => { if (lockedFields.enrichmentLink2) { e.target.blur(); setConfirmField('enrichmentLink2'); } }}
+                onBlur={() => { if (enrichmentLink2) setLockedFields(prev => ({...prev, enrichmentLink2: true})); }}
                 placeholder="رابط الخطة الإثرائية 2..."
-                className="text-sm"
+                className={cn("text-sm", lockedFields.enrichmentLink2 && "cursor-pointer")}
                 dir="ltr"
               />
               <Input
                 value={remedialLink}
                 onChange={(e) => setRemedialLink(e.target.value)}
+                onFocus={(e) => { if (lockedFields.remedialLink) { e.target.blur(); setConfirmField('remedialLink'); } }}
+                onBlur={() => { if (remedialLink) setLockedFields(prev => ({...prev, remedialLink: true})); }}
                 placeholder="رابط الخطة العلاجية 1..."
-                className="text-sm"
+                className={cn("text-sm", lockedFields.remedialLink && "cursor-pointer")}
                 dir="ltr"
               />
               <Input
                 value={remedialLink2}
                 onChange={(e) => setRemedialLink2(e.target.value)}
+                onFocus={(e) => { if (lockedFields.remedialLink2) { e.target.blur(); setConfirmField('remedialLink2'); } }}
+                onBlur={() => { if (remedialLink2) setLockedFields(prev => ({...prev, remedialLink2: true})); }}
                 placeholder="رابط الخطة العلاجية 2..."
-                className="text-sm"
+                className={cn("text-sm", lockedFields.remedialLink2 && "cursor-pointer")}
                 dir="ltr"
               />
             </div>
@@ -616,8 +634,10 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               <Textarea
                 value={unmasteredSkills}
                 onChange={(e) => setUnmasteredSkills(e.target.value)}
+                onFocus={(e) => { if (lockedFields.unmasteredSkills) { (e.target as HTMLTextAreaElement).blur(); setConfirmField('unmasteredSkills'); } }}
+                onBlur={() => { if (unmasteredSkills) setLockedFields(prev => ({...prev, unmasteredSkills: true})); }}
                 placeholder="أضيفي المهارات غير المتقنة هنا... (ستظهر في تحليل النتائج تحت الخطة العلاجية)"
-                className="text-sm min-h-[60px] resize-y"
+                className={cn("text-sm min-h-[60px] resize-y", lockedFields.unmasteredSkills && "cursor-pointer")}
                 dir="rtl"
               />
             </div>
@@ -634,6 +654,29 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
           </p>
         </div>
       ) : null}
+
+      {/* Confirmation dialog for editing saved links/skills */}
+      <AlertDialog open={!!confirmField} onOpenChange={(open) => { if (!open) setConfirmField(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد التعديل</AlertDialogTitle>
+            <AlertDialogDescription>
+              هذا الحقل يحتوي على بيانات محفوظة. هل تريدين تعديله؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (confirmField) {
+                setLockedFields(prev => ({...prev, [confirmField]: false}));
+                setConfirmField(null);
+              }
+            }}>
+              تعديل
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
