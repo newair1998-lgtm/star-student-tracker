@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -84,10 +84,10 @@ const FollowUp = () => {
     message: string;
   }>({ open: false, action: () => {}, message: '' });
 
-  const today = format(selectedDate, 'yyyy-MM-dd');
-  const currentWeekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
+  const weekStartDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
+  const today = format(weekStartDate, 'yyyy-MM-dd');
+  const currentWeekStart = weekStartDate;
   const currentWeekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
-  const weekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).filter(d => d.getDay() !== 5 && d.getDay() !== 6); // exclude Fri & Sat
   const isCurrentWeek = isSameDay(startOfWeek(new Date(), { weekStartsOn: 0 }), currentWeekStart);
 
   // Load records from database when date changes
@@ -355,26 +355,6 @@ const FollowUp = () => {
             </Button>
           </div>
 
-          {/* Day tabs within the week */}
-          <div className="flex items-center justify-center gap-1 flex-wrap">
-            {weekDays.map(day => {
-              const isSelected = isSameDay(day, selectedDate);
-              const dayLabel = format(day, 'EEEE', { locale: ar });
-              const dayNum = format(day, 'd');
-              return (
-                <Button
-                  key={day.toISOString()}
-                  variant={isSelected ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("min-w-[70px] flex flex-col h-auto py-1.5 gap-0", isSelected && "shadow-md")}
-                  onClick={() => setSelectedDate(day)}
-                >
-                  <span className="text-xs">{dayLabel}</span>
-                  <span className="text-sm font-bold">{dayNum}</span>
-                </Button>
-              );
-            })}
-          </div>
 
           {!isCurrentWeek && (
             <Button variant="link" className="text-primary" onClick={() => setSelectedDate(new Date())}>
