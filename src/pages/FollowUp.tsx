@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format, addDays, subDays } from 'date-fns';
+import { format, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -85,8 +85,10 @@ const FollowUp = () => {
   }>({ open: false, action: () => {}, message: '' });
 
   const today = format(selectedDate, 'yyyy-MM-dd');
-  const isToday = format(new Date(), 'yyyy-MM-dd') === today;
-  const isPast = selectedDate < new Date(format(new Date(), 'yyyy-MM-dd'));
+  const currentWeekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
+  const currentWeekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
+  const weekDays = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd }).filter(d => d.getDay() !== 5 && d.getDay() !== 6); // exclude Fri & Sat
+  const isCurrentWeek = isSameDay(startOfWeek(new Date(), { weekStartsOn: 0 }), currentWeekStart);
 
   // Load records from database when date changes
   useEffect(() => {
@@ -336,41 +338,47 @@ const FollowUp = () => {
         </Button>
 
         <div className="text-center mb-6 space-y-3">
-          <h1 className="text-2xl font-bold text-foreground">أعمال المتابعة اليومية</h1>
+          <h1 className="text-2xl font-bold text-foreground">أعمال المتابعة الأسبوعية</h1>
           
-          {/* Date Navigation */}
+          {/* Week Navigation */}
           <div className="flex items-center justify-center gap-3">
-            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => addDays(d, 1))} disabled={isToday}>
+            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => addWeeks(d, 1))} disabled={isCurrentWeek}>
               <ChevronRightIcon className="w-4 h-4" />
             </Button>
             
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2 min-w-[200px]">
-                  <CalendarIcon className="w-4 h-4" />
-                  {format(selectedDate, 'EEEE، d MMMM yyyy', { locale: ar })}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="text-sm font-medium text-foreground bg-secondary/50 px-4 py-2 rounded-lg min-w-[220px]">
+              {format(currentWeekStart, 'd MMMM', { locale: ar })} - {format(currentWeekEnd, 'd MMMM yyyy', { locale: ar })}
+            </div>
 
-            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => subDays(d, 1))}>
+            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => subWeeks(d, 1))}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
           </div>
 
-          {!isToday && (
+          {/* Day tabs within the week */}
+          <div className="flex items-center justify-center gap-1 flex-wrap">
+            {weekDays.map(day => {
+              const isSelected = isSameDay(day, selectedDate);
+              const dayLabel = format(day, 'EEEE', { locale: ar });
+              const dayNum = format(day, 'd');
+              return (
+                <Button
+                  key={day.toISOString()}
+                  variant={isSelected ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("min-w-[70px] flex flex-col h-auto py-1.5 gap-0", isSelected && "shadow-md")}
+                  onClick={() => setSelectedDate(day)}
+                >
+                  <span className="text-xs">{dayLabel}</span>
+                  <span className="text-sm font-bold">{dayNum}</span>
+                </Button>
+              );
+            })}
+          </div>
+
+          {!isCurrentWeek && (
             <Button variant="link" className="text-primary" onClick={() => setSelectedDate(new Date())}>
-              العودة لليوم الحالي
+              العودة للأسبوع الحالي
             </Button>
           )}
         </div>
