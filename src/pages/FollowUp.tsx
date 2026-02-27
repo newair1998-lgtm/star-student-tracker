@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
-import { Loader2, ArrowRight, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, ArrowRight, Check, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight as ChevronRightIcon, CalendarIcon } from 'lucide-react';
 import { Grade, EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSection as GradeSectionType, stageLabels } from '@/types/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,10 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format, addDays, subDays } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +67,7 @@ const FollowUp = () => {
   const [dailyRecords, setDailyRecords] = useState<Record<string, DailyRecord>>({});
   const [dbLoading, setDbLoading] = useState(true);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -71,13 +76,16 @@ const FollowUp = () => {
     message: string;
   }>({ open: false, action: () => {}, message: '' });
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = format(selectedDate, 'yyyy-MM-dd');
+  const isToday = format(new Date(), 'yyyy-MM-dd') === today;
+  const isPast = selectedDate < new Date(format(new Date(), 'yyyy-MM-dd'));
 
-  // Load records from database
+  // Load records from database when date changes
   useEffect(() => {
     if (!user) return;
     const loadRecords = async () => {
       setDbLoading(true);
+      setDailyRecords({});
       const { data, error } = await supabase
         .from('daily_followup')
         .select('*')
@@ -319,11 +327,44 @@ const FollowUp = () => {
           الرجوع للرئيسية
         </Button>
 
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 space-y-3">
           <h1 className="text-2xl font-bold text-foreground">أعمال المتابعة اليومية</h1>
-          <p className="text-muted-foreground mt-1">
-            {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+          
+          {/* Date Navigation */}
+          <div className="flex items-center justify-center gap-3">
+            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => addDays(d, 1))} disabled={isToday}>
+              <ChevronRightIcon className="w-4 h-4" />
+            </Button>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="gap-2 min-w-[200px]">
+                  <CalendarIcon className="w-4 h-4" />
+                  {format(selectedDate, 'EEEE، d MMMM yyyy', { locale: ar })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  disabled={(date) => date > new Date()}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => subDays(d, 1))}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {!isToday && (
+            <Button variant="link" className="text-primary" onClick={() => setSelectedDate(new Date())}>
+              العودة لليوم الحالي
+            </Button>
+          )}
         </div>
 
         {sectionsToShow.length === 0 && (
