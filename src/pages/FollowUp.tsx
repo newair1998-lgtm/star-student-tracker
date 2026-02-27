@@ -347,7 +347,7 @@ const FollowUp = () => {
             </Button>
             
             <div className="text-sm font-medium text-foreground bg-secondary/50 px-4 py-2 rounded-lg min-w-[220px]">
-              {format(currentWeekStart, 'd MMMM', { locale: ar })} - {format(currentWeekEnd, 'd MMMM yyyy', { locale: ar })}
+              {currentWeekStart.toLocaleDateString('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long' })} - {currentWeekEnd.toLocaleDateString('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
 
             <Button variant="outline" size="icon" onClick={() => setSelectedDate(d => subWeeks(d, 1))}>
