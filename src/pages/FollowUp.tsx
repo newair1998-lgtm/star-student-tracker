@@ -36,9 +36,9 @@ interface DailyRecord {
 }
 
 const defaultRecord = (): DailyRecord => ({
-  attendance: ['none', 'none', 'none', 'none'],
-  homework: ['none', 'none', 'none', 'none'],
-  participation: ['none', 'none', 'none', 'none'],
+  attendance: ['none', 'none'],
+  homework: ['none', 'none'],
+  participation: ['none', 'none'],
   performanceTasks: 'none',
 });
 
@@ -50,6 +50,14 @@ const isRecordEmpty = (record: DailyRecord): boolean => {
     record.performanceTasks === 'none'
   );
 };
+
+// Normalize records from DB (may have 4 slots) to 2 slots
+const normalizeRecord = (record: DailyRecord): DailyRecord => ({
+  attendance: record.attendance.slice(0, 2) as AttendanceStatus[],
+  homework: record.homework.slice(0, 2) as DailyStatus[],
+  participation: record.participation.slice(0, 2) as DailyStatus[],
+  performanceTasks: record.performanceTasks,
+});
 
 const FollowUp = () => {
   const navigate = useNavigate();
@@ -98,12 +106,12 @@ const FollowUp = () => {
       } else if (data) {
         const records: Record<string, DailyRecord> = {};
         data.forEach((row: any) => {
-          records[row.student_id] = {
+          records[row.student_id] = normalizeRecord({
             attendance: row.attendance as AttendanceStatus[],
             homework: row.homework as DailyStatus[],
             participation: row.participation as DailyStatus[],
             performanceTasks: row.performance_tasks as DailyStatus,
-          };
+          });
         });
         setDailyRecords(records);
       }
@@ -223,7 +231,7 @@ const FollowUp = () => {
       const updated = { ...dailyRecords };
       students.forEach(s => {
         const record = updated[s.id] || defaultRecord();
-        const newRecord = { ...record, attendance: ['present', 'present', 'present', 'present'] as AttendanceStatus[] };
+        const newRecord = { ...record, attendance: ['present', 'present'] as AttendanceStatus[] };
         updated[s.id] = newRecord;
         saveRecord(s.id, newRecord);
       });
@@ -242,7 +250,7 @@ const FollowUp = () => {
       const updated = { ...dailyRecords };
       students.forEach(s => {
         const record = updated[s.id] || defaultRecord();
-        const newRecord = { ...record, [field]: ['done', 'done', 'done', 'done'] as DailyStatus[] };
+        const newRecord = { ...record, [field]: ['done', 'done'] as DailyStatus[] };
         updated[s.id] = newRecord;
         saveRecord(s.id, newRecord);
       });
