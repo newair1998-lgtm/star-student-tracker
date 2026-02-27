@@ -229,6 +229,53 @@ export type Database = {
           },
         ]
       }
+      daily_followup: {
+        Row: {
+          attendance: Json
+          created_at: string
+          homework: Json
+          id: string
+          participation: Json
+          performance_tasks: string
+          record_date: string
+          student_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendance?: Json
+          created_at?: string
+          homework?: Json
+          id?: string
+          participation?: Json
+          performance_tasks?: string
+          record_date?: string
+          student_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendance?: Json
+          created_at?: string
+          homework?: Json
+          id?: string
+          participation?: Json
+          performance_tasks?: string
+          record_date?: string
+          student_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_followup_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disturbance_records: {
         Row: {
           count: number
