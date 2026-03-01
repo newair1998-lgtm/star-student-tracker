@@ -6,6 +6,7 @@ import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Footer from '@/components/Footer';
 import { Grade, EducationStage, getGradesForStage, GradeSection as GradeSectionType } from '@/types/student';
 
 const Index = () => {
@@ -117,10 +118,7 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border/50 bg-card/50">
-        <p>نظام إدارة الدرجات © 2026</p>
-        <p className="mt-1 font-medium text-foreground/70">الحقوق محفوظة للدكتورة نوير الحربي</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
