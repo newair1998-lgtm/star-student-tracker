@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, BookOpen, School } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ const Home = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

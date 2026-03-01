@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStudents } from '@/hooks/useStudents';
 import { useClassroom, StarsArray } from '@/hooks/useClassroom';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { ArrowRight, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare, Handshake, Sparkles, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -480,10 +481,7 @@ const ClassroomManagement = () => {
         )}
       </main>
 
-      <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border/50 bg-card/50">
-        <p>نظام إدارة الدرجات © 2026</p>
-        <p className="mt-1 font-medium text-foreground/70">الحقوق محفوظة للدكتورة نوير الحربي</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

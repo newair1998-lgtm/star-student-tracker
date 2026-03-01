@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Loader2, ArrowRight, Check, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight as ChevronRightIcon, CalendarIcon } from 'lucide-react';
 import { Grade, EducationStage, getGradesForStage, gradeLabels, gradeColors, GradeSection as GradeSectionType, stageLabels } from '@/types/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -513,10 +514,7 @@ const FollowUp = () => {
         </div>
       </main>
 
-      <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border/50 bg-card/50">
-        <p>نظام إدارة الدرجات © 2026</p>
-        <p className="mt-1 font-medium text-foreground/70">الحقوق محفوظة للدكتورة نوير الحربي</p>
-      </footer>
+      <Footer />
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
         <AlertDialogContent dir="rtl">
