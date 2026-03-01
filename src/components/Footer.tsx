@@ -1,5 +1,5 @@
 const Footer = () => (
-  <footer className="mt-auto py-4 text-center text-sm text-muted-foreground">
+  <footer className="absolute bottom-2 left-0 right-0 text-center text-sm text-muted-foreground pointer-events-none">
     <p>جميع الحقوق محفوظة للدكتورة نوير مسري الحربي ٢٠٢٦ ©</p>
   </footer>
 );
