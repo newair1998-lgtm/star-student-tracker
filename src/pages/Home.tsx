@@ -6,7 +6,8 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-cover bg-center bg-fixed" dir="rtl" style={{ backgroundImage: "url('/images/bg-moon.jpeg')" }}>
+      <div className="min-h-screen bg-background/60 backdrop-blur-sm">
       <Header />
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
@@ -52,6 +53,7 @@ const Home = () => {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 };
