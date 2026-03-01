@@ -11,7 +11,6 @@ import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, Headi
 import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
-import Footer from '@/components/Footer';
 import {
   BarChart,
   Bar,
@@ -935,8 +934,6 @@ const GradeAnalysis = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
