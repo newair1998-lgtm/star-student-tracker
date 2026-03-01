@@ -475,7 +475,7 @@ const GradeAnalysis = () => {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="bg-card shadow-soft border-b border-border/50 py-4">
         <div className="container flex flex-col gap-4">

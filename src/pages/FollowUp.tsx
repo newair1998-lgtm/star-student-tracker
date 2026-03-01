@@ -329,7 +329,7 @@ const FollowUp = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background flex flex-col" dir="rtl">
       <Header />
       
       <main className="container py-6 space-y-6">
