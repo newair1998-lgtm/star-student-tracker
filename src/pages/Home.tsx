@@ -17,7 +17,7 @@ const Home = () => {
             {/* أعمال المتابعة */}
             <button
               onClick={() => navigate('/follow-up')}
-              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border bg-card shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-accent/30 transition-all duration-300"
+              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border/50 bg-card/70 backdrop-blur-md shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-card/85 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <ClipboardList className="w-8 h-8 text-primary" />
@@ -29,7 +29,7 @@ const Home = () => {
             {/* أعمال السنة */}
             <button
               onClick={() => navigate('/yearly-work')}
-              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border bg-card shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-accent/30 transition-all duration-300"
+              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border/50 bg-card/70 backdrop-blur-md shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-card/85 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <BookOpen className="w-8 h-8 text-primary" />
@@ -41,7 +41,7 @@ const Home = () => {
             {/* الإدارة الصفية */}
             <button
               onClick={() => navigate('/classroom')}
-              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border bg-card shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-accent/30 transition-all duration-300"
+              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border/50 bg-card/70 backdrop-blur-md shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-card/85 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <School className="w-8 h-8 text-primary" />
