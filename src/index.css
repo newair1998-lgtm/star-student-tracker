@@ -116,7 +116,21 @@
   }
 
   body {
-    @apply bg-background text-foreground font-tajawal antialiased;
+    @apply text-foreground font-tajawal antialiased;
+    background-image: url('/images/bg-moon.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: hsl(var(--background));
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: hsl(var(--background) / 0.65);
+    backdrop-filter: blur(4px);
+    z-index: -1;
   }
 
   input[type="number"]::-webkit-inner-spin-button,

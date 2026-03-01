@@ -98,10 +98,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-4" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center p-4" dir="rtl">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-purple-800">
+          <CardTitle className="text-2xl font-bold text-primary">
             {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
           </CardTitle>
           <CardDescription>
@@ -142,7 +142,7 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-purple-600 hover:underline text-sm"
+              className="text-primary hover:underline text-sm"
             >
               {isLogin ? 'ليس لديك حساب؟ أنشئ حساباً جديداً' : 'لديك حساب؟ سجل الدخول'}
             </button>
