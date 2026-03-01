@@ -7,7 +7,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen" dir="rtl">
+    <div className="min-h-screen flex flex-col" dir="rtl">
       <Header />
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
