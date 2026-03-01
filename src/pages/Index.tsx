@@ -6,7 +6,6 @@ import AddStudentsSection from '@/components/AddStudentsSection';
 import GradeSection from '@/components/GradeSection';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Footer from '@/components/Footer';
 import { Grade, EducationStage, getGradesForStage, GradeSection as GradeSectionType } from '@/types/student';
 
 const Index = () => {
@@ -117,8 +116,6 @@ const Index = () => {
           ))}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

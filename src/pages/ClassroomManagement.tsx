@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useStudents } from '@/hooks/useStudents';
 import { useClassroom, StarsArray } from '@/hooks/useClassroom';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { ArrowRight, Star, Users2, StickyNote, ShieldAlert, Loader2, Plus, Minus, Trash2, MessageSquare, Handshake, Sparkles, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -480,8 +479,6 @@ const ClassroomManagement = () => {
           </Tabs>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 };
