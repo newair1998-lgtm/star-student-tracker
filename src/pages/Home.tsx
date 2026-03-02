@@ -19,7 +19,7 @@ const Home = () => {
           </div>
 
           <h1 className="text-3xl font-bold text-center text-foreground mb-12">
-            اختر نوع العمل
+            نظام إدارة الدرجات لجميع المراحل الدراسية
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {/* أعمال المتابعة */}
