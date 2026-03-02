@@ -9,8 +9,15 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col" dir="rtl">
       <Header />
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-10">
         <div className="max-w-3xl mx-auto">
+          {/* Top Info */}
+          <div className="text-center mb-8 space-y-1">
+            <p className="text-sm font-medium text-primary">رقمنة العمل لأداء متميز</p>
+            <p className="text-sm font-medium text-grade-five">خبير مايكروسوفت للتعليم الإبداعي</p>
+            <p className="text-lg font-bold text-grade-four">الدكتورة نوير مسري الحربي</p>
+          </div>
+
           <h1 className="text-3xl font-bold text-center text-foreground mb-12">
             اختر نوع العمل
           </h1>
