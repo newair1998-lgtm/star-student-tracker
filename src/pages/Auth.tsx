@@ -99,7 +99,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-6" dir="rtl">
+    <div className="min-h-screen flex flex-col items-center justify-start pt-12 p-4 gap-6" dir="rtl">
       <div className="text-center space-y-1 mb-2">
         <h1 className="text-3xl font-bold text-primary">نظام إدارة الدرجات</h1>
         <p className="text-lg font-semibold text-foreground">رقمنة العمل لأداء متميز</p>
