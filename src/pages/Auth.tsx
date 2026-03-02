@@ -99,7 +99,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4" dir="rtl">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-6" dir="rtl">
+      <div className="text-center space-y-1 mb-2">
+        <h1 className="text-3xl font-bold text-primary">نظام إدارة الدرجات</h1>
+        <p className="text-lg font-semibold text-foreground">رقمنة العمل لأداء متميز</p>
+        <p className="text-sm text-muted-foreground">خبير مايكروسوفت للتعليم الإبداعي</p>
+        <p className="text-sm font-medium text-muted-foreground">الدكتورة نوير مسري الحربي</p>
+      </div>
       <Card className="w-full max-w-md bg-card/70 backdrop-blur-md border-border/50">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary">
