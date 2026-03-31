@@ -428,7 +428,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               </AlertDialog>
             </div>
           )}
-          
+          </div>
           {onDuplicateGradeSection && (
             <>
               <DuplicateGradeDialog
