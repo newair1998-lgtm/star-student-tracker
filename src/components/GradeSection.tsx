@@ -53,6 +53,7 @@ interface GradeSectionProps {
   onTransferStudent?: (id: string, newGrade: Grade, newSubject?: string) => void;
   onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, targetGrade: Grade, targetSubject: string, includeScores: boolean) => void;
   onUpdateSubject?: (grade: Grade, oldSubject: string, newSubject: string) => void;
+  onAddStudents?: (names: string[], grade: Grade, subject?: string, sectionNumber?: number) => void;
 }
 
 const getGradeColorIndex = (grade: Grade): number => {
