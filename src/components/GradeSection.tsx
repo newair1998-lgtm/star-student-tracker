@@ -92,6 +92,8 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [editedSubject, setEditedSubject] = useState(subject === 'default' ? '' : subject);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [addStudentName, setAddStudentName] = useState('');
+  const [showAddStudent, setShowAddStudent] = useState(false);
   const [unmasteredSkills, setUnmasteredSkills] = useState<string>(() => {
     return localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
   });
