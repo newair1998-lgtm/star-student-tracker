@@ -191,7 +191,9 @@ export const useStudents = () => {
 
   // Get students by grade and subject
   const getStudentsByGradeAndSubject = useCallback((grade: Grade, subject: string, sectionNumber: number) =>
-    students.filter(student => student.grade === grade && student.subject === subject && student.sectionNumber === sectionNumber), [students]);
+    students
+      .filter(student => student.grade === grade && student.subject === subject && student.sectionNumber === sectionNumber)
+      .sort((a, b) => a.name.localeCompare(b.name, 'ar')), [students]);
 
   // Get all unique grade sections (grade + subject + section combinations)
   const getGradeSections = useCallback((): GradeSection[] => {
