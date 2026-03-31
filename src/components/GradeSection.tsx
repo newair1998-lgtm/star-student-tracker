@@ -325,6 +325,19 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               </p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {onAddStudents && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-success hover:bg-success/10"
+                title="إضافة طالبة"
+                onClick={() => setShowAddStudent(!showAddStudent)}
+              >
+                <UserPlus className="w-4 h-4 ml-1" />
+                إضافة طالبة
+              </Button>
+            )}
           {students.length > 0 && (
             <div className="flex items-center gap-2">
               {onDuplicateGradeSection && (
