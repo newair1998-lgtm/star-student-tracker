@@ -84,7 +84,7 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject }: GradeSectionProps) => {
+const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject, onAddStudents }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
