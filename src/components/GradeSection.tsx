@@ -451,6 +451,44 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
         </div>
       </div>
 
+      {/* Add Student Inline */}
+      {showAddStudent && onAddStudents && (
+        <div className="px-5 py-3 bg-secondary/20 border-b flex items-center gap-2" dir="rtl">
+          <Input
+            value={addStudentName}
+            onChange={(e) => setAddStudentName(e.target.value)}
+            placeholder="اسم الطالبة الجديدة..."
+            className="flex-1 h-9 bg-background"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && addStudentName.trim()) {
+                const names = addStudentName.split('\n').map(n => n.trim().replace(/^[\d\s.\-\)]+/, '').trim()).filter(n => n.length > 0);
+                onAddStudents(names, grade, subject, sectionNumber);
+                setAddStudentName('');
+                toast({ title: "تمت الإضافة", description: `تمت إضافة الطالبة بنجاح` });
+              }
+            }}
+          />
+          <Button
+            size="sm"
+            onClick={() => {
+              if (addStudentName.trim()) {
+                const names = addStudentName.split('\n').map(n => n.trim().replace(/^[\d\s.\-\)]+/, '').trim()).filter(n => n.length > 0);
+                onAddStudents(names, grade, subject, sectionNumber);
+                setAddStudentName('');
+                toast({ title: "تمت الإضافة", description: `تمت إضافة الطالبة بنجاح` });
+              }
+            }}
+          >
+            <UserPlus className="w-4 h-4 ml-1" />
+            إضافة
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setShowAddStudent(false); setAddStudentName(''); }}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
       {/* Table */}
       {!isCollapsed && students.length > 0 ? (
         <>
