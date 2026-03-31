@@ -112,6 +112,7 @@ const Index = () => {
               onTransferStudent={transferStudent}
               onDuplicateGradeSection={duplicateGradeSection}
               onUpdateSubject={updateSubject}
+              onAddStudents={addStudents}
             />
           ))}
         </div>
