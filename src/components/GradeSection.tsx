@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -53,6 +53,7 @@ interface GradeSectionProps {
   onTransferStudent?: (id: string, newGrade: Grade, newSubject?: string) => void;
   onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, targetGrade: Grade, targetSubject: string, includeScores: boolean) => void;
   onUpdateSubject?: (grade: Grade, oldSubject: string, newSubject: string) => void;
+  onAddStudents?: (names: string[], grade: Grade, subject?: string, sectionNumber?: number) => void;
 }
 
 const getGradeColorIndex = (grade: Grade): number => {
@@ -83,7 +84,7 @@ const gradeIconColorsList = [
   'bg-grade-six/20 text-grade-six',
 ];
 
-const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject }: GradeSectionProps) => {
+const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent, onDeleteStudent, onBulkUpdate, onTransferStudent, onDuplicateGradeSection, onUpdateSubject, onAddStudents }: GradeSectionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
@@ -91,6 +92,8 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [editedSubject, setEditedSubject] = useState(subject === 'default' ? '' : subject);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [addStudentName, setAddStudentName] = useState('');
+  const [showAddStudent, setShowAddStudent] = useState(false);
   const [unmasteredSkills, setUnmasteredSkills] = useState<string>(() => {
     return localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
   });
@@ -322,6 +325,19 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               </p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {onAddStudents && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-success hover:bg-success/10"
+                title="إضافة طالبة"
+                onClick={() => setShowAddStudent(!showAddStudent)}
+              >
+                <UserPlus className="w-4 h-4 ml-1" />
+                إضافة طالبة
+              </Button>
+            )}
           {students.length > 0 && (
             <div className="flex items-center gap-2">
               {onDuplicateGradeSection && (
@@ -412,7 +428,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
               </AlertDialog>
             </div>
           )}
-          
+          </div>
           {onDuplicateGradeSection && (
             <>
               <DuplicateGradeDialog
@@ -434,6 +450,44 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
           )}
         </div>
       </div>
+
+      {/* Add Student Inline */}
+      {showAddStudent && onAddStudents && (
+        <div className="px-5 py-3 bg-secondary/20 border-b flex items-center gap-2" dir="rtl">
+          <Input
+            value={addStudentName}
+            onChange={(e) => setAddStudentName(e.target.value)}
+            placeholder="اسم الطالبة الجديدة..."
+            className="flex-1 h-9 bg-background"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && addStudentName.trim()) {
+                const names = addStudentName.split('\n').map(n => n.trim().replace(/^[\d\s.\-\)]+/, '').trim()).filter(n => n.length > 0);
+                onAddStudents(names, grade, subject, sectionNumber);
+                setAddStudentName('');
+                toast({ title: "تمت الإضافة", description: `تمت إضافة الطالبة بنجاح` });
+              }
+            }}
+          />
+          <Button
+            size="sm"
+            onClick={() => {
+              if (addStudentName.trim()) {
+                const names = addStudentName.split('\n').map(n => n.trim().replace(/^[\d\s.\-\)]+/, '').trim()).filter(n => n.length > 0);
+                onAddStudents(names, grade, subject, sectionNumber);
+                setAddStudentName('');
+                toast({ title: "تمت الإضافة", description: `تمت إضافة الطالبة بنجاح` });
+              }
+            }}
+          >
+            <UserPlus className="w-4 h-4 ml-1" />
+            إضافة
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setShowAddStudent(false); setAddStudentName(''); }}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Table */}
       {!isCollapsed && students.length > 0 ? (
