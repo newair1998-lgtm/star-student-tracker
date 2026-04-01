@@ -606,6 +606,12 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                       </div>
                     </TableHead>
                   )}
+                  <TableHead className="text-center w-24">
+                    <div className="flex flex-col items-center gap-1">
+                      <span>مجموع الاختبارات</span>
+                      <span className="text-xs text-muted-foreground">({exam1Max !== 20 ? exam1Max + exam2Max : exam1Max})</span>
+                    </div>
+                  </TableHead>
                   <TableHead className="text-center w-28">
                     <div className="flex flex-col items-center gap-1">
                       <span>المجموع النهائي</span>
