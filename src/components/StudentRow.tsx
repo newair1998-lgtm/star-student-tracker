@@ -99,6 +99,11 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
           />
         </TableCell>
       )}
+      <TableCell className={cn("text-center font-bold", getScoreColor(examsTotal, hideExam2 ? exam1Max : exam1Max + exam2Max))}>
+        <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
+          {examsTotal}/{hideExam2 ? exam1Max : exam1Max + exam2Max}
+        </div>
+      </TableCell>
       <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, finalTotalMax))}>
         <div className="bg-primary/10 rounded-md py-1 px-2 inline-block min-w-[50px]">
           {finalTotal}/{finalTotalMax}
