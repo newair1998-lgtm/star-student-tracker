@@ -15,7 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft, UserPlus } from 'lucide-react';
+import { Users, GraduationCap, BarChart3, Eraser, Trash2, Copy, CopyPlus, Pencil, Check, X, ChevronDown, ChevronLeft, UserPlus, Eye } from 'lucide-react';
+import { ColumnVisibility, defaultColumnVisibility } from './StudentRow';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
