@@ -352,6 +352,32 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  title="إظهار/إخفاء الأعمدة"
+                >
+                  <Eye className="w-4 h-4 ml-1" />
+                  الأعمدة
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>إظهار/إخفاء الأعمدة</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {(Object.keys(columnLabels) as (keyof ColumnVisibility)[]).map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col}
+                    checked={columnVisibility[col]}
+                    onCheckedChange={() => toggleColumn(col)}
+                  >
+                    {columnLabels[col]}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             {onAddStudents && (
               <Button
                 variant="ghost"
