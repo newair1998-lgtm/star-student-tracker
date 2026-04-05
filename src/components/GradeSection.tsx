@@ -376,6 +376,13 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                     {columnLabels[col]}
                   </DropdownMenuCheckboxItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={Object.values(columnVisibility).every(Boolean)}
+                  onCheckedChange={() => setColumnVisibility(defaultColumnVisibility)}
+                >
+                  إظهار الكل
+                </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {onAddStudents && (
