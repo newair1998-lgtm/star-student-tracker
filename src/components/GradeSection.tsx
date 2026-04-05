@@ -550,32 +550,34 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 <TableRow className="bg-secondary/30 hover:bg-secondary/30">
                   <TableHead className="text-center w-10">#</TableHead>
                   <TableHead className="min-w-[140px]">اسم الطالبة</TableHead>
-                  <TableHead className="text-center w-28">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>المهام الأدائية</span>
-                      <div className="flex items-center gap-1">
-                        <Select value={performanceTasksMax.toString()} onValueChange={(val) => setPerformanceTasksMax(parseInt(val))}>
-                          <SelectTrigger className="h-7 w-14 text-xs bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover z-50">
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="20">20</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleBulkScoreUpdate('performanceTasks', performanceTasksMax)}
-                          className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
-                          title="تعبئة الكل"
-                        >
-                          {performanceTasksMax}
-                        </Button>
+                  {columnVisibility.performanceTasks && (
+                    <TableHead className="text-center w-28">
+                      <div className="flex flex-col items-center gap-1">
+                        <span>المهام الأدائية</span>
+                        <div className="flex items-center gap-1">
+                          <Select value={performanceTasksMax.toString()} onValueChange={(val) => setPerformanceTasksMax(parseInt(val))}>
+                            <SelectTrigger className="h-7 w-14 text-xs bg-background">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover z-50">
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="20">20</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleBulkScoreUpdate('performanceTasks', performanceTasksMax)}
+                            className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
+                            title="تعبئة الكل"
+                          >
+                            {performanceTasksMax}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </TableHead>
-                  {performanceTasksMax === 10 && (
+                    </TableHead>
+                  )}
+                  {columnVisibility.participation && performanceTasksMax === 10 && (
                     <TableHead className="text-center w-20">
                       <BulkScoreSelector
                         max={10}
@@ -584,53 +586,61 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                       />
                     </TableHead>
                   )}
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={10}
-                      label="الأنشطة الصفية"
-                      onSelect={(value) => handleBulkScoreUpdate('book', value)}
-                    />
-                  </TableHead>
-                  <TableHead className="text-center w-20">
-                    <BulkScoreSelector
-                      max={10}
-                      label="واجبات"
-                      onSelect={(value) => handleBulkScoreUpdate('homework', value)}
-                    />
-                  </TableHead>
-                  <TableHead className="text-center w-24">
-                    <div className="flex flex-col items-center">
-                      <span>مجموع المهام</span>
-                      <span className="text-xs text-muted-foreground">(40)</span>
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center w-28">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>اختبار ١</span>
-                      <div className="flex items-center gap-1">
-                        <Select value={exam1Max.toString()} onValueChange={(val) => setExam1Max(parseInt(val))}>
-                          <SelectTrigger className="h-7 w-14 text-xs bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover z-50">
-                            <SelectItem value="0">0</SelectItem>
-                            <SelectItem value="20">20</SelectItem>
-                            <SelectItem value="30">30</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleBulkScoreUpdate('exam1', exam1Max)}
-                          className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
-                          title="تعبئة الكل"
-                        >
-                          {exam1Max}
-                        </Button>
+                  {columnVisibility.book && (
+                    <TableHead className="text-center w-20">
+                      <BulkScoreSelector
+                        max={10}
+                        label="الأنشطة الصفية"
+                        onSelect={(value) => handleBulkScoreUpdate('book', value)}
+                      />
+                    </TableHead>
+                  )}
+                  {columnVisibility.homework && (
+                    <TableHead className="text-center w-20">
+                      <BulkScoreSelector
+                        max={10}
+                        label="واجبات"
+                        onSelect={(value) => handleBulkScoreUpdate('homework', value)}
+                      />
+                    </TableHead>
+                  )}
+                  {columnVisibility.tasksTotal && (
+                    <TableHead className="text-center w-24">
+                      <div className="flex flex-col items-center">
+                        <span>مجموع المهام</span>
+                        <span className="text-xs text-muted-foreground">(40)</span>
                       </div>
-                    </div>
-                  </TableHead>
-                  {exam1Max !== 20 && (
+                    </TableHead>
+                  )}
+                  {columnVisibility.exam1 && (
+                    <TableHead className="text-center w-28">
+                      <div className="flex flex-col items-center gap-1">
+                        <span>اختبار ١</span>
+                        <div className="flex items-center gap-1">
+                          <Select value={exam1Max.toString()} onValueChange={(val) => setExam1Max(parseInt(val))}>
+                            <SelectTrigger className="h-7 w-14 text-xs bg-background">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover z-50">
+                              <SelectItem value="0">0</SelectItem>
+                              <SelectItem value="20">20</SelectItem>
+                              <SelectItem value="30">30</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleBulkScoreUpdate('exam1', exam1Max)}
+                            className="h-7 min-w-[40px] text-xs bg-primary/10 border-primary/20 hover:bg-primary/20 hover:text-primary"
+                            title="تعبئة الكل"
+                          >
+                            {exam1Max}
+                          </Button>
+                        </div>
+                      </div>
+                    </TableHead>
+                  )}
+                  {columnVisibility.exam2 && exam1Max !== 20 && (
                     <TableHead className="text-center w-28">
                       <div className="flex flex-col items-center gap-1">
                         <span>اختبار ٢</span>
@@ -658,18 +668,22 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                       </div>
                     </TableHead>
                   )}
-                  <TableHead className="text-center w-24">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>مجموع الاختبارات</span>
-                      <span className="text-xs text-muted-foreground">({exam1Max !== 20 ? exam1Max + exam2Max : exam1Max})</span>
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center w-28">
-                    <div className="flex flex-col items-center gap-1">
-                      <span>المجموع النهائي</span>
-                      <span className="text-xs text-muted-foreground">({finalTotalMax})</span>
-                    </div>
-                  </TableHead>
+                  {columnVisibility.examsTotal && (
+                    <TableHead className="text-center w-24">
+                      <div className="flex flex-col items-center gap-1">
+                        <span>مجموع الاختبارات</span>
+                        <span className="text-xs text-muted-foreground">({exam1Max !== 20 ? exam1Max + exam2Max : exam1Max})</span>
+                      </div>
+                    </TableHead>
+                  )}
+                  {columnVisibility.finalTotal && (
+                    <TableHead className="text-center w-28">
+                      <div className="flex flex-col items-center gap-1">
+                        <span>المجموع النهائي</span>
+                        <span className="text-xs text-muted-foreground">({finalTotalMax})</span>
+                      </div>
+                    </TableHead>
+                  )}
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -687,6 +701,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                     exam2Max={exam2Max}
                     finalTotalMax={finalTotalMax}
                     hideExam2={exam1Max === 20}
+                    columnVisibility={columnVisibility}
                   />
                 ))}
               </TableBody>
