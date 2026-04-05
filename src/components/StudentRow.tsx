@@ -7,6 +7,30 @@ import ScoreInput from './ScoreInput';
 import { cn } from '@/lib/utils';
 import { TransferStudentDialog } from './TransferStudentDialog';
 
+export interface ColumnVisibility {
+  performanceTasks: boolean;
+  participation: boolean;
+  book: boolean;
+  homework: boolean;
+  tasksTotal: boolean;
+  exam1: boolean;
+  exam2: boolean;
+  examsTotal: boolean;
+  finalTotal: boolean;
+}
+
+export const defaultColumnVisibility: ColumnVisibility = {
+  performanceTasks: true,
+  participation: true,
+  book: true,
+  homework: true,
+  tasksTotal: true,
+  exam1: true,
+  exam2: true,
+  examsTotal: true,
+  finalTotal: true,
+};
+
 interface StudentRowProps {
   student: Student;
   index: number;
@@ -18,9 +42,10 @@ interface StudentRowProps {
   exam2Max?: number;
   finalTotalMax?: number;
   hideExam2?: boolean;
+  columnVisibility?: ColumnVisibility;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false, columnVisibility = defaultColumnVisibility }: StudentRowProps) => {
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const tasksTotal = performanceTasksMax === 20 
     ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
@@ -48,14 +73,16 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
       <TableCell className="font-medium text-foreground min-w-[140px]">
         {student.name}
       </TableCell>
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.performanceTasks}
-          max={performanceTasksMax}
-          onChange={(value) => onUpdate(student.id, { performanceTasks: value })}
-        />
-      </TableCell>
-      {performanceTasksMax === 10 && (
+      {columnVisibility.performanceTasks && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.performanceTasks}
+            max={performanceTasksMax}
+            onChange={(value) => onUpdate(student.id, { performanceTasks: value })}
+          />
+        </TableCell>
+      )}
+      {columnVisibility.participation && performanceTasksMax === 10 && (
         <TableCell className="text-center">
           <ScoreInput
             value={student.participation}
@@ -64,33 +91,41 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
           />
         </TableCell>
       )}
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.book}
-          max={10}
-          onChange={(value) => onUpdate(student.id, { book: value })}
-        />
-      </TableCell>
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.homework}
-          max={10}
-          onChange={(value) => onUpdate(student.id, { homework: value })}
-        />
-      </TableCell>
-      <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 40))}>
-        <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
-          {tasksTotal}/40
-        </div>
-      </TableCell>
-      <TableCell className="text-center">
-        <ScoreInput
-          value={student.exam1}
-          max={exam1Max}
-          onChange={(value) => onUpdate(student.id, { exam1: value })}
-        />
-      </TableCell>
-      {!hideExam2 && (
+      {columnVisibility.book && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.book}
+            max={10}
+            onChange={(value) => onUpdate(student.id, { book: value })}
+          />
+        </TableCell>
+      )}
+      {columnVisibility.homework && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.homework}
+            max={10}
+            onChange={(value) => onUpdate(student.id, { homework: value })}
+          />
+        </TableCell>
+      )}
+      {columnVisibility.tasksTotal && (
+        <TableCell className={cn("text-center font-bold", getScoreColor(tasksTotal, 40))}>
+          <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
+            {tasksTotal}/40
+          </div>
+        </TableCell>
+      )}
+      {columnVisibility.exam1 && (
+        <TableCell className="text-center">
+          <ScoreInput
+            value={student.exam1}
+            max={exam1Max}
+            onChange={(value) => onUpdate(student.id, { exam1: value })}
+          />
+        </TableCell>
+      )}
+      {columnVisibility.exam2 && !hideExam2 && (
         <TableCell className="text-center">
           <ScoreInput
             value={student.exam2}
@@ -99,16 +134,20 @@ const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanc
           />
         </TableCell>
       )}
-      <TableCell className={cn("text-center font-bold", getScoreColor(examsTotal, hideExam2 ? exam1Max : exam1Max + exam2Max))}>
-        <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
-          {examsTotal}/{hideExam2 ? exam1Max : exam1Max + exam2Max}
-        </div>
-      </TableCell>
-      <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, finalTotalMax))}>
-        <div className="bg-primary/10 rounded-md py-1 px-2 inline-block min-w-[50px]">
-          {finalTotal}/{finalTotalMax}
-        </div>
-      </TableCell>
+      {columnVisibility.examsTotal && (
+        <TableCell className={cn("text-center font-bold", getScoreColor(examsTotal, hideExam2 ? exam1Max : exam1Max + exam2Max))}>
+          <div className="bg-accent/50 rounded-md py-1 px-2 inline-block min-w-[40px]">
+            {examsTotal}/{hideExam2 ? exam1Max : exam1Max + exam2Max}
+          </div>
+        </TableCell>
+      )}
+      {columnVisibility.finalTotal && (
+        <TableCell className={cn("text-center font-bold", getScoreColor(finalTotal, finalTotalMax))}>
+          <div className="bg-primary/10 rounded-md py-1 px-2 inline-block min-w-[50px]">
+            {finalTotal}/{finalTotalMax}
+          </div>
+        </TableCell>
+      )}
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-1">
           {onTransfer && (
