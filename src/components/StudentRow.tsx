@@ -7,6 +7,30 @@ import ScoreInput from './ScoreInput';
 import { cn } from '@/lib/utils';
 import { TransferStudentDialog } from './TransferStudentDialog';
 
+export interface ColumnVisibility {
+  performanceTasks: boolean;
+  participation: boolean;
+  book: boolean;
+  homework: boolean;
+  tasksTotal: boolean;
+  exam1: boolean;
+  exam2: boolean;
+  examsTotal: boolean;
+  finalTotal: boolean;
+}
+
+export const defaultColumnVisibility: ColumnVisibility = {
+  performanceTasks: true,
+  participation: true,
+  book: true,
+  homework: true,
+  tasksTotal: true,
+  exam1: true,
+  exam2: true,
+  examsTotal: true,
+  finalTotal: true,
+};
+
 interface StudentRowProps {
   student: Student;
   index: number;
@@ -18,6 +42,7 @@ interface StudentRowProps {
   exam2Max?: number;
   finalTotalMax?: number;
   hideExam2?: boolean;
+  columnVisibility?: ColumnVisibility;
 }
 
 const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
