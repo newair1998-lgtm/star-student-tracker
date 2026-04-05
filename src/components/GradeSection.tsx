@@ -103,6 +103,23 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [addStudentName, setAddStudentName] = useState('');
   const [showAddStudent, setShowAddStudent] = useState(false);
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(defaultColumnVisibility);
+
+  const toggleColumn = (col: keyof ColumnVisibility) => {
+    setColumnVisibility(prev => ({ ...prev, [col]: !prev[col] }));
+  };
+
+  const columnLabels: Record<keyof ColumnVisibility, string> = {
+    performanceTasks: 'المهام الأدائية',
+    participation: 'مشاركة',
+    book: 'الأنشطة الصفية',
+    homework: 'واجبات',
+    tasksTotal: 'مجموع المهام',
+    exam1: 'اختبار ١',
+    exam2: 'اختبار ٢',
+    examsTotal: 'مجموع الاختبارات',
+    finalTotal: 'المجموع النهائي',
+  };
   const [unmasteredSkills, setUnmasteredSkills] = useState<string>(() => {
     return localStorage.getItem(`unmasteredSkills_${grade}_${subject}_${sectionNumber}`) || '';
   });
