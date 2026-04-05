@@ -45,7 +45,7 @@ interface StudentRowProps {
   columnVisibility?: ColumnVisibility;
 }
 
-const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false }: StudentRowProps) => {
+const StudentRow = ({ student, index, onUpdate, onDelete, onTransfer, performanceTasksMax = 10, exam1Max = 30, exam2Max = 30, finalTotalMax = 100, hideExam2 = false, columnVisibility = defaultColumnVisibility }: StudentRowProps) => {
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const tasksTotal = performanceTasksMax === 20 
     ? Math.min(student.performanceTasks, 20) + student.book + student.homework 
