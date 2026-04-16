@@ -1,16 +1,17 @@
 // Grade Analysis Page - Export to Word with charts
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, getStageFromGrade, stageLabels } from '@/types/student';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
+import { ArrowRight, FileSpreadsheet, FileText, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType } from 'docx';
 import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
+import { supabase } from '@/integrations/supabase/client';
 import {
   BarChart,
   Bar,
