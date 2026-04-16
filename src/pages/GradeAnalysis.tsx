@@ -509,6 +509,25 @@ const GradeAnalysis = () => {
 
       if (error) throw error;
 
+      // Capture charts as images
+      toast({ title: 'جاري التقاط الرسوم البيانية', description: 'يتم تحويل الرسوم البيانية إلى صور...' });
+      const chartImages: { data: Uint8Array; width: number; height: number }[] = [];
+      const chartRefs = [section2Ref, section4Ref];
+      for (const ref of chartRefs) {
+        if (ref.current) {
+          const canvas = await html2canvas(ref.current, {
+            scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+          });
+          const imageData = canvas.toDataURL('image/png');
+          const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+          chartImages.push({
+            data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+            width: 500,
+            height: Math.round((canvas.height / canvas.width) * 500),
+          });
+        }
+      }
+
       // Generate DOCX from AI data
       const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "999999" };
       const cellBorders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder };
@@ -529,6 +548,23 @@ const GradeAnalysis = () => {
         });
       };
 
+      const createImageCell = (imageData: Uint8Array, imgWidth: number, imgHeight: number, opts?: { shading?: typeof headerShading; width?: number }) => {
+        return new TableCell({
+          borders: cellBorders,
+          margins: cellMargins,
+          width: opts?.width ? { size: opts.width, type: WidthType.DXA } : undefined,
+          shading: opts?.shading,
+          children: [new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [new ImageRun({
+              data: imageData,
+              transformation: { width: imgWidth, height: imgHeight },
+              type: 'png',
+            })],
+          })],
+        });
+      };
+
       const createLabelValueRow = (label: string, value: string) => {
         return new TableRow({
           children: [
@@ -537,6 +573,19 @@ const GradeAnalysis = () => {
           ],
         });
       };
+
+      // Build chart image paragraphs for the "رسومات بيانية" section
+      const chartParagraphs = chartImages.map(img => 
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 100, after: 100 },
+          children: [new ImageRun({
+            data: img.data,
+            transformation: { width: img.width, height: img.height },
+            type: 'png',
+          })],
+        })
+      );
 
       const doc = new Document({
         sections: [{
@@ -617,7 +666,7 @@ const GradeAnalysis = () => {
 
             new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
 
-            // Statistics section
+            // Statistics & Charts table
             new Table({
               width: { size: 9360, type: WidthType.DXA },
               columnWidths: [7000, 2360],
@@ -628,14 +677,18 @@ const GradeAnalysis = () => {
                     createCell("الإحصاءات", { bold: true, shading: headerShading, width: 2360 }),
                   ],
                 }),
-                new TableRow({
-                  children: [
-                    createCell(`عدد الطالبات: ${students.length} | المتوسط: ${average.toFixed(2)} | نسبة التحصيل: ${achievementPercentage.toFixed(2)}% | أعلى: ${maxScore} | أدنى: ${minScore}`, { width: 7000 }),
-                    createCell("رسومات بيانية", { bold: true, shading: headerShading, width: 2360 }),
-                  ],
-                }),
               ],
             }),
+
+            new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
+
+            // Charts section label
+            new Paragraph({
+              alignment: AlignmentType.RIGHT, bidirectional: true, spacing: { after: 100 },
+              children: [new TextRun({ text: "رسومات بيانية:", bold: true, size: 24, font: "Arial", color: "1A5276" })],
+            }),
+            // Embed captured chart images
+            ...chartParagraphs,
 
             new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
 
@@ -660,8 +713,38 @@ const GradeAnalysis = () => {
               rows: [
                 new TableRow({
                   children: [
-                    createCell(`مديرة المدرسة:\nالاسم:\nالتوقيع:`, { bold: true, alignment: AlignmentType.CENTER }),
-                    createCell(`معدة التقرير: ${teacherName}\nالاسم: ${teacherName}\nالتوقيع:`, { bold: true, alignment: AlignmentType.CENTER }),
+                    new TableCell({
+                      borders: cellBorders,
+                      margins: cellMargins,
+                      width: { size: 4680, type: WidthType.DXA },
+                      children: [
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 60 },
+                          children: [new TextRun({ text: "مديرة المدرسة:", bold: true, size: 22, font: "Arial" })],
+                        }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 60 },
+                          children: [new TextRun({ text: "الاسم: نايفة الحربي", size: 22, font: "Arial" })],
+                        }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true,
+                          children: [new TextRun({ text: "التوقيع:", size: 22, font: "Arial" })],
+                        }),
+                      ],
+                    }),
+                    new TableCell({
+                      borders: cellBorders,
+                      margins: cellMargins,
+                      width: { size: 4680, type: WidthType.DXA },
+                      children: [
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 60 },
+                          children: [new TextRun({ text: "معدة التقرير:", bold: true, size: 22, font: "Arial" })],
+                        }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 60 },
+                          children: [new TextRun({ text: "الاسم: نوير الحربي", size: 22, font: "Arial" })],
+                        }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true,
+                          children: [new TextRun({ text: "التوقيع:", size: 22, font: "Arial" })],
+                        }),
+                      ],
+                    }),
                   ],
                 }),
               ],
