@@ -1132,7 +1132,7 @@ const GradeAnalysis = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-4 flex justify-center gap-4 flex-wrap">
             <Button onClick={() => exportToExcel(students)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
               <FileSpreadsheet className="w-4 h-4 ml-2" />
               تصدير السجل
@@ -1140,6 +1140,15 @@ const GradeAnalysis = () => {
             <Button onClick={() => exportFullReportToWord()} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
               حفظ التقرير Word
+            </Button>
+            <Button
+              onClick={generateAIReport}
+              disabled={generatingReport}
+              variant="outline"
+              className="border-purple-600 text-purple-600 hover:bg-purple-50"
+            >
+              {generatingReport ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Sparkles className="w-4 h-4 ml-2" />}
+              {generatingReport ? 'جاري الإنشاء...' : 'تقرير بالذكاء الاصطناعي'}
             </Button>
           </div>
         </div>
