@@ -512,7 +512,7 @@ const GradeAnalysis = () => {
       // Generate DOCX from AI data
       const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "999999" };
       const cellBorders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder };
-      const headerShading = { fill: "D6EAF8", type: ShadingType.CLEAR as const };
+      const headerShading = { fill: "D6EAF8", type: ShadingType.CLEAR };
       const cellMargins = { top: 60, bottom: 60, left: 100, right: 100 };
 
       const createCell = (text: string, opts?: { bold?: boolean; shading?: typeof headerShading; width?: number; alignment?: typeof AlignmentType.CENTER }) => {
