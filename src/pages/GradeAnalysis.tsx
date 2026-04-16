@@ -1,16 +1,17 @@
 // Grade Analysis Page - Export to Word with charts
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useStudents } from '@/hooks/useStudents';
 import { Grade, gradeLabels, getStageFromGrade, stageLabels } from '@/types/student';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileSpreadsheet, FileText } from 'lucide-react';
+import { ArrowRight, FileSpreadsheet, FileText, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType } from 'docx';
 import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
+import { supabase } from '@/integrations/supabase/client';
 import {
   BarChart,
   Bar,
@@ -111,6 +112,7 @@ const GradeAnalysis = () => {
   const section3Ref = useRef<HTMLDivElement>(null);
   const section4Ref = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   const STUDENTS_PER_PAGE = 25;
 
@@ -471,6 +473,214 @@ const GradeAnalysis = () => {
     }
     return baseCategories;
   })();
+  const generateAIReport = async () => {
+    setGeneratingReport(true);
+    toast({ title: 'جاري إنشاء التقرير', description: 'يتم استخدام الذكاء الاصطناعي لتعبئة النموذج...' });
+
+    try {
+      const highMastery = students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 > 90).length;
+      const mediumMastery = students.filter(s => {
+        const pct = (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100;
+        return pct >= 70 && pct <= 90;
+      }).length;
+      const lowMastery = students.filter(s => (calculateTotal(s, performanceTasksMax, exam1Max, exam2Max, finalTotalMax) / finalTotalMax) * 100 < 70).length;
+
+      const { data, error } = await supabase.functions.invoke('generate-report', {
+        body: {
+          analysisData: {
+            gradeName: gradeLabels[grade as Grade],
+            subject: subject !== 'default' ? subject : '',
+            teacherName,
+            semester,
+            academicYear,
+            studentCount: students.length,
+            average: average.toFixed(2),
+            achievementPercentage: achievementPercentage.toFixed(2),
+            maxScore,
+            minScore,
+            standardDeviation: standardDeviation.toFixed(2),
+            gradeDistribution,
+            highMastery,
+            mediumMastery,
+            lowMastery,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      // Generate DOCX from AI data
+      const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "999999" };
+      const cellBorders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder };
+      const headerShading = { fill: "D6EAF8", type: ShadingType.CLEAR };
+      const cellMargins = { top: 60, bottom: 60, left: 100, right: 100 };
+
+      const createCell = (text: string, opts?: { bold?: boolean; shading?: typeof headerShading; width?: number; alignment?: typeof AlignmentType.CENTER }) => {
+        return new TableCell({
+          borders: cellBorders,
+          margins: cellMargins,
+          width: opts?.width ? { size: opts.width, type: WidthType.DXA } : undefined,
+          shading: opts?.shading,
+          children: [new Paragraph({
+            alignment: opts?.alignment || AlignmentType.RIGHT,
+            bidirectional: true,
+            children: [new TextRun({ text, bold: opts?.bold, size: 22, font: "Arial" })],
+          })],
+        });
+      };
+
+      const createLabelValueRow = (label: string, value: string) => {
+        return new TableRow({
+          children: [
+            createCell(value, { width: 7000 }),
+            createCell(label, { bold: true, shading: headerShading, width: 2360 }),
+          ],
+        });
+      };
+
+      const doc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              size: { width: 11906, height: 16838 },
+              margin: { top: 720, right: 720, bottom: 720, left: 720 },
+            },
+          },
+          children: [
+            // Header
+            new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 100 },
+              children: [new TextRun({ text: "المملكة العربية السعودية", bold: true, size: 24, font: "Arial" })],
+            }),
+            new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 100 },
+              children: [new TextRun({ text: "وزارة التعليم", bold: true, size: 24, font: "Arial" })],
+            }),
+            new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 300 },
+              children: [new TextRun({ text: `تقرير عن تحليل نتائج ${gradeLabels[grade as Grade]}`, bold: true, size: 28, font: "Arial", color: "1A5276" })],
+            }),
+
+            // Main info table
+            new Table({
+              width: { size: 9360, type: WidthType.DXA },
+              columnWidths: [7000, 2360],
+              rows: [
+                createLabelValueRow("العنوان", data.title || ""),
+                createLabelValueRow("الهدف العام", data.generalObjective || ""),
+                createLabelValueRow("الهدف التفصيلي", data.detailedObjective || ""),
+              ],
+            }),
+
+            new Paragraph({ spacing: { before: 200, after: 200 }, children: [] }),
+
+            // Details table
+            new Table({
+              width: { size: 9360, type: WidthType.DXA },
+              columnWidths: [1337, 1337, 1337, 1337, 1337, 1337, 1338],
+              rows: [
+                new TableRow({
+                  children: [
+                    createCell("مؤشر الإنجاز", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("مكان التنفيذ", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("عدد مرات التنفيذ", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("زمن التنفيذ", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("المحقق الفعلي", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("عدد المستهدف", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                    createCell("الفئة المستهدفة", { bold: true, shading: headerShading, alignment: AlignmentType.CENTER }),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    createCell(data.achievementIndicator || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.executionPlace || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.executionCount || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.executionTime || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.actualAchieved || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.targetCount || "", { alignment: AlignmentType.CENTER }),
+                    createCell(data.targetGroup || "", { alignment: AlignmentType.CENTER }),
+                  ],
+                }),
+              ],
+            }),
+
+            new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
+
+            // Findings
+            new Paragraph({
+              alignment: AlignmentType.RIGHT, bidirectional: true, spacing: { after: 100 },
+              children: [new TextRun({ text: "تم بحمد الله تنفيذ تحليل النتائج حسب البيانات أعلاه ومن خلال ملاحظة الأثر على الفئة المستهدفة تحقق ما يلي:", bold: true, size: 22, font: "Arial" })],
+            }),
+            ...(data.findings || []).map((finding: string, i: number) =>
+              new Paragraph({
+                alignment: AlignmentType.RIGHT, bidirectional: true, spacing: { after: 60 },
+                children: [new TextRun({ text: `${i + 1}) ${finding}`, size: 22, font: "Arial" })],
+              })
+            ),
+
+            new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
+
+            // Statistics section
+            new Table({
+              width: { size: 9360, type: WidthType.DXA },
+              columnWidths: [7000, 2360],
+              rows: [
+                new TableRow({
+                  children: [
+                    createCell(data.statistics || "", { width: 7000 }),
+                    createCell("الإحصاءات", { bold: true, shading: headerShading, width: 2360 }),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    createCell(`عدد الطالبات: ${students.length} | المتوسط: ${average.toFixed(2)} | نسبة التحصيل: ${achievementPercentage.toFixed(2)}% | أعلى: ${maxScore} | أدنى: ${minScore}`, { width: 7000 }),
+                    createCell("رسومات بيانية", { bold: true, shading: headerShading, width: 2360 }),
+                  ],
+                }),
+              ],
+            }),
+
+            new Paragraph({ spacing: { before: 200, after: 100 }, children: [] }),
+
+            // Recommendations
+            new Paragraph({
+              alignment: AlignmentType.RIGHT, bidirectional: true, spacing: { after: 100 },
+              children: [new TextRun({ text: "التوصيات:", bold: true, size: 24, font: "Arial", color: "1A5276" })],
+            }),
+            ...(data.recommendations || []).map((rec: string, i: number) =>
+              new Paragraph({
+                alignment: AlignmentType.RIGHT, bidirectional: true, spacing: { after: 60 },
+                children: [new TextRun({ text: `${i + 1}) ${rec}`, size: 22, font: "Arial" })],
+              })
+            ),
+
+            new Paragraph({ spacing: { before: 400, after: 100 }, children: [] }),
+
+            // Signatures
+            new Table({
+              width: { size: 9360, type: WidthType.DXA },
+              columnWidths: [4680, 4680],
+              rows: [
+                new TableRow({
+                  children: [
+                    createCell(`مديرة المدرسة:\nالاسم:\nالتوقيع:`, { bold: true, alignment: AlignmentType.CENTER }),
+                    createCell(`معدة التقرير: ${teacherName}\nالاسم: ${teacherName}\nالتوقيع:`, { bold: true, alignment: AlignmentType.CENTER }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `تقرير_تحليل_${gradeLabels[grade as Grade]}${subject !== 'default' ? `_${subject}` : ''}.docx`);
+
+      toast({ title: 'تم إنشاء التقرير بنجاح', description: 'تم تعبئة النموذج باستخدام الذكاء الاصطناعي وحفظه' });
+    } catch (error) {
+      console.error('Error generating AI report:', error);
+      toast({ title: 'خطأ', description: 'حدث خطأ أثناء إنشاء التقرير', variant: 'destructive' });
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
 
 
   return (
@@ -922,7 +1132,7 @@ const GradeAnalysis = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-4 flex justify-center gap-4 flex-wrap">
             <Button onClick={() => exportToExcel(students)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
               <FileSpreadsheet className="w-4 h-4 ml-2" />
               تصدير السجل
@@ -930,6 +1140,15 @@ const GradeAnalysis = () => {
             <Button onClick={() => exportFullReportToWord()} variant="outline" className="border-primary text-primary hover:bg-primary/10">
               <FileText className="w-4 h-4 ml-2" />
               حفظ التقرير Word
+            </Button>
+            <Button
+              onClick={generateAIReport}
+              disabled={generatingReport}
+              variant="outline"
+              className="border-purple-600 text-purple-600 hover:bg-purple-50"
+            >
+              {generatingReport ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Sparkles className="w-4 h-4 ml-2" />}
+              {generatingReport ? 'جاري الإنشاء...' : 'تقرير بالذكاء الاصطناعي'}
             </Button>
           </div>
         </div>
