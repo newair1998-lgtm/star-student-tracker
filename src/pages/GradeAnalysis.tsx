@@ -112,6 +112,7 @@ const GradeAnalysis = () => {
   const section3Ref = useRef<HTMLDivElement>(null);
   const section4Ref = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   const STUDENTS_PER_PAGE = 25;
 
