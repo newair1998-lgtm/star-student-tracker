@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, FileSpreadsheet, FileText, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType, Header, Footer } from 'docx';
 import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
