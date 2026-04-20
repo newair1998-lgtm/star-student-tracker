@@ -60,7 +60,7 @@ interface GradeSectionProps {
   onDeleteStudent: (id: string) => void;
   onBulkUpdate?: (studentIds: string[], updates: Partial<Student>) => void;
   onTransferStudent?: (id: string, newGrade: Grade, newSubject?: string) => void;
-  onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, targetGrade: Grade, targetSubject: string, includeScores: boolean) => void;
+  onDuplicateGradeSection?: (sourceGrade: Grade, sourceSubject: string, sourceSectionNumber: number, targetGrade: Grade, targetSubject: string, targetSectionNumber: number, includeScores: boolean) => void;
   onUpdateSubject?: (grade: Grade, oldSubject: string, newSubject: string) => void;
   onAddStudents?: (names: string[], grade: Grade, subject?: string, sectionNumber?: number) => void;
 }
@@ -495,7 +495,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 onOpenChange={setDuplicateDialogOpen}
                 sourceGrade={grade}
                 studentsCount={students.length}
-                onDuplicate={(targetGrade, includeScores) => onDuplicateGradeSection(grade, subject, targetGrade, 'default', includeScores)}
+                onDuplicate={(targetGrade, includeScores) => onDuplicateGradeSection(grade, subject, sectionNumber, targetGrade, 'default', sectionNumber, includeScores)}
               />
               <DuplicateSameGradeDialog
                 open={duplicateSameGradeDialogOpen}
@@ -503,7 +503,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 grade={grade}
                 subject={subject}
                 studentsCount={students.length}
-                onConfirm={(newSubject, includeScores) => onDuplicateGradeSection(grade, subject, grade, newSubject, includeScores)}
+                onConfirm={(newSubject, includeScores) => onDuplicateGradeSection(grade, subject, sectionNumber, grade, newSubject, sectionNumber, includeScores)}
               />
             </>
           )}
