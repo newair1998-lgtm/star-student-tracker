@@ -495,7 +495,7 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
                 onOpenChange={setDuplicateDialogOpen}
                 sourceGrade={grade}
                 studentsCount={students.length}
-                onDuplicate={(targetGrade, includeScores) => onDuplicateGradeSection(grade, subject, sectionNumber, targetGrade, 'default', sectionNumber, includeScores)}
+                onDuplicate={(targetGrade, targetSectionNumber, includeScores) => onDuplicateGradeSection(grade, subject, sectionNumber, targetGrade, 'default', targetSectionNumber, includeScores)}
               />
               <DuplicateSameGradeDialog
                 open={duplicateSameGradeDialogOpen}

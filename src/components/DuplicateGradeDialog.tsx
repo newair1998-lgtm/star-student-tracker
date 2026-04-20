@@ -101,6 +101,22 @@ export const DuplicateGradeDialog = ({
             </Select>
           </div>
 
+          <div className="space-y-2">
+            <label className="text-sm font-medium">رقم الفصل المستهدف</label>
+            <Select value={String(selectedSection)} onValueChange={(val) => setSelectedSection(Number(val))}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="اختر رقم الفصل" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    فصل {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center space-x-2 space-x-reverse">
             <Checkbox 
               id="includeScores" 
