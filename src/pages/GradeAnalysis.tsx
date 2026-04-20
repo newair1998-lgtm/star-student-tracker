@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, FileSpreadsheet, FileText, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, ImageRun, BorderStyle, ShadingType, Header, Footer } from 'docx';
 import { QRCodeSVG } from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
@@ -250,7 +250,7 @@ const GradeAnalysis = () => {
 
       // Smaller width so two sections fit per page
       const IMG_WIDTH = 480;
-      const MAX_IMG_HEIGHT = 320;
+      const MAX_IMG_HEIGHT = 300;
 
       for (const sectionRef of sections) {
         if (sectionRef.current) {
@@ -276,6 +276,16 @@ const GradeAnalysis = () => {
         }
       }
 
+      // Load Ministry of Education logo for the header
+      let logoData: Uint8Array | null = null;
+      try {
+        const logoResp = await fetch('/images/ministry-logo.jpeg');
+        const logoBuf = await logoResp.arrayBuffer();
+        logoData = new Uint8Array(logoBuf);
+      } catch (e) {
+        console.warn('Could not load ministry logo:', e);
+      }
+
       // Build children: header + 2 sections on page 1, page break, 2 sections on page 2
       const buildSectionBlock = (img: typeof sectionImages[number], title: string) => [
         new Paragraph({
@@ -283,7 +293,7 @@ const GradeAnalysis = () => {
           heading: HeadingLevel.HEADING_3,
           alignment: AlignmentType.CENTER,
           bidirectional: true,
-          spacing: { before: 80, after: 80 },
+          spacing: { before: 60, after: 60 },
         }),
         new Paragraph({
           children: [
@@ -294,28 +304,23 @@ const GradeAnalysis = () => {
             }),
           ],
           alignment: AlignmentType.CENTER,
-          spacing: { after: 80 },
+          spacing: { after: 60 },
         }),
       ];
 
       const headerChildren = [
         new Paragraph({
-          children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}${subject !== 'default' ? ` - ${subject}` : ''}`, bold: true, size: 28, font: "Arial" })],
+          children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}${subject !== 'default' ? ` - ${subject}` : ''}`, bold: true, size: 26, font: "Arial" })],
           heading: HeadingLevel.HEADING_1,
           alignment: AlignmentType.CENTER,
           bidirectional: true,
-          spacing: { after: 100 },
+          spacing: { after: 80 },
         }),
-        ...(teacherName ? [new Paragraph({
-          children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 20, font: "Arial" })],
-          alignment: AlignmentType.CENTER,
-          bidirectional: true,
-        })] : []),
         ...(semester ? [new Paragraph({
           children: [new TextRun({ text: `الفصل الدراسي: ${semester}`, size: 20, font: "Arial" })],
           alignment: AlignmentType.CENTER,
           bidirectional: true,
-          spacing: { after: 120 },
+          spacing: { after: 100 },
         })] : []),
       ];
 
@@ -330,16 +335,52 @@ const GradeAnalysis = () => {
         ...(sectionImages[3] ? buildSectionBlock(sectionImages[3], sectionTitles[3]) : []),
       ];
 
+      // Build page header (logo + ministry text)
+      const pageHeader = new Header({
+        children: [
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 40 },
+            children: logoData
+              ? [new ImageRun({ data: logoData, transformation: { width: 60, height: 60 }, type: 'jpg' })]
+              : [],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            bidirectional: true,
+            children: [new TextRun({ text: "المملكة العربية السعودية - وزارة التعليم", bold: true, size: 18, font: "Arial" })],
+          }),
+        ],
+      });
+
+      // Build page footer (teacher + principal names)
+      const teacherDisplay = teacherName || "نوير الحربي";
+      const pageFooter = new Footer({
+        children: [
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            bidirectional: true,
+            border: { top: { style: BorderStyle.SINGLE, size: 6, color: "1A5276", space: 4 } },
+            spacing: { before: 60 },
+            children: [
+              new TextRun({ text: `معدة التقرير: ${teacherDisplay}`, bold: true, size: 18, font: "Arial" }),
+              new TextRun({ text: "          ", size: 18, font: "Arial" }),
+              new TextRun({ text: "مديرة المدرسة: نايفة الحربي", bold: true, size: 18, font: "Arial" }),
+            ],
+          }),
+        ],
+      });
+
+      const sectionProps = {
+        properties: { page: { margin: { top: 1100, right: 500, bottom: 900, left: 500 } } },
+        headers: { default: pageHeader },
+        footers: { default: pageFooter },
+      };
+
       const doc = new Document({
         sections: [
-          {
-            properties: { page: { margin: { top: 400, right: 500, bottom: 400, left: 500 } } },
-            children: page1Children,
-          },
-          {
-            properties: { page: { margin: { top: 400, right: 500, bottom: 400, left: 500 } } },
-            children: page2Children,
-          },
+          { ...sectionProps, children: page1Children },
+          { ...sectionProps, children: page2Children },
         ],
       });
 
