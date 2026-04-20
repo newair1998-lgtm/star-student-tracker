@@ -273,6 +273,7 @@ export const useStudents = () => {
         name: student.name,
         grade: targetGrade,
         subject: targetSubject,
+        section_number: targetSectionNumber,
         user_id: user.id,
         attendance: includeScores ? student.attendance : defaultAttendanceJson,
         performance_tasks: includeScores ? student.performanceTasks : 0,
