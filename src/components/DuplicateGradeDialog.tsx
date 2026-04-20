@@ -24,7 +24,7 @@ interface DuplicateGradeDialogProps {
   onOpenChange: (open: boolean) => void;
   sourceGrade: Grade;
   studentsCount: number;
-  onDuplicate: (targetGrade: Grade, includeScores: boolean) => void;
+  onDuplicate: (targetGrade: Grade, targetSectionNumber: number, includeScores: boolean) => void;
 }
 
 export const DuplicateGradeDialog = ({
@@ -37,15 +37,17 @@ export const DuplicateGradeDialog = ({
   const currentStage = getStageFromGrade(sourceGrade);
   const [selectedStage, setSelectedStage] = useState<EducationStage>(currentStage);
   const [selectedGrade, setSelectedGrade] = useState<Grade | ''>('');
+  const [selectedSection, setSelectedSection] = useState<number>(1);
   const [includeScores, setIncludeScores] = useState(false);
 
   const availableGrades = getGradesForStage(selectedStage).filter(g => g !== sourceGrade);
 
   const handleDuplicate = () => {
     if (selectedGrade) {
-      onDuplicate(selectedGrade, includeScores);
+      onDuplicate(selectedGrade, selectedSection, includeScores);
       onOpenChange(false);
       setSelectedGrade('');
+      setSelectedSection(1);
       setIncludeScores(false);
     }
   };
@@ -93,6 +95,22 @@ export const DuplicateGradeDialog = ({
                 {availableGrades.map((grade) => (
                   <SelectItem key={grade} value={grade}>
                     {gradeLabels[grade]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">رقم الفصل المستهدف</label>
+            <Select value={String(selectedSection)} onValueChange={(val) => setSelectedSection(Number(val))}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="اختر رقم الفصل" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    فصل {n}
                   </SelectItem>
                 ))}
               </SelectContent>
