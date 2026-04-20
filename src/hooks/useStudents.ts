@@ -247,14 +247,16 @@ export const useStudents = () => {
   const duplicateGradeSection = useCallback(async (
     sourceGrade: Grade, 
     sourceSubject: string,
+    sourceSectionNumber: number,
     targetGrade: Grade, 
     targetSubject: string,
+    targetSectionNumber: number,
     includeScores: boolean
   ) => {
     if (!user) return;
 
     try {
-      const sourceStudents = students.filter(s => s.grade === sourceGrade && s.subject === sourceSubject);
+      const sourceStudents = students.filter(s => s.grade === sourceGrade && s.subject === sourceSubject && s.sectionNumber === sourceSectionNumber);
       
       if (sourceStudents.length === 0) {
         toast({
