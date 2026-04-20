@@ -141,78 +141,58 @@ const GradeAnalysis = () => {
   };
 
   const exportToExcel = (studentsData: StudentType[]) => {
-    const subject = localStorage.getItem('subject') || '';
+    const subject = searchParams.get('subject') || 'default';
     const teacherName = localStorage.getItem('teacherName') || '';
-    
-    // Prepare data for Excel with correct column order
+
+    // Read column visibility saved from the grade section
+    const defaultVis = {
+      performanceTasks: true,
+      participation: true,
+      book: true,
+      homework: true,
+      tasksTotal: true,
+      exam1: true,
+      exam2: true,
+      examsTotal: true,
+      finalTotal: true,
+    };
+    let visibility = { ...defaultVis };
+    try {
+      const stored = localStorage.getItem(`columnVisibility_${grade}_${subject}_${sectionNumber}`);
+      if (stored) visibility = { ...defaultVis, ...JSON.parse(stored) };
+    } catch {}
+
+    const showPerformance = visibility.performanceTasks;
+    const showParticipation = visibility.participation && performanceTasksMax === 10;
+    const showBook = visibility.book;
+    const showHomework = visibility.homework;
+    const showExam1 = visibility.exam1;
+    const showExam2 = visibility.exam2 && exam1Max !== 20;
+    const showFinal = visibility.finalTotal;
+
+    // Build rows dynamically based on visibility
     const excelData = studentsData.map((student, index) => {
       const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
       const gradeLevel = getGradeLevel(total, finalTotalMax);
-      
-      if (performanceTasksMax === 20) {
-        // Mode with 20 performance tasks (no participation)
-        if (exam1Max === 20) {
-          // Only Exam 1, no Exam 2
-          return {
-            '#': index + 1,
-            'الاسم': student.name,
-            'المهام الأدائية': student.performanceTasks,
-            'الأنشطة': student.book,
-            'الواجبات': student.homework,
-            'اختبار ١': student.exam1,
-            'المجموع': total,
-            'التقدير': gradeLevel,
-          };
-        } else {
-          // Both Exam 1 and Exam 2
-          return {
-            '#': index + 1,
-            'الاسم': student.name,
-            'المهام الأدائية': student.performanceTasks,
-            'الأنشطة': student.book,
-            'الواجبات': student.homework,
-            'اختبار ١': student.exam1,
-            'اختبار ٢': student.exam2,
-            'المجموع': total,
-            'التقدير': gradeLevel,
-          };
-        }
+      const row: Record<string, string | number> = {
+        '#': index + 1,
+        'الاسم': student.name,
+      };
+      if (showPerformance) row['المهام الأدائية'] = student.performanceTasks;
+      if (showParticipation) row['المشاركة'] = student.participation;
+      if (showBook) row['الأنشطة'] = student.book;
+      if (showHomework) row['الواجبات'] = student.homework;
+      if (showExam1) row['اختبار ١'] = student.exam1;
+      if (showExam2) row['اختبار ٢'] = student.exam2;
+      if (showFinal) {
+        row['المجموع'] = total;
+        row['التقدير'] = gradeLevel;
       }
-      
-      // Standard mode with participation
-      if (exam1Max === 20) {
-        // Only Exam 1, no Exam 2
-        return {
-          '#': index + 1,
-          'الاسم': student.name,
-          'المهام الأدائية': student.performanceTasks,
-          'المشاركة': student.participation,
-          'الأنشطة': student.book,
-          'الواجبات': student.homework,
-          'اختبار ١': student.exam1,
-          'المجموع': total,
-          'التقدير': gradeLevel,
-        };
-      } else {
-        // Both Exam 1 and Exam 2
-        return {
-          '#': index + 1,
-          'الاسم': student.name,
-          'المهام الأدائية': student.performanceTasks,
-          'المشاركة': student.participation,
-          'الأنشطة': student.book,
-          'الواجبات': student.homework,
-          'اختبار ١': student.exam1,
-          'اختبار ٢': student.exam2,
-          'المجموع': total,
-          'التقدير': gradeLevel,
-        };
-      }
+      return row;
     });
 
     // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(excelData);
 
     // Add header info
     const subjectLabel = subject !== 'default' ? subject : '';
@@ -226,19 +206,16 @@ const GradeAnalysis = () => {
     const wsWithHeader = XLSX.utils.aoa_to_sheet(headerInfo);
     XLSX.utils.sheet_add_json(wsWithHeader, excelData, { origin: 'A5' });
 
-    // Set column widths
-    wsWithHeader['!cols'] = [
-      { wch: 5 },   // #
-      { wch: 25 },  // الاسم
-      { wch: 15 },  // المهام الأدائية
-      { wch: 10 },  // المشاركة
-      { wch: 10 },  // الأنشطة
-      { wch: 10 },  // الواجبات
-      { wch: 10 },  // اختبار ١
-      { wch: 10 },  // اختبار ٢
-      { wch: 10 },  // المجموع
-      { wch: 10 },  // التقدير
-    ];
+    // Set column widths dynamically
+    const cols: { wch: number }[] = [{ wch: 5 }, { wch: 25 }];
+    if (showPerformance) cols.push({ wch: 15 });
+    if (showParticipation) cols.push({ wch: 10 });
+    if (showBook) cols.push({ wch: 10 });
+    if (showHomework) cols.push({ wch: 10 });
+    if (showExam1) cols.push({ wch: 10 });
+    if (showExam2) cols.push({ wch: 10 });
+    if (showFinal) cols.push({ wch: 10 }, { wch: 10 });
+    wsWithHeader['!cols'] = cols;
 
     // Set RTL view so names appear on the right
     wsWithHeader['!sheetViews'] = [{ rightToLeft: true }];

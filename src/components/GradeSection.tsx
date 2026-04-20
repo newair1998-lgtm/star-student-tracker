@@ -103,7 +103,18 @@ const GradeSection = ({ grade, subject, sectionNumber, students, onUpdateStudent
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [addStudentName, setAddStudentName] = useState('');
   const [showAddStudent, setShowAddStudent] = useState(false);
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(defaultColumnVisibility);
+  const columnVisibilityKey = `columnVisibility_${grade}_${subject}_${sectionNumber}`;
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(() => {
+    try {
+      const stored = localStorage.getItem(columnVisibilityKey);
+      if (stored) return { ...defaultColumnVisibility, ...JSON.parse(stored) };
+    } catch {}
+    return defaultColumnVisibility;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(columnVisibilityKey, JSON.stringify(columnVisibility));
+  }, [columnVisibility, columnVisibilityKey]);
 
   const toggleColumn = (col: keyof ColumnVisibility) => {
     setColumnVisibility(prev => ({ ...prev, [col]: !prev[col] }));
