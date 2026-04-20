@@ -56,15 +56,16 @@ const Index = () => {
     // Only show sections that have students
     const stageSections = allSections.filter(section => stageGrades.includes(section.grade));
     
-    // Sort by grade order, then section number
+    // Sort: grade → subject (default first) → section number, so duplicated sections appear under the original
     stageSections.sort((a, b) => {
       const gradeOrder = stageGrades.indexOf(a.grade) - stageGrades.indexOf(b.grade);
       if (gradeOrder !== 0) return gradeOrder;
-      const sectionOrder = a.sectionNumber - b.sectionNumber;
-      if (sectionOrder !== 0) return sectionOrder;
-      if (a.subject === 'default') return -1;
-      if (b.subject === 'default') return 1;
-      return a.subject.localeCompare(b.subject, 'ar');
+      if (a.subject !== b.subject) {
+        if (a.subject === 'default') return -1;
+        if (b.subject === 'default') return 1;
+        return a.subject.localeCompare(b.subject, 'ar');
+      }
+      return a.sectionNumber - b.sectionNumber;
     });
     
     return stageSections;
