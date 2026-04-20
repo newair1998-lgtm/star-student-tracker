@@ -248,6 +248,10 @@ const GradeAnalysis = () => {
     try {
       const sectionImages: { data: Uint8Array; width: number; height: number }[] = [];
 
+      // Smaller width so two sections fit per page
+      const IMG_WIDTH = 480;
+      const MAX_IMG_HEIGHT = 320;
+
       for (const sectionRef of sections) {
         if (sectionRef.current) {
           const canvas = await html2canvas(sectionRef.current, {
@@ -258,67 +262,93 @@ const GradeAnalysis = () => {
           });
           const imageData = canvas.toDataURL('image/png');
           const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+          let h = Math.round((canvas.height / canvas.width) * IMG_WIDTH);
+          let w = IMG_WIDTH;
+          if (h > MAX_IMG_HEIGHT) {
+            w = Math.round((IMG_WIDTH * MAX_IMG_HEIGHT) / h);
+            h = MAX_IMG_HEIGHT;
+          }
           sectionImages.push({
             data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
-            width: 600,
-            height: Math.round((canvas.height / canvas.width) * 600),
+            width: w,
+            height: h,
           });
         }
       }
 
-      const docSections = sectionImages.map((img, index) => ({
-        properties: {
-          page: { margin: { top: 500, right: 500, bottom: 500, left: 500 } }
-        },
-        children: [
-          ...(index === 0 ? [
-            new Paragraph({
-              children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}${subject !== 'default' ? ` - ${subject}` : ''}`, bold: true, size: 36, font: "Arial" })],
-              heading: HeadingLevel.HEADING_1,
-              alignment: AlignmentType.CENTER,
-              bidirectional: true,
-              spacing: { after: 200 },
+      // Build children: header + 2 sections on page 1, page break, 2 sections on page 2
+      const buildSectionBlock = (img: typeof sectionImages[number], title: string) => [
+        new Paragraph({
+          children: [new TextRun({ text: title, bold: true, size: 22, font: "Arial" })],
+          heading: HeadingLevel.HEADING_3,
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+          spacing: { before: 80, after: 80 },
+        }),
+        new Paragraph({
+          children: [
+            new ImageRun({
+              data: img.data,
+              transformation: { width: img.width, height: img.height },
+              type: 'png',
             }),
-            ...(teacherName ? [new Paragraph({
-              children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 24, font: "Arial" })],
-              alignment: AlignmentType.CENTER,
-              bidirectional: true,
-            })] : []),
-            ...(semester ? [new Paragraph({
-              children: [new TextRun({ text: `الفصل الدراسي: ${semester}`, size: 24, font: "Arial" })],
-              alignment: AlignmentType.CENTER,
-              bidirectional: true,
-              spacing: { after: 300 },
-            })] : []),
-          ] : []),
-          new Paragraph({
-            children: [new TextRun({ text: sectionTitles[index], bold: true, size: 28, font: "Arial" })],
-            heading: HeadingLevel.HEADING_2,
-            alignment: AlignmentType.CENTER,
-            bidirectional: true,
-            spacing: { before: 200, after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new ImageRun({
-                data: img.data,
-                transformation: { width: img.width, height: img.height },
-                type: 'png',
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-          }),
-        ],
-      }));
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 80 },
+        }),
+      ];
 
-      const doc = new Document({ sections: docSections });
+      const headerChildren = [
+        new Paragraph({
+          children: [new TextRun({ text: `تقرير تحليل نتائج ${gradeLabels[grade as Grade]}${subject !== 'default' ? ` - ${subject}` : ''}`, bold: true, size: 28, font: "Arial" })],
+          heading: HeadingLevel.HEADING_1,
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+          spacing: { after: 100 },
+        }),
+        ...(teacherName ? [new Paragraph({
+          children: [new TextRun({ text: `المعلمة: ${teacherName}`, size: 20, font: "Arial" })],
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+        })] : []),
+        ...(semester ? [new Paragraph({
+          children: [new TextRun({ text: `الفصل الدراسي: ${semester}`, size: 20, font: "Arial" })],
+          alignment: AlignmentType.CENTER,
+          bidirectional: true,
+          spacing: { after: 120 },
+        })] : []),
+      ];
+
+      const page1Children = [
+        ...headerChildren,
+        ...(sectionImages[0] ? buildSectionBlock(sectionImages[0], sectionTitles[0]) : []),
+        ...(sectionImages[1] ? buildSectionBlock(sectionImages[1], sectionTitles[1]) : []),
+      ];
+
+      const page2Children = [
+        ...(sectionImages[2] ? buildSectionBlock(sectionImages[2], sectionTitles[2]) : []),
+        ...(sectionImages[3] ? buildSectionBlock(sectionImages[3], sectionTitles[3]) : []),
+      ];
+
+      const doc = new Document({
+        sections: [
+          {
+            properties: { page: { margin: { top: 400, right: 500, bottom: 400, left: 500 } } },
+            children: page1Children,
+          },
+          {
+            properties: { page: { margin: { top: 400, right: 500, bottom: 400, left: 500 } } },
+            children: page2Children,
+          },
+        ],
+      });
 
       const blob = await Packer.toBlob(doc);
       saveAs(blob, `تقرير_تحليل_نتائج_${gradeLabels[grade as Grade]}${subject !== 'default' ? `_${subject}` : ''}.docx`);
 
       toast({
         title: 'تم الحفظ بنجاح',
-        description: 'تم حفظ التقرير في 4 صفحات مرتبة',
+        description: 'تم حفظ التقرير في صفحتين',
       });
     } catch (error) {
       console.error('Error exporting to Word:', error);
