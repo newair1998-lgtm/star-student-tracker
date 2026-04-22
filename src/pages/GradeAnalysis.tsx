@@ -166,14 +166,22 @@ const GradeAnalysis = () => {
     const showParticipation = visibility.participation && performanceTasksMax === 10;
     const showBook = visibility.book;
     const showHomework = visibility.homework;
+    const showTasksTotal = visibility.tasksTotal;
     const showExam1 = visibility.exam1;
     const showExam2 = visibility.exam2 && exam1Max !== 20;
+    const showExamsTotal = visibility.examsTotal;
     const showFinal = visibility.finalTotal;
 
-    // Build rows dynamically based on visibility
+    // Build rows dynamically based on visibility (يطابق الأعمدة الظاهرة في الجدول)
     const excelData = studentsData.map((student, index) => {
       const total = calculateTotal(student, performanceTasksMax, exam1Max, exam2Max, finalTotalMax);
       const gradeLevel = getGradeLevel(total, finalTotalMax);
+      const tasksTotal = performanceTasksMax === 20
+        ? Math.min(student.performanceTasks, 20) + student.book + student.homework
+        : student.performanceTasks + student.participation + student.book + student.homework;
+      const examsTotal = exam1Max === 20
+        ? Math.min(student.exam1, exam1Max)
+        : Math.min(student.exam1, exam1Max) + Math.min(student.exam2, exam2Max);
       const row: Record<string, string | number> = {
         '#': index + 1,
         'الاسم': student.name,
@@ -182,8 +190,10 @@ const GradeAnalysis = () => {
       if (showParticipation) row['المشاركة'] = student.participation;
       if (showBook) row['الأنشطة'] = student.book;
       if (showHomework) row['الواجبات'] = student.homework;
+      if (showTasksTotal) row['مجموع المهام'] = tasksTotal;
       if (showExam1) row['اختبار ١'] = student.exam1;
       if (showExam2) row['اختبار ٢'] = student.exam2;
+      if (showExamsTotal) row['مجموع الاختبارات'] = examsTotal;
       if (showFinal) {
         row['المجموع'] = total;
         row['التقدير'] = gradeLevel;
@@ -206,14 +216,16 @@ const GradeAnalysis = () => {
     const wsWithHeader = XLSX.utils.aoa_to_sheet(headerInfo);
     XLSX.utils.sheet_add_json(wsWithHeader, excelData, { origin: 'A5' });
 
-    // Set column widths dynamically
+    // Set column widths dynamically (مطابقة للأعمدة الظاهرة فقط)
     const cols: { wch: number }[] = [{ wch: 5 }, { wch: 25 }];
     if (showPerformance) cols.push({ wch: 15 });
     if (showParticipation) cols.push({ wch: 10 });
     if (showBook) cols.push({ wch: 10 });
     if (showHomework) cols.push({ wch: 10 });
+    if (showTasksTotal) cols.push({ wch: 14 });
     if (showExam1) cols.push({ wch: 10 });
     if (showExam2) cols.push({ wch: 10 });
+    if (showExamsTotal) cols.push({ wch: 16 });
     if (showFinal) cols.push({ wch: 10 }, { wch: 10 });
     wsWithHeader['!cols'] = cols;
 
