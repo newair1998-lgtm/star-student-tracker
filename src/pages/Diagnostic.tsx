@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Plus, Trash2, Printer, FileText, BarChart3 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -377,7 +377,6 @@ const Diagnostic = () => {
 };
 
 // ============== Official Report ==============
-import React from 'react';
 
 interface ReportProps {
   settings: DiagSettings;
