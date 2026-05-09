@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Index from "./pages/Index";
 import FollowUp from "./pages/FollowUp";
 import ClassroomManagement from "./pages/ClassroomManagement";
+import Diagnostic from "./pages/Diagnostic";
 import GradeAnalysis from "./pages/GradeAnalysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/yearly-work" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/follow-up" element={<ProtectedRoute><FollowUp /></ProtectedRoute>} />
           <Route path="/classroom" element={<ProtectedRoute><ClassroomManagement /></ProtectedRoute>} />
+          <Route path="/diagnostic" element={<ProtectedRoute><Diagnostic /></ProtectedRoute>} />
           <Route path="/analysis/:grade" element={<ProtectedRoute><GradeAnalysis /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, BookOpen, School } from 'lucide-react';
+import { ClipboardList, BookOpen, School, FileBarChart2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -14,7 +14,7 @@ const Home = () => {
           <h1 className="text-3xl font-bold text-center text-foreground mb-12">
             اختر نوع العمل
           </h1>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* أعمال المتابعة */}
             <button
               onClick={() => navigate('/follow-up')}
@@ -49,6 +49,18 @@ const Home = () => {
               </div>
               <span className="text-xl font-bold text-foreground">الإدارة الصفية</span>
               <span className="text-sm text-muted-foreground text-center">إدارة وتنظيم الفصول الدراسية</span>
+            </button>
+
+            {/* الاختبار التشخيصي */}
+            <button
+              onClick={() => navigate('/diagnostic')}
+              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-border/50 bg-card/70 backdrop-blur-md shadow-sm hover:shadow-lg hover:border-primary/50 hover:bg-card/85 transition-all duration-300"
+            >
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <FileBarChart2 className="w-8 h-8 text-primary" />
+              </div>
+              <span className="text-xl font-bold text-foreground">الاختبار التشخيصي</span>
+              <span className="text-sm text-muted-foreground text-center">تحليل الاختبار القبلي والبعدي</span>
             </button>
           </div>
         </div>
