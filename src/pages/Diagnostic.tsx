@@ -107,9 +107,19 @@ const Diagnostic = () => {
     toast({ title: 'تمت الإضافة', description: `تمت إضافة ${names.length} طالب/ـة` });
   };
 
+  const normalizeDigits = (s: string) =>
+    s.replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+     .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+     .replace(/٫|،/g, m => (m === '٫' ? '.' : ','));
+
+  const parseNum = (v: string): number | null => {
+    const n = Number(normalizeDigits(v).replace(/[^\d.\-]/g, ''));
+    return isNaN(n) ? null : n;
+  };
+
   const applyBulkScores = (kind: 'pre' | 'post', text: string) => {
-    const values = text
-      .split(/[\n,،\t\s]+/)
+    const values = normalizeDigits(text)
+      .split(/[\n,\t\s]+/)
       .map(v => v.trim())
       .filter(v => v !== '');
     if (!values.length) {
@@ -121,8 +131,8 @@ const Diagnostic = () => {
       let vi = 0;
       for (let i = 0; i < next.length && vi < values.length; i++) {
         if (!next[i].name.trim()) continue;
-        const num = Number(values[vi]);
-        if (!isNaN(num)) next[i] = { ...next[i], [kind]: num } as DiagRow;
+        const num = parseNum(values[vi]);
+        if (num !== null) next[i] = { ...next[i], [kind]: num } as DiagRow;
         vi++;
       }
       return next;
