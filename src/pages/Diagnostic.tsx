@@ -637,7 +637,6 @@ const Diagnostic = () => {
           @page { size: A4; margin: 8mm; }
         }
       `}</style>
-      </main>
 
       {/* Official Report (printable) */}
       {showReport && analysis.total > 0 && (
