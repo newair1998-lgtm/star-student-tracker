@@ -258,12 +258,24 @@ const Diagnostic = () => {
               <Input value={settings.subject} onChange={e => setSettings({ ...settings, subject: e.target.value })} placeholder="مثال: الدراسات الاجتماعية" />
             </div>
             <div>
-              <Label>اسم الاختبار</Label>
+              <Label>اسم الاختبار / عنوان المهارة</Label>
               <Input value={settings.testName} onChange={e => setSettings({ ...settings, testName: e.target.value })} />
             </div>
             <div>
-              <Label>المرحلة / الصف</Label>
-              <Input value={settings.grade} onChange={e => setSettings({ ...settings, grade: e.target.value })} placeholder="مثال: ابتدائي - رابع" />
+              <Label>المرحلة / الصف / الفصل</Label>
+              <Input value={settings.grade} onChange={e => setSettings({ ...settings, grade: e.target.value })} placeholder="مثال: الثالث متوسط / ج" />
+            </div>
+            <div>
+              <Label>الإدارة العامة للتعليم بـ</Label>
+              <Input value={settings.eduDept} onChange={e => setSettings({ ...settings, eduDept: e.target.value })} />
+            </div>
+            <div>
+              <Label>اسم المدرسة</Label>
+              <Input value={settings.schoolName} onChange={e => setSettings({ ...settings, schoolName: e.target.value })} />
+            </div>
+            <div>
+              <Label>تاريخ التطبيق</Label>
+              <Input value={settings.applyDate} onChange={e => setSettings({ ...settings, applyDate: e.target.value })} placeholder="2025-11-14" />
             </div>
             <div>
               <Label>اسم المعلمة</Label>
