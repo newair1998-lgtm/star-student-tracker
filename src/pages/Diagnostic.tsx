@@ -30,6 +30,10 @@ interface DiagSettings {
   postGoal: string;
   improvedSkills: string;
   needsSupportSkills: string;
+  eduDept: string;
+  schoolName: string;
+  applyDate: string;
+  conclusion: string;
 }
 
 const STORAGE_KEY = 'diagnosticTest_v1';
