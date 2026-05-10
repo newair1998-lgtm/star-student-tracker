@@ -30,6 +30,10 @@ interface DiagSettings {
   postGoal: string;
   improvedSkills: string;
   needsSupportSkills: string;
+  eduDept: string;
+  schoolName: string;
+  applyDate: string;
+  conclusion: string;
 }
 
 const STORAGE_KEY = 'diagnosticTest_v1';
@@ -49,6 +53,10 @@ const defaultSettings: DiagSettings = {
   postGoal: 'قياس مدى تحقق نواتج التعلم',
   improvedSkills: '',
   needsSupportSkills: '',
+  eduDept: '',
+  schoolName: '',
+  applyDate: '',
+  conclusion: 'يوصى بالاستمرار في الأسلوب أو البرنامج المطبق.\nيمكن تعميم التجربة على موضوعات مشابهة.\nيستفاد من النتائج في دعم الممارسات التعليمية الفاعلة.',
 };
 
 const Diagnostic = () => {
@@ -250,12 +258,24 @@ const Diagnostic = () => {
               <Input value={settings.subject} onChange={e => setSettings({ ...settings, subject: e.target.value })} placeholder="مثال: الدراسات الاجتماعية" />
             </div>
             <div>
-              <Label>اسم الاختبار</Label>
+              <Label>اسم الاختبار / عنوان المهارة</Label>
               <Input value={settings.testName} onChange={e => setSettings({ ...settings, testName: e.target.value })} />
             </div>
             <div>
-              <Label>المرحلة / الصف</Label>
-              <Input value={settings.grade} onChange={e => setSettings({ ...settings, grade: e.target.value })} placeholder="مثال: ابتدائي - رابع" />
+              <Label>المرحلة / الصف / الفصل</Label>
+              <Input value={settings.grade} onChange={e => setSettings({ ...settings, grade: e.target.value })} placeholder="مثال: الثالث متوسط / ج" />
+            </div>
+            <div>
+              <Label>الإدارة العامة للتعليم بـ</Label>
+              <Input value={settings.eduDept} onChange={e => setSettings({ ...settings, eduDept: e.target.value })} />
+            </div>
+            <div>
+              <Label>اسم المدرسة</Label>
+              <Input value={settings.schoolName} onChange={e => setSettings({ ...settings, schoolName: e.target.value })} />
+            </div>
+            <div>
+              <Label>تاريخ التطبيق</Label>
+              <Input value={settings.applyDate} onChange={e => setSettings({ ...settings, applyDate: e.target.value })} placeholder="2025-11-14" />
             </div>
             <div>
               <Label>اسم المعلمة</Label>
@@ -303,6 +323,14 @@ const Diagnostic = () => {
                 className="w-full border rounded-md p-2 min-h-[80px] bg-background"
                 value={settings.needsSupportSkills}
                 onChange={e => setSettings({ ...settings, needsSupportSkills: e.target.value })}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Label>الاستنتاج (سطر لكل بند)</Label>
+              <textarea
+                className="w-full border rounded-md p-2 min-h-[80px] bg-background"
+                value={settings.conclusion}
+                onChange={e => setSettings({ ...settings, conclusion: e.target.value })}
               />
             </div>
           </div>
@@ -431,51 +459,184 @@ const Diagnostic = () => {
           )}
         </Card>
 
-        {/* Analysis */}
+        {/* Analysis - matches official report image */}
         {analysis.total > 0 && (
-          <div className="print-area space-y-4">
-            <Card className="p-5">
-              <h2 className="text-xl font-bold mb-4 text-center">تحليل النتائج</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4 bg-blue-50/50">
-                  <h3 className="font-bold mb-3 text-blue-900">الاختبار القبلي</h3>
-                  <ul className="space-y-1 text-sm">
-                    <li>عدد الطلاب: <b>{analysis.pre.count}</b></li>
-                    <li>متوسط الدرجات: <b>{fmt(analysis.pre.avg)}</b> من {settings.maxScore}</li>
-                    <li>أعلى درجة: <b>{analysis.pre.max}</b></li>
-                    <li>أقل درجة: <b>{analysis.pre.min}</b></li>
-                    <li>نسبة الإتقان: <b>{fmt(analysis.pre.mastery)}%</b> ({analysis.pre.masteryCount} طالب/ـة)</li>
-                    <li>المستوى المرتفع: <b>{analysis.pre.high}</b> | المتوسط: <b>{analysis.pre.mid}</b> | المنخفض: <b>{analysis.pre.low}</b></li>
-                  </ul>
-                </div>
-                <div className="border rounded-lg p-4 bg-green-50/50">
-                  <h3 className="font-bold mb-3 text-green-900">الاختبار البعدي</h3>
-                  <ul className="space-y-1 text-sm">
-                    <li>عدد الطلاب: <b>{analysis.post.count}</b></li>
-                    <li>متوسط الدرجات: <b>{fmt(analysis.post.avg)}</b> من {settings.maxScore}</li>
-                    <li>أعلى درجة: <b>{analysis.post.max}</b></li>
-                    <li>أقل درجة: <b>{analysis.post.min}</b></li>
-                    <li>نسبة الإتقان: <b>{fmt(analysis.post.mastery)}%</b> ({analysis.post.masteryCount} طالب/ـة)</li>
-                    <li>المستوى المرتفع: <b>{analysis.post.high}</b> | المتوسط: <b>{analysis.post.mid}</b> | المنخفض: <b>{analysis.post.low}</b></li>
-                  </ul>
-                </div>
+          <div className="analysis-print bg-white text-black mx-auto" style={{ maxWidth: 900, fontFamily: 'Tajawal, Cairo, sans-serif' }}>
+            {/* Top header */}
+            <div className="flex items-stretch justify-between gap-3 p-3 border-b-2" style={{ borderColor: '#3a6b3a' }}>
+              <div className="border rounded p-2 text-[10px] text-center text-gray-500" style={{ width: 90, borderColor: '#3a6b3a' }}>
+                شعارك هنا<br/>سيظهر شعار المدرسة هنا
               </div>
+              <div className="flex-1 text-center">
+                <div className="font-bold text-lg">الإدارة العامة للتعليم بـ {settings.eduDept || '............'}</div>
+                <div className="text-sm">{settings.schoolName || 'اسم المدرسة سيظهر هنا'}</div>
+              </div>
+              <img src="/images/ministry-logo.jpeg" alt="وزارة التعليم" style={{ height: 64 }} />
+            </div>
 
-              <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30 text-center">
-                <p className="text-lg font-bold">
-                  تحسّن مستوى أداء الطلاب من <span className="text-primary">{fmt(analysis.pre.pct)}%</span> إلى <span className="text-primary">{fmt(analysis.post.pct)}%</span>
-                </p>
-                <p className="text-sm mt-1">
-                  بفارق <b>{fmt(analysis.improvement)}</b> نقطة مئوية — نسبة الكسب: <b>{fmt(analysis.gain)}%</b>
-                </p>
-                <p className="text-sm mt-1">
-                  تحسّن: <b className="text-green-600">{analysis.improved}</b> | ثبات: <b className="text-amber-600">{analysis.same}</b> | تراجع: <b className="text-red-600">{analysis.regressed}</b>
-                </p>
+            {/* Title bar */}
+            <div className="text-white text-center font-bold py-2 my-3 rounded" style={{ background: '#3a6b3a' }}>
+              نتائج الاختبارات القبلية والبعدية
+            </div>
+
+            {/* Info grid */}
+            <div className="grid grid-cols-4 gap-2 px-3 mb-3 text-sm">
+              <div className="border rounded p-2 text-center" style={{ borderColor: '#cfd8cf' }}>
+                <div className="text-xs text-gray-500">📘 المادة</div>
+                <div className="font-bold">{settings.subject || '—'}</div>
               </div>
-            </Card>
+              <div className="border rounded p-2 text-center" style={{ borderColor: '#cfd8cf' }}>
+                <div className="text-xs text-gray-500">📅 تاريخ التطبيق</div>
+                <div className="font-bold">{settings.applyDate || '—'}</div>
+              </div>
+              <div className="border rounded p-2 text-center" style={{ borderColor: '#cfd8cf' }}>
+                <div className="text-xs text-gray-500">🏫 الصف / الفصل</div>
+                <div className="font-bold">{settings.grade || '—'}</div>
+              </div>
+              <div className="border rounded p-2 text-center" style={{ borderColor: '#cfd8cf' }}>
+                <div className="text-xs text-gray-500">🎯 الدرجة العظمى</div>
+                <div className="font-bold">{settings.maxScore}</div>
+              </div>
+              <div className="col-span-4 border rounded p-2" style={{ borderColor: '#cfd8cf' }}>
+                <div className="text-xs text-gray-500">عنوان المهارة / البرنامج / الدرس</div>
+                <div className="font-bold">{settings.testName || '—'}</div>
+              </div>
+            </div>
+
+            {/* Warning */}
+            {analysis.pre.count !== analysis.post.count && (
+              <div className="mx-3 mb-3 text-center text-sm font-bold p-2 rounded" style={{ background: '#fde8e8', color: '#b91c1c' }}>
+                تنبيه: عدد درجات الاختبار القبلي ({analysis.pre.count}) لا يساوي عدد درجات الاختبار البعدي ({analysis.post.count}). تم احتساب المؤشرات على أول {Math.min(analysis.pre.count, analysis.post.count)} درجة متطابقة فقط.
+              </div>
+            )}
+
+            {/* Stat tiles */}
+            <div className="grid grid-cols-5 gap-2 px-3 mb-3">
+              {[
+                { label: 'عدد الطلاب', val: analysis.total, unit: 'طالب' },
+                { label: 'متوسط القبلي', val: fmt(analysis.pre.avg), unit: 'درجة' },
+                { label: 'متوسط البعدي', val: fmt(analysis.post.avg), unit: 'درجة' },
+                { label: 'مقدار التحسن', val: fmt(analysis.post.avg - analysis.pre.avg), unit: 'درجة' },
+                { label: 'نسبة التحسن', val: fmt(analysis.improvement), unit: '%' },
+              ].map((t, i) => (
+                <div key={i} className="border rounded p-2 text-center" style={{ borderColor: '#cfd8cf', background: '#f6faf6' }}>
+                  <div className="text-xs">{t.label}</div>
+                  <div className="text-2xl font-bold" style={{ color: '#3a6b3a' }}>{t.val}</div>
+                  <div className="text-[10px] text-gray-500">{t.unit}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bars + Distribution */}
+            <div className="grid grid-cols-2 gap-3 px-3 mb-3">
+              <div className="border rounded p-3" style={{ borderColor: '#cfd8cf' }}>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-xs text-gray-500">بالدرجة العظمى</div>
+                  <div className="font-bold">📊 مقارنة المتوسطات</div>
+                </div>
+                {[
+                  { label: 'القبلي', val: analysis.pre.avg, color: '#7fb069' },
+                  { label: 'البعدي', val: analysis.post.avg, color: '#3a6b3a' },
+                ].map((b, i) => (
+                  <div key={i} className="flex items-center gap-2 mb-2 text-sm">
+                    <div className="w-12 text-left font-bold">{b.label}</div>
+                    <div className="flex-1 h-5 rounded-full" style={{ background: '#e8f0e8' }}>
+                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, (b.val / settings.maxScore) * 100)}%`, background: b.color }} />
+                    </div>
+                    <div className="w-10 text-right font-bold">{fmt(b.val)}</div>
+                  </div>
+                ))}
+                <div className="text-[10px] text-gray-500 text-center mt-1">يعرض طول الشريط مستوى المتوسط مقارنة بالدرجة العظمى</div>
+              </div>
+              <div className="border rounded p-3" style={{ borderColor: '#cfd8cf' }}>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-xs text-gray-500">تحسن / ثبات / انخفاض</div>
+                  <div className="font-bold">📈 توزيع الطلاب</div>
+                </div>
+                {[
+                  { label: 'متحسنون', val: analysis.improved, color: '#7fb069' },
+                  { label: 'ثابتون', val: analysis.same, color: '#9ca3af' },
+                  { label: 'انخفضوا', val: analysis.regressed, color: '#e0a060' },
+                ].map((b, i) => {
+                  const pct = analysis.total ? (b.val / analysis.total) * 100 : 0;
+                  return (
+                    <div key={i} className="flex items-center gap-2 mb-2 text-sm">
+                      <div className="w-12 text-left font-bold">{Math.round(pct)}%</div>
+                      <div className="flex-1 h-5 rounded-full" style={{ background: '#f1f4f1' }}>
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: b.color }} />
+                      </div>
+                      <div className="w-16 text-right">{b.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Summary + Statistical notes */}
+            <div className="grid grid-cols-2 gap-3 px-3 mb-3">
+              <div className="border rounded p-3" style={{ borderColor: '#cfd8cf' }}>
+                <div className="font-bold mb-2 text-right">📝 ملخص النتيجة</div>
+                <ul className="text-sm space-y-1 list-disc pr-5">
+                  <li>أظهرت النتائج تحسّناً {analysis.improvement > 0 ? 'مرتفعاً' : 'محدوداً'} بين الاختبار القبلي والاختبار البعدي.</li>
+                  <li>{analysis.improvement > 0 ? 'ارتفع' : 'انخفض'} متوسط الأداء بعد التطبيق بصورة واضحة.</li>
+                  <li>تشير البيانات إلى أثر {analysis.improvement > 0 ? 'إيجابي' : 'محدود'} ملحوظ على مستوى الطلاب.</li>
+                </ul>
+              </div>
+              <div className="border rounded p-3" style={{ borderColor: '#cfd8cf' }}>
+                <div className="font-bold mb-2 text-right">🔍 الملاحظات الإحصائية</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>أعلى قبلي / بعدي: <b>{analysis.pre.max} / {analysis.post.max}</b></div>
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>أقل قبلي / بعدي: <b>{analysis.pre.min} / {analysis.post.min}</b></div>
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>المتحسنون: <b>{analysis.improved}</b></div>
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>لم يتغيروا: <b>{analysis.same}</b></div>
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>انخفضوا: <b>{analysis.regressed}</b></div>
+                  <div className="border rounded p-2" style={{ borderColor: '#e5e7eb' }}>عدد الطلاب: <b>{analysis.total}</b> محسوبة من {analysis.total}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Conclusion */}
+            <div className="px-3 mb-3">
+              <div className="border rounded p-3" style={{ borderColor: '#cfd8cf' }}>
+                <div className="font-bold mb-2 text-right">💡 الاستنتاج</div>
+                <ul className="text-sm space-y-1 list-disc pr-5">
+                  {settings.conclusion.split('\n').map(s => s.trim()).filter(Boolean).map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer signatures */}
+            <div className="grid grid-cols-3 gap-3 px-3 pt-4 mt-4 border-t text-sm text-center" style={{ borderColor: '#3a6b3a' }}>
+              <div>
+                <div className="font-bold mb-2">اسم المعلم</div>
+                <div>{settings.teacher || '—'}</div>
+                <div className="text-xs text-gray-500 mt-1">التوقيع: ............</div>
+              </div>
+              <div>
+                <div className="font-bold mb-2">الختم المدرسي</div>
+                <div className="mx-auto rounded-full border-2 border-dashed" style={{ width: 60, height: 60, borderColor: '#9ca3af' }} />
+              </div>
+              <div>
+                <div className="font-bold mb-2">مدير المدرسة</div>
+                <div>{settings.principal || '—'}</div>
+                <div className="text-xs text-gray-500 mt-1">التوقيع: ............</div>
+              </div>
+            </div>
           </div>
         )}
       </main>
+
+      {/* Print CSS for analysis */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          .analysis-print, .analysis-print * { visibility: visible; }
+          .analysis-print { position: absolute; left: 0; top: 0; width: 100%; }
+          @page { size: A4; margin: 8mm; }
+        }
+      `}</style>
 
       {/* Official Report (printable) */}
       {showReport && analysis.total > 0 && (
