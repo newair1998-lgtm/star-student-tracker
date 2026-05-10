@@ -398,12 +398,22 @@ const Diagnostic = () => {
                           <Input value={row.name} onChange={e => updateRow(row.id, { name: e.target.value })} />
                         </td>
                         <td className="p-2">
-                          <Input type="number" min={0} max={settings.maxScore} value={row.pre}
-                            onChange={e => updateRow(row.id, { pre: e.target.value === '' ? '' : Number(e.target.value) })} />
+                          <Input inputMode="decimal" value={row.pre}
+                            onChange={e => {
+                              const v = e.target.value;
+                              if (v === '') return updateRow(row.id, { pre: '' });
+                              const n = parseNum(v);
+                              if (n !== null) updateRow(row.id, { pre: n });
+                            }} />
                         </td>
                         <td className="p-2">
-                          <Input type="number" min={0} max={settings.maxScore} value={row.post}
-                            onChange={e => updateRow(row.id, { post: e.target.value === '' ? '' : Number(e.target.value) })} />
+                          <Input inputMode="decimal" value={row.post}
+                            onChange={e => {
+                              const v = e.target.value;
+                              if (v === '') return updateRow(row.id, { post: '' });
+                              const n = parseNum(v);
+                              if (n !== null) updateRow(row.id, { post: n });
+                            }} />
                         </td>
                         <td className={`p-2 text-center font-bold ${color}`}>{change === null ? '—' : change > 0 ? `+${change}` : change}</td>
                         <td className={`p-2 text-center ${color}`}>{status}</td>
