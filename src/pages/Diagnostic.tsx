@@ -325,6 +325,14 @@ const Diagnostic = () => {
                 onChange={e => setSettings({ ...settings, needsSupportSkills: e.target.value })}
               />
             </div>
+            <div className="md:col-span-3">
+              <Label>الاستنتاج (سطر لكل بند)</Label>
+              <textarea
+                className="w-full border rounded-md p-2 min-h-[80px] bg-background"
+                value={settings.conclusion}
+                onChange={e => setSettings({ ...settings, conclusion: e.target.value })}
+              />
+            </div>
           </div>
         </Card>
 
