@@ -298,6 +298,55 @@ const Diagnostic = () => {
           </div>
         </Card>
 
+        {/* Bulk add panel */}
+        <Card className="p-5 print:hidden">
+          <h2 className="text-xl font-bold mb-4">الإضافة الجماعية</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>الصق أسماء الطلاب (سطر لكل اسم)</Label>
+              <textarea
+                className="w-full border rounded-md p-2 min-h-[120px] bg-background mt-1"
+                value={bulkNames}
+                onChange={e => setBulkNames(e.target.value)}
+                placeholder="فاطمة أحمد&#10;نورة محمد&#10;سارة علي"
+                dir="rtl"
+              />
+              <Button onClick={addBulkNames} size="sm" className="mt-2 w-full gap-1">
+                <Plus className="w-4 h-4" /> إضافة الأسماء
+              </Button>
+            </div>
+            <div>
+              <Label>الصق درجات الاختبار القبلي (بنفس ترتيب الأسماء)</Label>
+              <textarea
+                className="w-full border rounded-md p-2 min-h-[120px] bg-background mt-1"
+                value={bulkPre}
+                onChange={e => setBulkPre(e.target.value)}
+                placeholder="درجة في كل سطر أو مفصولة بفاصلة"
+                dir="ltr"
+              />
+              <Button onClick={() => applyBulkScores('pre', bulkPre)} size="sm" variant="outline" className="mt-2 w-full">
+                تطبيق درجات القبلي
+              </Button>
+            </div>
+            <div>
+              <Label>الصق درجات الاختبار البعدي (بنفس ترتيب الأسماء)</Label>
+              <textarea
+                className="w-full border rounded-md p-2 min-h-[120px] bg-background mt-1"
+                value={bulkPost}
+                onChange={e => setBulkPost(e.target.value)}
+                placeholder="درجة في كل سطر أو مفصولة بفاصلة"
+                dir="ltr"
+              />
+              <Button onClick={() => applyBulkScores('post', bulkPost)} size="sm" variant="outline" className="mt-2 w-full">
+                تطبيق درجات البعدي
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            ملاحظة: تُطبَّق الدرجات على الطلاب بنفس الترتيب الموجود في الجدول أدناه. أضف الأسماء أولاً ثم الصق الدرجات.
+          </p>
+        </Card>
+
         {/* Students table */}
         <Card className="p-5 print:hidden">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
