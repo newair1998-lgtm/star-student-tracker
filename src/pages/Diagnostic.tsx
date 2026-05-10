@@ -53,6 +53,10 @@ const defaultSettings: DiagSettings = {
   postGoal: 'قياس مدى تحقق نواتج التعلم',
   improvedSkills: '',
   needsSupportSkills: '',
+  eduDept: '',
+  schoolName: '',
+  applyDate: '',
+  conclusion: 'يوصى بالاستمرار في الأسلوب أو البرنامج المطبق.\nيمكن تعميم التجربة على موضوعات مشابهة.\nيستفاد من النتائج في دعم الممارسات التعليمية الفاعلة.',
 };
 
 const Diagnostic = () => {
