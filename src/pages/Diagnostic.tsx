@@ -86,6 +86,51 @@ const Diagnostic = () => {
     ]);
   };
 
+  const [bulkNames, setBulkNames] = useState('');
+  const [bulkPre, setBulkPre] = useState('');
+  const [bulkPost, setBulkPost] = useState('');
+
+  const addBulkNames = () => {
+    const names = bulkNames
+      .split('\n')
+      .map(n => n.trim().replace(/^[\d\s.\-\)]+/, '').trim())
+      .filter(Boolean);
+    if (!names.length) {
+      toast({ title: 'لا توجد أسماء', description: 'الصق أسماء الطلاب أولاً', variant: 'destructive' });
+      return;
+    }
+    setRows(prev => [
+      ...prev,
+      ...names.map(name => ({ id: crypto.randomUUID(), name, pre: '' as const, post: '' as const })),
+    ]);
+    setBulkNames('');
+    toast({ title: 'تمت الإضافة', description: `تمت إضافة ${names.length} طالب/ـة` });
+  };
+
+  const applyBulkScores = (kind: 'pre' | 'post', text: string) => {
+    const values = text
+      .split(/[\n,،\t\s]+/)
+      .map(v => v.trim())
+      .filter(v => v !== '');
+    if (!values.length) {
+      toast({ title: 'لا توجد درجات', description: 'الصق الدرجات أولاً', variant: 'destructive' });
+      return;
+    }
+    setRows(prev => {
+      const next = [...prev];
+      let vi = 0;
+      for (let i = 0; i < next.length && vi < values.length; i++) {
+        if (!next[i].name.trim()) continue;
+        const num = Number(values[vi]);
+        if (!isNaN(num)) next[i] = { ...next[i], [kind]: num } as DiagRow;
+        vi++;
+      }
+      return next;
+    });
+    if (kind === 'pre') setBulkPre(''); else setBulkPost('');
+    toast({ title: 'تم التطبيق', description: `تم إدخال ${values.length} درجة` });
+  };
+
   const updateRow = (id: string, patch: Partial<DiagRow>) => {
     setRows(prev => prev.map(r => (r.id === id ? { ...r, ...patch } : r)));
   };
