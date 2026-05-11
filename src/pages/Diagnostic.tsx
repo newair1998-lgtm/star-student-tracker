@@ -677,19 +677,39 @@ const DiagnosticReport = React.forwardRef<HTMLDivElement, ReportProps>(({ settin
     ]);
     const pages = Array.from(node.querySelectorAll<HTMLElement>('.report-page'));
     const targets = pages.length ? pages : [node];
+
+    // Render targets in an isolated white container so the modal backdrop and
+    // surrounding chrome (buttons, overlay) never leak into the capture.
+    const sandbox = document.createElement('div');
+    sandbox.style.cssText = 'position:fixed;top:-10000px;left:0;background:#ffffff;width:800px;padding:0;margin:0;z-index:-1;';
+    sandbox.setAttribute('dir', 'rtl');
+    document.body.appendChild(sandbox);
+
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pw = pdf.internal.pageSize.getWidth();
     const ph = pdf.internal.pageSize.getHeight();
-    for (let i = 0; i < targets.length; i++) {
-      const canvas = await html2canvas(targets[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      const img = canvas.toDataURL('image/jpeg', 0.95);
-      const ratio = Math.min(pw / canvas.width, ph / canvas.height);
-      const w = canvas.width * ratio;
-      const h = canvas.height * ratio;
-      const x = (pw - w) / 2;
-      const y = (ph - h) / 2;
-      if (i > 0) pdf.addPage();
-      pdf.addImage(img, 'JPEG', x, y, w, h);
+    const margin = 6; // mm
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const clone = targets[i].cloneNode(true) as HTMLElement;
+        clone.style.background = '#ffffff';
+        clone.style.width = '800px';
+        sandbox.innerHTML = '';
+        sandbox.appendChild(clone);
+        const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        const img = canvas.toDataURL('image/jpeg', 0.95);
+        const availW = pw - margin * 2;
+        const availH = ph - margin * 2;
+        const ratio = Math.min(availW / canvas.width, availH / canvas.height);
+        const w = canvas.width * ratio;
+        const h = canvas.height * ratio;
+        const x = (pw - w) / 2;
+        const y = (ph - h) / 2;
+        if (i > 0) pdf.addPage();
+        pdf.addImage(img, 'JPEG', x, y, w, h);
+      }
+    } finally {
+      sandbox.remove();
     }
     const safe = (settings.schoolName || 'تقرير-التشخيصي').replace(/[\\/:*?"<>|]/g, '');
     pdf.save(`${safe}.pdf`);
