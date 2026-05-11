@@ -709,7 +709,7 @@ const DiagnosticReport = React.forwardRef<HTMLDivElement, ReportProps>(({ settin
           </Button>
         </div>
 
-        <div ref={ref} className="diagnostic-report bg-white text-black mx-auto" style={{ maxWidth: '800px' }}>
+        <div ref={setRefs} className="diagnostic-report bg-white text-black mx-auto" style={{ maxWidth: '800px' }}>
           {/* PAGE 1 */}
           <div className="report-page p-8" style={{ fontFamily: 'Tajawal, Cairo, sans-serif' }}>
             {/* Header */}
