@@ -463,12 +463,13 @@ const Diagnostic = () => {
         {analysis.total > 0 && (
           <div className="analysis-print bg-white text-black mx-auto" style={{ maxWidth: 900, fontFamily: 'Tajawal, Cairo, sans-serif' }}>
             {/* Top header */}
-            <div className="flex items-stretch justify-between gap-3 p-3 border-b-2" style={{ borderColor: '#3a6b3a' }}>
+            <div className="flex items-center justify-between gap-3 p-3 border-b-2" style={{ borderColor: '#3a6b3a' }}>
+              <img src="/images/ministry-logo.jpeg" alt="وزارة التعليم" style={{ height: 64, width: 64, objectFit: 'contain', visibility: 'hidden' }} />
               <div className="flex-1 text-center">
                 <div className="font-bold text-lg">الإدارة العامة للتعليم بـ {settings.eduDept || '............'}</div>
                 <div className="text-sm">{settings.schoolName || 'اسم المدرسة سيظهر هنا'}</div>
               </div>
-              <img src="/images/ministry-logo.jpeg" alt="وزارة التعليم" style={{ height: 64 }} />
+              <img src="/images/ministry-logo.jpeg" alt="وزارة التعليم" style={{ height: 64, width: 64, objectFit: 'contain' }} />
             </div>
 
             {/* Title bar */}
