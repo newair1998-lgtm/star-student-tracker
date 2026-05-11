@@ -660,12 +660,49 @@ const DiagnosticReport = React.forwardRef<HTMLDivElement, ReportProps>(({ settin
   const fmt = (n: number, d = 1) => (isFinite(n) ? n.toFixed(d) : '0');
   const improvedList = settings.improvedSkills.split('\n').map(s => s.trim()).filter(Boolean);
   const supportList = settings.needsSupportSkills.split('\n').map(s => s.trim()).filter(Boolean);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const setRefs = (node: HTMLDivElement | null) => {
+    innerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+  };
+
+  const exportPdf = async () => {
+    const node = innerRef.current;
+    if (!node) return;
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
+    const pages = Array.from(node.querySelectorAll<HTMLElement>('.report-page'));
+    const targets = pages.length ? pages : [node];
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = pdf.internal.pageSize.getHeight();
+    for (let i = 0; i < targets.length; i++) {
+      const canvas = await html2canvas(targets[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const img = canvas.toDataURL('image/jpeg', 0.95);
+      const ratio = Math.min(pw / canvas.width, ph / canvas.height);
+      const w = canvas.width * ratio;
+      const h = canvas.height * ratio;
+      const x = (pw - w) / 2;
+      const y = (ph - h) / 2;
+      if (i > 0) pdf.addPage();
+      pdf.addImage(img, 'JPEG', x, y, w, h);
+    }
+    const safe = (settings.schoolName || 'تقرير-التشخيصي').replace(/[\\/:*?"<>|]/g, '');
+    pdf.save(`${safe}.pdf`);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 overflow-auto print:bg-white print:relative print:inset-auto print:overflow-visible" dir="rtl">
       <div className="container py-6 print:p-0">
         <div className="flex justify-end gap-2 mb-4 print:hidden">
           <Button variant="outline" onClick={onClose}>إغلاق</Button>
+          <Button variant="outline" onClick={exportPdf} className="gap-2">
+            <FileText className="w-4 h-4" />
+            تصدير PDF
+          </Button>
           <Button onClick={() => window.print()} className="gap-2">
             <Printer className="w-4 h-4" />
             طباعة التقرير
