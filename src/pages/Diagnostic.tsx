@@ -464,8 +464,8 @@ const Diagnostic = () => {
           <div className="analysis-print bg-white text-black mx-auto" style={{ maxWidth: 900, fontFamily: 'Tajawal, Cairo, sans-serif' }}>
             {/* Top header */}
             <div className="flex items-stretch justify-between gap-3 p-3 border-b-2" style={{ borderColor: '#3a6b3a' }}>
-              <div className="border rounded p-2 text-[10px] text-center text-gray-500" style={{ width: 90, borderColor: '#3a6b3a' }}>
-                شعارك هنا<br/>سيظهر شعار المدرسة هنا
+              <div className="border rounded p-2 text-[10px] text-center text-gray-500 flex items-center justify-center" style={{ width: 90, minHeight: 60, borderColor: '#3a6b3a' }}>
+                سيظهر شعار المدرسة هنا
               </div>
               <div className="flex-1 text-center">
                 <div className="font-bold text-lg">الإدارة العامة للتعليم بـ {settings.eduDept || '............'}</div>
