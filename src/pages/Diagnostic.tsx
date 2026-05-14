@@ -629,9 +629,37 @@ const Diagnostic = () => {
       {/* Print CSS for analysis */}
       <style>{`
         @media print {
+          html, body {
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body::before { display: none !important; }
           body * { visibility: hidden; }
-          .analysis-print, .analysis-print * { visibility: visible; }
-          .analysis-print { position: absolute; left: 0; top: 0; width: 100%; }
+          .analysis-print, .analysis-print * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          .analysis-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            box-shadow: none !important;
+          }
+          .analysis-print, .analysis-print > * {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          .analysis-print .grid { break-inside: avoid; page-break-inside: avoid; }
           @page { size: A4; margin: 8mm; }
         }
       `}</style>
